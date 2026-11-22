@@ -56,7 +56,7 @@ final class Process
      * PHP with the settings of this process: the same php.ini, or none, and a -d only for the
      * settings that differ from it, since some values (`a=href,form=`) do not survive the ini parser.
      */
-    private static function buildCommand(): array
+    public static function buildCommand(): array
     {
         if (self::$command !== null) {
             return self::$command;

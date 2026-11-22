@@ -15,7 +15,7 @@ final class Literal
             case $value === null: return 'null';
             case is_bool($value): return $value ? 'true' : 'false';
             case is_int($value): return (string) $value;
-            case is_float($value): return is_nan($value) ? 'NAN' : (is_infinite($value) ? ($value > 0 ? 'INF' : '-INF') : var_export($value, true));
+            case is_float($value): return var_export($value, true);
             case is_string($value): return '"' . implode('', self::tokenize($value)) . '"';
             case is_array($value): return self::renderArray($value);
             case $value instanceof \UnitEnum: return get_class($value) . '::' . $value->name;

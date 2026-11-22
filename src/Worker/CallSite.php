@@ -9,6 +9,9 @@ final class CallSite
 {
     private const CALL_LINES = 10;
 
+    /** @var array<string, list<string>> */
+    private static array $sources = [];
+
     /** The lines of the test code that called into baretest. */
     public static function find(): array
     {
@@ -23,7 +26,7 @@ final class CallSite
     /** The first and last line of the call to $function that contains $line, which can be either of them. */
     private static function findCall(string $file, int $line, string $function): array
     {
-        $lines = is_readable($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [];
+        $lines = self::$sources[$file] ??= is_readable($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [];
         $pattern = '~\b' . preg_quote(substr((string) strrchr('\\' . $function, '\\'), 1), '~') . '\s*\(~';
         for ($start = $line - 1; $start >= max(0, $line - self::CALL_LINES); $start--) {
             if (preg_match($pattern, $lines[$start] ?? '', $match, PREG_OFFSET_CAPTURE)) {

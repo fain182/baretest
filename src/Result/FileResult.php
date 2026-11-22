@@ -9,19 +9,16 @@ final class FileResult
 {
     /**
      * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started
-     * @param ?array{title: string, failure: array} $stopped set when the file failed outside any test
      */
     public string $file;
     public array $tests;
-    public ?array $stopped;
     public float $time;
     public string $output;
 
-    public function __construct(string $file, array $tests, ?array $stopped, float $time, string $output)
+    public function __construct(string $file, array $tests, float $time, string $output)
     {
         $this->file = self::makeRelative($file);
         $this->tests = $tests;
-        $this->stopped = $stopped;
         $this->time = $time;
         $this->output = $output;
     }
@@ -38,7 +35,7 @@ final class FileResult
         if (!isset($failure['file'])) {
             return null;
         }
-        return self::makeRelative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
+        return self::makeRelative($failure['file']) . ':' . $failure['line'];
     }
 
     public static function describe(array $failure): string
@@ -55,18 +52,17 @@ final class FileResult
 
     public function hasNoTests(): bool
     {
-        return $this->tests === [] && $this->stopped === null;
+        return $this->tests === [];
     }
 
     public function countTests(): int
     {
-        return count($this->tests) + ($this->stopped !== null ? 1 : 0);
+        return count($this->tests);
     }
 
     public function countFailed(): int
     {
-        $failed = count(array_filter($this->tests, static fn (array $test): bool => $test['failure'] !== null || $test['subtestFailed']));
-        return $failed + ($this->stopped !== null ? 1 : 0);
+        return count(array_filter($this->tests, static fn (array $test): bool => $test['failure'] !== null || $test['subtestFailed']));
     }
 
     public function countSkipped(): int
@@ -88,6 +84,6 @@ final class FileResult
                 $failures[] = ['title' => self::formatTitle($test), 'failure' => $test['failure']];
             }
         }
-        return $this->stopped === null ? $failures : [...$failures, $this->stopped];
+        return $failures;
     }
 }

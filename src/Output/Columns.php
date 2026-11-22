@@ -21,11 +21,11 @@ final class Columns
     /** Cuts long values to a window around the caret, the same window for both. */
     public static function cut(string $expected, string $got, ?int $caret): array
     {
-        $a = self::splitCharacters($expected);
-        $b = self::splitCharacters($got);
         if (max(self::measure($expected), self::measure($got)) <= self::VALUE_WIDTH) {
             return [$expected, $got, $caret];
         }
+        $a = self::splitCharacters($expected);
+        $b = self::splitCharacters($got);
         $index = 0;
         for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
             $column += self::measure($b[$index]);
@@ -34,11 +34,12 @@ final class Columns
         for ($context = 0; $start > 0 && $context + self::measure($b[$start - 1]) <= self::CONTEXT_WIDTH; $start--) {
             $context += self::measure($b[$start - 1]);
         }
-        $window = static function (array $characters) use ($start): string {
+        $lead = $start > 0 ? '…' : '';
+        $window = static function (array $characters) use ($start, $lead): string {
             $rest = array_slice($characters, $start);
-            $room = self::VALUE_WIDTH - ($start > 0 ? 1 : 0);
+            $room = self::VALUE_WIDTH - ($lead === '' ? 0 : 1);
             if (self::measure(implode('', $rest)) <= $room) {
-                return ($start > 0 ? '…' : '') . implode('', $rest);
+                return $lead . implode('', $rest);
             }
             $shown = '';
             foreach ($rest as $character) {
@@ -48,9 +49,9 @@ final class Columns
                 }
                 $shown .= $character;
             }
-            return ($start > 0 ? '…' : '') . $shown . '…';
+            return $lead . $shown . '…';
         };
-        $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
+        $before = $lead . implode('', array_slice($b, $start, $index - $start));
         return [$window($a), $window($b), $caret === null ? null : self::measure($before)];
     }
 

@@ -15,11 +15,6 @@ final class SuiteResult implements \IteratorAggregate
         $this->files[] = $file;
     }
 
-    public function getLast(): FileResult
-    {
-        return $this->files[array_key_last($this->files)];
-    }
-
     /** @param ?callable(FileResult): bool $filter */
     public function countFiles(?callable $filter = null): int
     {

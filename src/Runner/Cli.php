@@ -25,9 +25,10 @@ final class Cli
             $report = new Report(stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
             $results = new SuiteResult();
             foreach ($files as $file) {
-                $results->append(Process::run($file));
-                $report->printFile($results->getLast());
-                Github::annotate($results->getLast());
+                $result = Process::run($file);
+                $results->append($result);
+                $report->printFile($result);
+                Github::annotate($result);
             }
             $report->printSummary($results);
             Gitlab::save($results);

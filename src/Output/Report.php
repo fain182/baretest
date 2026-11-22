@@ -56,8 +56,7 @@ final class Report
                 . ' failed in ' . $failedFiles . ' of ' . self::count($files, 'file')
                 . ($emptyFiles > 0 ? ', ' . $emptyFiles . ' did not run any test' : '');
         }
-        $text .= $skipped > 0 ? ', ' . $skipped . ' skipped' : '';
-        $this->write($this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $time . "\n");
+        $this->write($this->mark($ok) . ' ' . $this->paint(self::BOLD, self::addSkipped($text, $skipped)) . '  ' . $time . "\n");
     }
 
     private function summarize(FileResult $result, bool $ok): string
@@ -67,7 +66,11 @@ final class Report
         } else {
             $text = $ok ? self::count($result->countTests(), 'test') : $result->countFailed() . ' of ' . $result->countTests() . ' failed';
         }
-        $skipped = $result->countSkipped();
+        return self::addSkipped($text, $result->countSkipped());
+    }
+
+    private static function addSkipped(string $text, int $skipped): string
+    {
         return $skipped > 0 ? $text . ', ' . $skipped . ' skipped' : $text;
     }
 
@@ -102,13 +105,12 @@ final class Report
     private function renderBlock(string $title, array $failure): string
     {
         $location = FileResult::formatLocation($failure);
-        $line = $failure['line'] ?? null;
         $out = '  ' . $this->mark(false) . ' ' . $this->paint(self::BOLD, $title);
         if ($location !== null) {
             $out .= '  ' . $this->paint(self::DIM, '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $location !== null && $line !== null ? $this->readSource($failure['file'], $line, $failure['lastLine'] ?? $line) : [];
+        $source = $location !== null ? $this->readSource($failure['file'], $failure['line'], $failure['lastLine'] ?? $failure['line']) : [];
         $width = strlen((string) array_key_last($source));
         foreach ($source as $number => $code) {
             $out .= self::DETAIL_INDENT . $this->paint(self::DIM, str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";

@@ -35,9 +35,6 @@ final class Gitlab
                 $failure = $test['failure'] ?? ($test['subtestFailed'] ? ['message' => 'a subtest failed'] : null);
                 $xml .= self::renderTestCase($result->file, FileResult::formatTitle($test), $test['time'], $failure, $test['skipped']);
             }
-            if ($result->stopped !== null) {
-                $xml .= self::renderTestCase($result->file, $result->stopped['title'], 0.0, $result->stopped['failure']);
-            }
             $xml .= "  </testsuite>\n";
         }
         return $xml . "</testsuites>\n";

@@ -104,7 +104,7 @@ final class Report
         };
     }
 
-    /** The failures of a file, and with -v its passing tests too, in the order they finished. */
+    /** The failures of a file, and with -v its other tests too, in the order they started. */
     private function entries(FileResult $result): string
     {
         $out = '';

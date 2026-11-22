@@ -32,8 +32,8 @@ final class Gitlab
                 $result->time,
             );
             foreach ($result->tests as $test) {
-                $failure = $test['failure'] ?? ($test['subtestFailed'] ? ['message' => 'a subtest failed'] : null);
-                $xml .= self::renderTestCase($result->file, FileResult::formatTitle($test), $test['time'], $failure, $test['skipped']);
+                $failure = $test->failure ?? ($test->subtestFailed ? ['message' => 'a subtest failed'] : null);
+                $xml .= self::renderTestCase($result->file, $test->title, $test->time, $failure, $test->skipped);
             }
             $xml .= "  </testsuite>\n";
         }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 use Baretest\Output\Literal;
-use Baretest\Result\FileResult;
+use Baretest\Result\TestResult;
 use Baretest\Result\Records;
 
 /**
@@ -132,7 +132,7 @@ final class Session
             ? ['label' => 'Fatal error', 'message' => $last['message'], 'file' => $last['file'], 'line' => $last['line']]
             : ['message' => 'the file called exit()'];
         if (self::$active !== []) {
-            $failure['message'] .= "\nwhile running: " . FileResult::formatTitle(['path' => array_column(self::$active, 'name')]);
+            $failure['message'] .= "\nwhile running: " . TestResult::formatTitle(array_column(self::$active, 'name'));
         }
         self::$active = [];
         self::register($failure, $fatal ? 'fatal error' : 'exit() called');

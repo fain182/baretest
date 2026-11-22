@@ -19,12 +19,12 @@ final class Github
     private static function render(FileResult $result): string
     {
         $out = '';
-        foreach ($result->listFailures() as $entry) {
-            $failure = $entry['failure'];
+        foreach ($result->listFailures() as $test) {
+            $failure = $test->failure;
             $file = isset($failure['file']) ? FileResult::makeRelative($failure['file']) : $result->file;
             $properties = 'file=' . self::escape($file, true)
                 . (isset($failure['line']) ? ',line=' . $failure['line'] : '')
-                . ',title=' . self::escape($entry['title'], true);
+                . ',title=' . self::escape($test->title, true);
             $out .= '::error ' . $properties . '::' . self::escape(FileResult::describe($failure), false) . "\n";
         }
         return $out;

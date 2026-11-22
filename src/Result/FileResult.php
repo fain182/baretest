@@ -7,10 +7,8 @@ namespace Baretest\Result;
 /** What happened when one test file ran in its own process. */
 final class FileResult
 {
-    /**
-     * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started, then any failure outside a test
-     */
     public string $file;
+    /** @var list<TestResult> in the order they started, then any failure outside a test */
     public array $tests;
     public float $time;
     public string $output;
@@ -44,12 +42,6 @@ final class FileResult
         return $label === null ? $failure['message'] : ($failure['message'] === '' ? $label : $label . ': ' . $failure['message']);
     }
 
-    /** @param array{path: list<string>} $test */
-    public static function formatTitle(array $test): string
-    {
-        return implode(' › ', $test['path']);
-    }
-
     public function hasNoTests(): bool
     {
         return $this->tests === [];
@@ -62,12 +54,12 @@ final class FileResult
 
     public function countFailed(): int
     {
-        return count(array_filter($this->tests, static fn (array $test): bool => $test['failure'] !== null || $test['subtestFailed']));
+        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->hasFailed()));
     }
 
     public function countSkipped(): int
     {
-        return count(array_filter($this->tests, static fn (array $test): bool => $test['skipped'] !== null));
+        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->skipped !== null));
     }
 
     public function hasFailures(): bool
@@ -75,15 +67,9 @@ final class FileResult
         return $this->listFailures() !== [];
     }
 
-    /** @return list<array{title: string, failure: array}> */
+    /** @return list<TestResult> the tests that failed themselves, not only through a subtest */
     public function listFailures(): array
     {
-        $failures = [];
-        foreach ($this->tests as $test) {
-            if ($test['failure'] !== null) {
-                $failures[] = ['title' => self::formatTitle($test), 'failure' => $test['failure']];
-            }
-        }
-        return $failures;
+        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->failure !== null));
     }
 }

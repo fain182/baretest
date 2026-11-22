@@ -6,6 +6,7 @@ namespace Baretest\Runner;
 
 use Baretest\Result\FileResult;
 use Baretest\Result\Records;
+use Baretest\Result\TestResult;
 
 /** Runs a test file in a fresh PHP process and reads back what it recorded. */
 final class Process
@@ -44,6 +45,10 @@ final class Process
             }
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
+        $tests = array_map(
+            static fn (array $test): TestResult => new TestResult(TestResult::formatTitle($test['path']), $test['time'], $test['failure'], $test['subtestFailed'], $test['skipped']),
+            $tests,
+        );
         $printed = (string) file_get_contents($output);
         if ((!$done || $code !== 0) && $stopped === null) {
             $stopped = self::buildFailedTest('crashed', ['message' => self::describeCrash($code, $printed)]);
@@ -56,9 +61,9 @@ final class Process
     }
 
     /** A failure outside any test, listed after the tests as one more failed test. */
-    private static function buildFailedTest(string $title, array $failure): array
+    private static function buildFailedTest(string $title, array $failure): TestResult
     {
-        return ['path' => [$title], 'time' => 0.0, 'failure' => $failure, 'subtestFailed' => false, 'skipped' => null];
+        return new TestResult($title, 0.0, $failure, false, null);
     }
 
     /**

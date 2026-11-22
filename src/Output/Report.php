@@ -79,13 +79,13 @@ final class Report
     {
         $skips = '';
         foreach ($result->tests as $test) {
-            if ($test['skipped'] !== null) {
-                $skips .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
+            if ($test->skipped !== null) {
+                $skips .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . $test->title . '  ' . $test->skipped . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
             }
         }
         $out = '';
-        foreach ($result->listFailures() as $entry) {
-            $out .= $this->renderBlock($entry['title'], $entry['failure']) . "\n";
+        foreach ($result->listFailures() as $test) {
+            $out .= $this->renderBlock($test->title, $test->failure) . "\n";
         }
         return $skips . ($out === '' ? '' : "\n" . $out);
     }

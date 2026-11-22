@@ -15,7 +15,7 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 - Expected warnings use `@` and `error_get_last()`. The error handler returns `false` when `!(error_reporting() & $level)`, so PHP records the suppressed warning; any other warning fails the test. Call `error_clear_last()` before each test and subtest. Checked on PHP 8.1 and 8.3.
 - For a call spread over several lines, `debug_backtrace()` reports its last line on PHP 8.1 and its first from 8.2. The worker finds the whole call by counting parentheses from the function's name, so every version shows the same lines.
 - A failure stops its test by throwing. A test that wraps code in `catch (\Throwable)` would swallow it: decide how to make that visible before 1.0.
-- The output in the README is the reference layout: labels right-aligned in one column, the type in parentheses after every value, the failing line as `14 │ code`, `✓`/`✗` everywhere, failures indented under their file.
+- The expected output of the fixtures is the reference layout, and the README shows it only as a screenshot (`make screenshot`): labels right-aligned in one column, the type in parentheses after every value, the failing line as `14 │ code`, `✓`/`✗` everywhere, failures indented under their file, a `^` under the first differing element or byte, long values cut around it to 48 columns, a file's own output after `│`.
 - Differential testing (native vs polyfill outcomes) stays out of baretest; it lives in each polyfill's own tests.
 - No speed claims in the README until a benchmark script in the repository measures them: 1 file with 1 test, 1 file with 10,000 table rows, 200 files with 10 tests, and a real suite.
 

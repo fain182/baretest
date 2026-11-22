@@ -11,7 +11,7 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 | | baretest | PHPUnit 13 | Pest 5 |
 |---|---|---|---|
 | PHP versions | 8.1 – 8.6 | 8.4.1 and later | 8.4 and later |
-| API to learn | 4 functions | 176 assertion methods | 16 functions and 131 expectations |
+| API to learn | 5 functions | 176 assertion methods | 16 functions and 131 expectations |
 | Extensions required | none | dom, filter, json, libxml, mbstring, xmlwriter | those of PHPUnit, which it is built on |
 | Test files isolated from each other | always, one process per file | opt-in, one process per test | not supported |
 | Packages installed | 1 | 28 | 63 |
@@ -68,6 +68,7 @@ That is the whole API:
 | `equal($expected, $actual)` | fails the test unless the two are identical (`===`) |
 | `throws($class, $fn)` | fails the test unless `$fn` throws `$class`; returns the exception |
 | `fail($message)` | fails the test |
+| `skip($reason)` | stops the test and reports it as skipped, with `$reason` |
 
 A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
 
@@ -89,6 +90,21 @@ test('splits', function () {
     }
 });
 ```
+
+## Skipping a test
+
+A test that cannot run here calls `skip()` with the reason. The condition is PHP:
+
+```php
+test('lowercases accented letters', function () {
+    if (!extension_loaded('mbstring')) {
+        skip('needs mbstring');
+    }
+    equal('àb', mb_strtolower('ÀB'));
+});
+```
+
+A skipped test does not fail the run, and it is always listed under its file with its reason. A test whose subtest failed stays failed even if it then calls `skip()`. Outside a test, `skip()` fails the file: to skip a whole file, put its tests inside one test.
 
 ## Expected warnings
 
@@ -125,7 +141,8 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 ## Output
 
 ```
-✓ tests/encoding_test.php  38 tests  0.05s
+✓ tests/encoding_test.php  38 tests, 1 skipped  0.05s
+  - lowercases accented letters  needs mbstring
 ✗ tests/split_test.php  4 of 41 failed  0.07s
 
   ✗ splits › trailing comma  (tests/split_test.php:14)
@@ -148,10 +165,10 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
        expected  3      (int)
             got  "3"    (string)
 
-✗ 4 of 214 tests failed in 2 of 9 files  0.41s
+✗ 4 of 214 tests failed in 2 of 9 files, 1 skipped  0.41s
 ```
 
-- One line per file, `✓` or `✗`, so you see progress.
+- One line per file, `✓` or `✗`, so you see progress. Under it, a `-` line for each skipped test, with its reason.
 - Each failure sits under its file and starts with the test name and its `file:line`. Below it, the line that failed with its number, what was expected and what was got.
 - Values are written as PHP would, followed by their type: strings in double quotes with `\n`, `\t` and `\xE0` for invisible characters and invalid bytes.
 - A `^` marks the first element or byte that differs. Long values are cut around it.

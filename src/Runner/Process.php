@@ -46,11 +46,7 @@ final class Process
             }
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
-        $tests = array_map(
-            static fn (array $test): TestResult => new TestResult(TestResult::formatTitle($test['path']), $test['time'],
-                $test['failure'] === null ? null : new Failure($test['failure']), $test['subtestFailed'], $test['skipped']),
-            $tests,
-        );
+        $tests = array_map([self::class, 'buildTest'], $tests);
         $printed = (string) file_get_contents($output);
         if ((!$done || $code !== 0) && $stopped === null) {
             $stopped = self::buildFailedTest('crashed', ['message' => self::describeCrash($code, $printed)]);
@@ -60,6 +56,17 @@ final class Process
         unlink($output);
 
         return new FileResult($file, $stopped === null ? $tests : [...$tests, $stopped], $time, $printed);
+    }
+
+    private static function buildTest(array $record): TestResult
+    {
+        return new TestResult(
+            TestResult::formatTitle($record['path']),
+            $record['time'],
+            $record['failure'] === null ? null : new Failure($record['failure']),
+            $record['subtestFailed'],
+            $record['skipped'],
+        );
     }
 
     /** A failure outside any test, listed after the tests as one more failed test. */

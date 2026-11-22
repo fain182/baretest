@@ -43,7 +43,7 @@ final class Test
     }
 
     /** @param list<string> $path the names of this test and of the tests around it */
-    public function toRecord(array $path): array
+    public function buildRecord(array $path): array
     {
         return [
             't' => 'test',

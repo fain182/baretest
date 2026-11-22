@@ -38,7 +38,7 @@ final class Process
             if ($record['t'] === 'test') {
                 $tests[] = $record;
             } elseif ($record['t'] === 'file') {
-                $stopped = self::toTest($record['title'], $record['failure']);
+                $stopped = self::buildFailedTest($record['title'], $record['failure']);
             } elseif ($record['t'] === 'done') {
                 $done = true;
             }
@@ -46,7 +46,7 @@ final class Process
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
         $printed = (string) file_get_contents($output);
         if ((!$done || $code !== 0) && $stopped === null) {
-            $stopped = self::toTest('crashed', ['message' => self::describeCrash($code, $printed)]);
+            $stopped = self::buildFailedTest('crashed', ['message' => self::describeCrash($code, $printed)]);
             $printed = '';
         }
         unlink($records);
@@ -56,7 +56,7 @@ final class Process
     }
 
     /** A failure outside any test, listed after the tests as one more failed test. */
-    private static function toTest(string $title, array $failure): array
+    private static function buildFailedTest(string $title, array $failure): array
     {
         return ['path' => [$title], 'time' => 0.0, 'failure' => $failure, 'subtestFailed' => false, 'skipped' => null];
     }

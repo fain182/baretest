@@ -8,7 +8,7 @@ namespace Baretest\Result;
 final class FileResult
 {
     /**
-     * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started
+     * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started, then any failure outside a test
      */
     public string $file;
     public array $tests;

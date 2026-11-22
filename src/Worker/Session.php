@@ -68,7 +68,7 @@ final class Session
         if (self::$active !== [] && $test->hasFailed()) {
             self::$active[array_key_last(self::$active)]->markSubtestFailed();
         }
-        self::$records->write($test->toRecord($path));
+        self::$records->write($test->buildRecord($path));
     }
 
     /** @return never */

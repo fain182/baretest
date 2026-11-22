@@ -28,7 +28,3 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 ## Testing baretest
 
 Locally, `make test` on the host PHP. CI also runs the suite on the minimal PHP that users get: the `Dockerfile` built with `--disable-all` for each version from 8.1 to 8.6. Run fixture test files and compare the runner's whole output and exit code with the expected ones.
-
-## First user
-
-Once it runs, port `mbregex-polyfill`'s tests to it. That suite (over 600 table cases, expected warnings, invalid bytes) is the first check that the API holds; what does not fit is a design question, not something to patch around.

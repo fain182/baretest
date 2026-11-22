@@ -20,7 +20,6 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 
 ## Open questions
 
-- A final summary listing the names of the failed tests?
 - Which line `debug_backtrace()` reports for a call spread over several lines, on 8.1 and 8.6: verify before deciding which code to show.
 - How long values are cut so that the `^` stays aligned.
 

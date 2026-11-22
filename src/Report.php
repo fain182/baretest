@@ -93,13 +93,8 @@ final class Report
             }
         }
         $out = '';
-        foreach ($result->tests as $test) {
-            if ($test['failure'] !== null) {
-                $out .= $this->renderBlock(FileResult::formatTitle($test), $test['failure']) . "\n";
-            }
-        }
-        if ($result->stopped !== null) {
-            $out .= $this->renderBlock($result->stopped['title'], $result->stopped['failure']) . "\n";
+        foreach ($result->listFailures() as $entry) {
+            $out .= $this->renderBlock($entry['title'], $entry['failure']) . "\n";
         }
         return $skips . ($out === '' ? '' : "\n" . $out);
     }

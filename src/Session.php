@@ -24,6 +24,9 @@ final class Session
     {
         self::$records = fopen($recordsPath, 'ab');
         error_reporting(E_ALL);
+        // Errors become failures; PHP's own copy would show up again as the file's output.
+        ini_set('display_errors', '0');
+        ini_set('log_errors', '0');
         set_error_handler(self::onError(...));
         register_shutdown_function(self::onShutdown(...));
 

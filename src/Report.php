@@ -66,6 +66,7 @@ final class Report
         $time = $this->paint('2', sprintf('%.2fs', $result->time));
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summary($result, $ok) . '  ' . $time . "\n");
         $this->write($this->entries($result));
+        $this->write($this->output($result));
 
         if ($this->ci === 'github') {
             foreach ($failures as $entry) {
@@ -126,6 +127,18 @@ final class Report
             $block($result->stopped['title'], $result->stopped['failure']);
         }
         return $out === '' || $afterBlock ? $out : $out . "\n";
+    }
+
+    private function output(FileResult $result): string
+    {
+        if ($result->output === '') {
+            return '';
+        }
+        $out = '  ' . $this->paint('2', 'output') . "\n";
+        foreach (explode("\n", rtrim($result->output, "\n")) as $line) {
+            $out .= self::DETAIL_INDENT . $this->paint('2', '│') . ($line === '' ? '' : ' ' . $line) . "\n";
+        }
+        return $out . "\n";
     }
 
     private function block(string $title, array $failure): string

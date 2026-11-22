@@ -16,6 +16,7 @@ final class FileResult
         public readonly array $tests,
         public readonly ?array $stopped,
         public readonly float $time,
+        public readonly string $output,
     ) {
     }
 

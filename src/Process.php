@@ -39,13 +39,15 @@ final class Process
             };
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
+        $printed = (string) file_get_contents($output);
         if ((!$done || $code !== 0) && $stopped === null) {
-            $stopped = ['title' => 'crashed', 'failure' => ['message' => self::describeCrash($code, (string) file_get_contents($output))]];
+            $stopped = ['title' => 'crashed', 'failure' => ['message' => self::describeCrash($code, $printed)]];
+            $printed = '';
         }
         unlink($records);
         unlink($output);
 
-        return new FileResult($display, $tests, $stopped, $time);
+        return new FileResult($display, $tests, $stopped, $time, $printed);
     }
 
     /**

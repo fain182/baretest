@@ -1,0 +1,19 @@
+✗ fixtures/output/printing_test.php  1 of 2 failed  0.00s
+
+  ✗ fails  (fixtures/output/printing_test.php:14)
+       14 │ equal(1, 2);
+
+       expected  1    (int)
+            got  2    (int)
+
+  output
+       │ at the top
+       │ array(2) {
+       │   [0]=>
+       │   int(1)
+       │   [1]=>
+       │   string(1) "a"
+       │ }
+       │ no newline
+
+✗ 1 of 2 tests failed in 1 of 1 file  0.00s

@@ -124,9 +124,9 @@ final class Report
 
     private function renderValues(array $failure): string
     {
-        [$expected, $got, $caret] = Value::cut($failure['expected'], $failure['got'], $failure['caret']);
-        $width = max(Value::measureWidth($expected), Value::measureWidth($got)) + 4;
-        $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::measureWidth($value));
+        [$expected, $got, $caret] = Columns::cut($failure['expected'], $failure['got'], $failure['caret']);
+        $width = max(Columns::measure($expected), Columns::measure($got)) + 4;
+        $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Columns::measure($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
         $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $failure['expectedType'] . ')') . "\n"

@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Output\Value;
+use Baretest\Output\Literal;
 use function Baretest\{test, equal};
 
 test('render', function () {
@@ -19,7 +19,7 @@ test('render', function () {
         'control'    => ["\x00\x7F", '"\x00\x7F"'],
     ];
     foreach ($cases as $name => [$value, $expected]) {
-        test($name, fn () => equal($expected, Value::render($value)));
+        test($name, fn () => equal($expected, Literal::render($value)));
     }
 });
 
@@ -39,6 +39,6 @@ test('offset', function () {
         'combining'      => ["e\u{301}x", "e\u{301}y", 2],
     ];
     foreach ($cases as $name => [$expected, $got, $offset]) {
-        test($name, fn () => equal($offset, Value::findOffset($expected, $got)));
+        test($name, fn () => equal($offset, Literal::findOffset($expected, $got)));
     }
 });

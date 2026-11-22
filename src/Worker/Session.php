@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Worker;
 
-use Baretest\Output\Value;
+use Baretest\Output\Literal;
 
 /**
  * The state of one test file, in the process that runs it. Every finished test is
@@ -74,11 +74,11 @@ final class Session
     public static function failValues($expected, $got)
     {
         $failure = [
-            'expected' => Value::render($expected),
-            'got' => Value::render($got),
-            'expectedType' => Value::describeType($expected),
-            'gotType' => Value::describeType($got),
-            'caret' => Value::findOffset($expected, $got),
+            'expected' => Literal::render($expected),
+            'got' => Literal::render($got),
+            'expectedType' => Literal::describeType($expected),
+            'gotType' => Literal::describeType($got),
+            'caret' => Literal::findOffset($expected, $got),
         ];
         $failure['message'] = sprintf('expected %s (%s), got %s (%s)', $failure['expected'], $failure['expectedType'], $failure['got'], $failure['gotType']);
         self::raise($failure);

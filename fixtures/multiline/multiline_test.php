@@ -26,3 +26,10 @@ test('nothing thrown', function () {
         fn () => null,
     );
 });
+
+test('two calls on the first line', function () {
+    equal(1, 1); equal(
+        2,
+        3,
+    );
+});

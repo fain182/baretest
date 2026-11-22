@@ -1,4 +1,4 @@
-✗ fixtures/multiline/multiline_test.php  4 of 4 failed  0.00s
+✗ fixtures/multiline/multiline_test.php  5 of 5 failed  0.00s
 
   ✗ arguments on their own lines  (fixtures/multiline/multiline_test.php:6)
        6 │ equal(
@@ -36,4 +36,13 @@
 
        expected LogicException to be thrown, nothing was thrown
 
-✗ 4 of 4 tests failed in 1 of 1 file  0.00s
+  ✗ two calls on the first line  (fixtures/multiline/multiline_test.php:31)
+       31 │ equal(1, 1); equal(
+       32 │     2,
+       33 │     3,
+       34 │ );
+
+       expected  2    (int)
+            got  3    (int)
+
+✗ 5 of 5 tests failed in 1 of 1 file  0.00s

@@ -1,0 +1,48 @@
+✗ fixtures/values/values_test.php  7 of 7 failed  0.00s
+
+  ✗ null and bool  (fixtures/values/values_test.php:7)
+       7 │ test('null and bool', fn () => equal(null, false));
+
+       expected  null     (null)
+            got  false    (bool)
+
+  ✗ floats  (fixtures/values/values_test.php:8)
+       8 │ test('floats', fn () => equal(1.0, 1));
+
+       expected  1.0    (float)
+            got  1      (int)
+
+  ✗ float precision  (fixtures/values/values_test.php:9)
+       9 │ test('float precision', fn () => equal(0.1 + 0.2, 0.3));
+
+       expected  0.30000000000000004    (float)
+            got  0.3                    (float)
+
+  ✗ enum  (fixtures/values/values_test.php:10)
+       10 │ test('enum', fn () => equal(Suit::Hearts, 'Hearts'));
+
+       expected  Suit::Hearts    (Suit)
+            got  "Hearts"        (string)
+
+  ✗ escapes  (fixtures/values/values_test.php:11)
+       11 │ test('escapes', fn () => equal("a\\b\"c\$d\r\n\x00", ''));
+
+       expected  "a\\b\"c\$d\r\n\x00"    (string)
+            got  ""                      (string)
+                  ^
+
+  ✗ multibyte  (fixtures/values/values_test.php:12)
+       12 │ test('multibyte', fn () => equal("caffè", "caffe\u{300}"));
+
+       expected  "caffè"     (string)
+            got  "caffè"    (string)
+                      ^
+
+  ✗ empty string  (fixtures/values/values_test.php:13)
+       13 │ test('empty string', fn () => equal('', ' '));
+
+       expected  ""     (string)
+            got  " "    (string)
+                  ^
+
+✗ 7 of 7 tests failed in 1 of 1 file  0.00s

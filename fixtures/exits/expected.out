@@ -1,0 +1,23 @@
+✗ fixtures/exits/exit_test.php  1 of 2 failed  0.00s
+
+  ✗ exit() called
+
+       the file called exit()
+       while running: exits › inner
+
+✗ fixtures/exits/fatal_test.php  1 of 1 failed  0.00s
+
+  ✗ fatal error  (fixtures/exits/fatal_test.php(6) : eval()'d code:1)
+
+       Fatal error: Cannot redeclare strlen()
+       while running: fatal
+
+✓ fixtures/exits/ok_test.php  1 test  0.00s
+✗ fixtures/exits/uncaught_test.php  1 of 1 failed  0.00s
+
+  ✗ uncaught exception  (fixtures/exits/uncaught_test.php:3)
+       3 │ throw new LogicException('at the top of the file');
+
+       LogicException: at the top of the file
+
+✗ 3 of 5 tests failed in 3 of 4 files  0.00s

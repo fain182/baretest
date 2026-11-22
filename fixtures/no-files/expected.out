@@ -1,0 +1,1 @@
+baretest: no *_test.php files in fixtures/no-files

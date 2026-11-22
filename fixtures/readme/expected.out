@@ -1,0 +1,24 @@
+✓ fixtures/readme/encoding_test.php  2 tests  0.00s
+✗ fixtures/readme/split_test.php  3 of 5 failed  0.00s
+
+  ✗ splits › trailing comma  (fixtures/readme/split_test.php:17)
+       17 │ test($name, fn () => equal($expected, split($separator, $input)));
+
+       expected  ["a", "b"]        (array)
+            got  ["a", "b", ""]    (array)
+                            ^
+
+  ✗ splits › invalid bytes  (fixtures/readme/split_test.php:17)
+       17 │ test($name, fn () => equal($expected, split($separator, $input)));
+
+       expected  ["b\xE0c"]        (array)
+            got  ["b\xE0\xA0c"]    (array)
+                        ^
+
+  ✗ counts pieces  (fixtures/readme/split_test.php:22)
+       22 │ equal(3, '3');
+
+       expected  3      (int)
+            got  "3"    (string)
+
+✗ 3 of 7 tests failed in 1 of 2 files  0.00s

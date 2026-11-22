@@ -24,7 +24,7 @@ final class Cli
                 Github::annotate($result);
             }
             $report->printSummary();
-            Junit::save($results);
+            Gitlab::save($results);
             return self::computeExitCode($results);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");

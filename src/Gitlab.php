@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest;
 
 /** The JUnit XML report that GitLab reads. */
-final class Junit
+final class Gitlab
 {
     private const FILE = 'baretest-junit.xml';
 

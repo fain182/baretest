@@ -23,4 +23,13 @@ jobs:
         php: ['8.1', '8.2', '8.3', '8.4', '8.5', '8.6']
     steps:
       - uses: actions/checkout@v4
-      - run: make docker-test V=${{ matrix.php }}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          build-args: PHP_VERSION=${{ matrix.php }}
+          tags: baretest-php:${{ matrix.php }}
+          load: true
+          cache-from: type=gha,scope=php-${{ matrix.php }}
+          cache-to: type=gha,mode=max,scope=php-${{ matrix.php }}
+      - run: docker run --rm -v "$PWD":/app baretest-php:${{ matrix.php }} php bin/baretest

@@ -65,10 +65,6 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 
 <sub>Measured in November 2026 with `composer require` of the latest releases. baretest's size is checked in CI.</sub>
 
-A fatal error, an `exit()` or a crash in one test file is reported as that file's failure, and the other files still run.
-
-baretest is the test runner for libraries. If you are not writing one, use PHPUnit or Pest.
-
 ## Running
 
 ```
@@ -76,7 +72,7 @@ vendor/bin/baretest [--ci=github|gitlab] [PATH...]
 ```
 
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
-- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner.
+- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
 - Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
 - `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.

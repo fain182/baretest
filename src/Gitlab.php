@@ -9,16 +9,14 @@ final class Gitlab
 {
     private const FILE = 'baretest-junit.xml';
 
-    /** @param list<FileResult> $results */
-    public static function save(array $results): void
+    public static function save(SuiteResult $results): void
     {
         if (getenv('GITLAB_CI') === 'true' && @file_put_contents(self::FILE, self::render($results)) === false) {
             throw new \RuntimeException('cannot write ' . self::FILE . ': ' . error_get_last()['message']);
         }
     }
 
-    /** @param list<FileResult> $results */
-    private static function render(array $results): string
+    private static function render(SuiteResult $results): string
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<testsuites>\n";
         foreach ($results as $result) {

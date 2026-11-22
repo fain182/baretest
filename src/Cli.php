@@ -17,33 +17,18 @@ final class Cli
 
             $noColor = getenv('NO_COLOR');
             $report = new Report(STDOUT, stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
-            $results = [];
+            $results = new SuiteResult();
             foreach ($files as $file) {
-                $results[] = $result = Process::run($file, FileResult::makeRelative($file));
-                $report->printFile($result);
-                Github::annotate($result);
+                $results->append(Process::run($file, FileResult::makeRelative($file)));
+                $report->printFile($results->getLast());
+                Github::annotate($results->getLast());
             }
             $report->printSummary();
             Gitlab::save($results);
-            return self::computeExitCode($results);
+            return $results->hasFileWithoutTests() ? 2 : ($results->hasFailures() ? 1 : 0);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
             return 2;
         }
-    }
-
-    /** @param list<FileResult> $results */
-    private static function computeExitCode(array $results): int
-    {
-        $code = 0;
-        foreach ($results as $result) {
-            if ($result->hasNoTests()) {
-                return 2;
-            }
-            if ($result->hasFailures()) {
-                $code = 1;
-            }
-        }
-        return $code;
     }
 }

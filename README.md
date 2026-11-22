@@ -140,7 +140,7 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 
 ## Output
 
-![baretest output in a terminal: one passing file, one with three failures](docs/output.svg)
+![baretest output in a terminal: one passing file, one with three failures](docs/output.png)
 
 ```
 ✓ tests/encoding_test.php  38 tests, 1 skipped  0.05s

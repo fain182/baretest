@@ -69,7 +69,7 @@ That is the whole API:
 | `throws($class, $fn)` | fails the test unless `$fn` throws `$class`; returns the exception |
 | `fail($message)` | fails the test |
 
-A failure stops the test it happens in. Any other test, and any other subtest, still runs.
+A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
 
 A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
 
@@ -115,7 +115,7 @@ vendor/bin/baretest [-v] [--ci=github|gitlab] [PATH...]
 ```
 
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
-- Each file runs in its own PHP process, so global state does not leak between files.
+- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner, so global state does not leak between files.
 - `-v` also lists the tests that pass.
 - Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
 - `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
@@ -127,7 +127,7 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 
 ```
 ✓ tests/encoding_test.php  38 tests  0.05s
-✗ tests/split_test.php  3 of 41 failed  0.07s
+✗ tests/split_test.php  4 of 41 failed  0.07s
 
   ✗ splits › trailing comma  (tests/split_test.php:14)
        14 │ test($name, fn () => equal($expected, explode($separator, $input)));
@@ -149,7 +149,7 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
        expected  3      (int)
             got  "3"    (string)
 
-✗ 3 of 214 tests failed in 2 of 9 files  0.41s
+✗ 4 of 214 tests failed in 2 of 9 files  0.41s
 ```
 
 - One line per file, `✓` or `✗`, so you see progress. `-v` adds one line per test.

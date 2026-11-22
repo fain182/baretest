@@ -13,6 +13,12 @@
        while running: fatal
 
 ✓ fixtures/exits/ok_test.php  1 test  0.00s
+✗ fixtures/exits/shutdown_test.php  1 of 2 failed  0.00s
+
+  ✗ crashed
+
+       the process ended unexpectedly (exit code 3)
+
 ✗ fixtures/exits/uncaught_test.php  1 of 1 failed  0.00s
 
   ✗ uncaught exception  (fixtures/exits/uncaught_test.php:3)
@@ -20,4 +26,4 @@
 
        LogicException: at the top of the file
 
-✗ 3 of 5 tests failed in 3 of 4 files  0.00s
+✗ 4 of 7 tests failed in 4 of 5 files  0.00s

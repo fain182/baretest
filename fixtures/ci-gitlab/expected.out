@@ -1,4 +1,4 @@
-✗ fixtures/ci-gitlab/ci_test.php  2 of 3 failed  0.00s
+✗ fixtures/ci-gitlab/ci_test.php  5 of 6 failed  0.00s
 
   ✗ fails, with: odd,chars  (fixtures/ci-gitlab/ci_test.php:6)
        6 │ test('fails, with: odd,chars', fn () => equal("50%\n", 'x'));
@@ -12,10 +12,21 @@
 
        Exception: a < b
 
-✗ 2 of 3 tests failed in 1 of 1 file  0.00s
+  ✗ empty message  (fixtures/ci-gitlab/ci_test.php:8)
+       8 │ test('empty message', fn () => Baretest\fail(''));
+
+       
+
+  ✗ parent › child  (fixtures/ci-gitlab/ci_test.php:9)
+       9 │ test('parent', fn () => test('child', fn () => equal(1, 2)));
+
+       expected  1    (int)
+            got  2    (int)
+
+✗ 5 of 6 tests failed in 1 of 1 file  0.00s
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="fixtures/ci-gitlab/ci_test.php" tests="3" failures="2" time="0.000">
+  <testsuite name="fixtures/ci-gitlab/ci_test.php" tests="6" failures="5" time="0.000">
     <testcase classname="fixtures/ci-gitlab/ci_test.php" name="passes" time="0.000"/>
     <testcase classname="fixtures/ci-gitlab/ci_test.php" name="fails, with: odd,chars" time="0.000">
       <failure message="expected &quot;50%\n&quot; (string), got &quot;x&quot; (string)">fixtures/ci-gitlab/ci_test.php:6
@@ -24,6 +35,18 @@ expected &quot;50%\n&quot; (string), got &quot;x&quot; (string)</failure>
     <testcase classname="fixtures/ci-gitlab/ci_test.php" name="&lt;xml&gt; &amp; &quot;quotes&quot;" time="0.000">
       <failure message="Exception: a &lt; b">fixtures/ci-gitlab/ci_test.php:7
 Exception: a &lt; b</failure>
+    </testcase>
+    <testcase classname="fixtures/ci-gitlab/ci_test.php" name="empty message" time="0.000">
+      <failure message="">fixtures/ci-gitlab/ci_test.php:8
+</failure>
+    </testcase>
+    <testcase classname="fixtures/ci-gitlab/ci_test.php" name="parent" time="0.000">
+      <failure message="a subtest failed">fixtures/ci-gitlab/ci_test.php
+a subtest failed</failure>
+    </testcase>
+    <testcase classname="fixtures/ci-gitlab/ci_test.php" name="parent › child" time="0.000">
+      <failure message="expected 1 (int), got 2 (int)">fixtures/ci-gitlab/ci_test.php:9
+expected 1 (int), got 2 (int)</failure>
     </testcase>
   </testsuite>
 </testsuites>

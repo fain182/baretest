@@ -1,5 +1,5 @@
 ✓ fixtures/readme/encoding_test.php  2 tests  0.00s
-✗ fixtures/readme/split_test.php  3 of 5 failed  0.00s
+✗ fixtures/readme/split_test.php  4 of 5 failed  0.00s
 
   ✗ splits › trailing comma  (fixtures/readme/split_test.php:17)
        17 │ test($name, fn () => equal($expected, split($separator, $input)));
@@ -21,4 +21,4 @@
        expected  3      (int)
             got  "3"    (string)
 
-✗ 3 of 7 tests failed in 1 of 2 files  0.00s
+✗ 4 of 7 tests failed in 1 of 2 files  0.00s

@@ -1,0 +1,10 @@
+✗ fixtures/long-wide/wide_test.php  1 of 1 failed  0.00s
+
+  ✗ wide  (fixtures/long-wide/wide_test.php:5)
+       5 │ test('wide', fn () => equal(str_repeat('日本', 20) . 'x' . str_repeat('語', 30), str_repeat('日本', 20) . 'y' . str_repeat('語', 30)));
+
+       expected  …日本日本日本日本日本日本日本日本日本日本x語語語語語語語語語語語語語語語語語語語語語語語語語語語語語語"    (string)
+            got  …日本日本日本日本日本日本日本日本日本日本y語語語語語語語語語語語語語語語語語語語語語語語語語語語語語語"    (string)
+                                                          ^
+
+✗ 1 of 1 test failed in 1 of 1 file  0.00s

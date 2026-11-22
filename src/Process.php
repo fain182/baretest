@@ -7,13 +7,16 @@ namespace Baretest;
 /** Runs a test file in a fresh PHP process and reads back what it recorded. */
 final class Process
 {
+    /** @var ?list<string> */
+    private static ?array $php = null;
+
     public static function run(string $file, string $display): FileResult
     {
         $records = tempnam(sys_get_temp_dir(), 'baretest');
         $output = tempnam(sys_get_temp_dir(), 'baretest');
         $start = microtime(true);
         $process = proc_open(
-            [PHP_BINARY, __DIR__ . '/worker.php', $file, $records],
+            [...self::php(), __DIR__ . '/worker.php', $file, $records],
             [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $output, 'w'], 2 => ['redirect', 1]],
             $pipes,
         );
@@ -36,13 +39,38 @@ final class Process
             };
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
-        if (!$done && $stopped === null) {
+        if ((!$done || $code !== 0) && $stopped === null) {
             $stopped = ['title' => 'crashed', 'failure' => ['message' => self::describeCrash($code, (string) file_get_contents($output))]];
         }
         unlink($records);
         unlink($output);
 
         return new FileResult($display, $tests, $stopped, $time);
+    }
+
+    /**
+     * PHP with the settings of this process: the same php.ini, or none, and a -d only for the
+     * settings that differ from it, since some values (`a=href,form=`) do not survive the ini parser.
+     */
+    private static function php(): array
+    {
+        if (self::$php !== null) {
+            return self::$php;
+        }
+        $ini = php_ini_loaded_file();
+        $php = $ini === false ? [PHP_BINARY, '-n'] : [PHP_BINARY, '-c', $ini];
+        $probe = proc_open([...$php, '-r', 'echo json_encode(ini_get_all(null, false));'], [1 => ['pipe', 'w']], $pipes);
+        if ($probe === false) {
+            throw new \RuntimeException('could not start ' . PHP_BINARY);
+        }
+        $defaults = json_decode(stream_get_contents($pipes[1]), true) ?? [];
+        proc_close($probe);
+        foreach (ini_get_all(null, false) as $name => $value) {
+            if ($value !== null && ($defaults[$name] ?? null) !== $value) {
+                array_push($php, '-d', "$name=$value");
+            }
+        }
+        return self::$php = $php;
     }
 
     private static function describeCrash(int $code, string $output): string

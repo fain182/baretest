@@ -14,7 +14,7 @@ final class Report
     private int $failedFiles = 0;
     private int $tests = 0;
     private int $failed = 0;
-    private bool $incomplete = false;
+    private int $emptyFiles = 0;
     private float $start;
     /** @var list<FileResult> */
     private array $results = [];
@@ -57,10 +57,11 @@ final class Report
 
         $failures = $result->failures();
         $ok = $failures === [] && !$result->hasNoTests();
-        if (!$ok) {
+        if ($result->hasNoTests()) {
+            $this->emptyFiles++;
+        } elseif (!$ok) {
             $this->failedFiles++;
         }
-        $this->incomplete = $this->incomplete || $result->hasNoTests();
 
         $time = $this->paint('2', sprintf('%.2fs', $result->time));
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summary($result, $ok) . '  ' . $time . "\n");
@@ -76,12 +77,14 @@ final class Report
     public function finish(): void
     {
         $time = $this->paint('2', sprintf('%.2fs', microtime(true) - $this->start));
+        $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;
         $text = match (true) {
-            $this->failedFiles === 0 => self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file'),
-            $this->failed === 0 => $this->failedFiles . ' of ' . self::count($this->files, 'file') . ' did not run any test',
-            default => $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file'),
+            $ok => self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file'),
+            $this->failedFiles === 0 => $this->emptyFiles . ' of ' . self::count($this->files, 'file') . ' did not run any test',
+            default => $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file')
+                . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : ''),
         };
-        $this->write($this->mark($this->failedFiles === 0) . ' ' . $text . '  ' . $time . "\n");
+        $this->write($this->mark($ok) . ' ' . $text . '  ' . $time . "\n");
         if ($this->ci === 'gitlab') {
             fwrite(STDOUT, Junit::render($this->results));
         }
@@ -89,7 +92,7 @@ final class Report
 
     public function exitCode(): int
     {
-        return $this->incomplete ? 2 : ($this->failedFiles > 0 ? 1 : 0);
+        return $this->emptyFiles > 0 ? 2 : ($this->failedFiles > 0 ? 1 : 0);
     }
 
     private function summary(FileResult $result, bool $ok): string
@@ -115,7 +118,7 @@ final class Report
             if ($test['failure'] !== null) {
                 $block($title, $test['failure']);
             } elseif ($this->verbose) {
-                $out .= '  ' . $this->mark(true) . ' ' . $title . "\n";
+                $out .= '  ' . $this->mark(!FileResult::hasFailed($test)) . ' ' . $title . "\n";
                 $afterBlock = false;
             }
         }
@@ -167,11 +170,16 @@ final class Report
         if (max(count($a), count($b)) <= self::VALUE_WIDTH) {
             return [$expected, $got, $caret];
         }
-        $start = max(0, ($caret ?? 0) - 20);
+        $index = 0;
+        for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
+            $column += Value::width($b[$index]);
+        }
+        $start = max(0, $index - 20);
         $window = static fn (array $characters): string => ($start > 0 ? '…' : '')
             . implode('', array_slice($characters, $start, self::VALUE_WIDTH))
             . ($start + self::VALUE_WIDTH < count($characters) ? '…' : '');
-        return [$window($a), $window($b), $caret === null ? null : $caret - $start + ($start > 0 ? 1 : 0)];
+        $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
+        return [$window($a), $window($b), $caret === null ? null : Value::width($before)];
     }
 
     private static function characters(string $text): array

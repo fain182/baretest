@@ -9,6 +9,9 @@ final class Value
 {
     private const UTF8 = '~[\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2}|.~s';
 
+    private const ZERO_WIDTH = '~[\p{Mn}\p{Me}\x{200B}-\x{200F}\x{FE00}-\x{FE0F}]~u';
+    private const WIDE = '~[\x{1100}-\x{115F}\x{2E80}-\x{303E}\x{3041}-\x{33FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{A000}-\x{A4CF}\x{AC00}-\x{D7A3}\x{F900}-\x{FAFF}\x{FE30}-\x{FE4F}\x{FF00}-\x{FF60}\x{FFE0}-\x{FFE6}\x{1F300}-\x{1F64F}\x{1F900}-\x{1F9FF}\x{20000}-\x{3FFFD}]~u';
+
     public static function render(mixed $value): string
     {
         return match (true) {
@@ -45,9 +48,10 @@ final class Value
         return null;
     }
 
+    /** Terminal columns: wide East Asian characters and emoji take two, combining marks none. */
     public static function width(string $text): int
     {
-        return preg_match_all('~[^\x80-\xBF]~', $text);
+        return preg_match_all('~[^\x80-\xBF]~', $text) - (int) preg_match_all(self::ZERO_WIDTH, $text) + (int) preg_match_all(self::WIDE, $text);
     }
 
     /** One token per character: valid UTF-8 as it is, anything else escaped. */

@@ -34,7 +34,7 @@
   ✗ multibyte  (fixtures/values/values_test.php:12)
        12 │ test('multibyte', fn () => equal("caffè", "caffe\u{300}"));
 
-       expected  "caffè"     (string)
+       expected  "caffè"    (string)
             got  "caffè"    (string)
                       ^
 

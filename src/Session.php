@@ -12,7 +12,7 @@ final class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
-    /** @var list<array{name: string, seq: int, failure: ?array}> */
+    /** @var list<array{name: string, seq: int, failure: ?array, subtestFailed: bool}> */
     private static array $active = [];
     /** @var resource|null */
     private static $records = null;
@@ -47,7 +47,7 @@ final class Session
         }
         error_clear_last();
         $start = microtime(true);
-        self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null];
+        self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null, 'subtestFailed' => false];
         try {
             $fn();
         } catch (Failure) {
@@ -57,7 +57,10 @@ final class Session
         }
         $path = array_column(self::$active, 'name');
         $test = array_pop(self::$active);
-        self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure']]);
+        if (self::$active !== [] && ($test['failure'] !== null || $test['subtestFailed'])) {
+            self::$active[array_key_last(self::$active)]['subtestFailed'] = true;
+        }
+        self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure'], 'subtestFailed' => $test['subtestFailed']]);
     }
 
     public static function failValues(mixed $expected, mixed $got): never

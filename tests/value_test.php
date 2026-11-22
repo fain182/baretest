@@ -35,6 +35,8 @@ test('offset', function () {
         'keyed'          => [['a' => 1, 'b' => 2], ['a' => 1, 'b' => 3], 18],
         'scalars'        => [1, 2, null],
         'types'          => [3, '3', null],
+        'wide'           => ['日本語x', '日本語y', 7],
+        'combining'      => ["e\u{301}x", "e\u{301}y", 2],
     ];
     foreach ($cases as $name => [$expected, $got, $offset]) {
         test($name, fn () => equal($offset, Value::offset($expected, $got)));

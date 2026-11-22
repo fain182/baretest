@@ -45,7 +45,7 @@ final class Session
         self::write(['t' => 'done']);
     }
 
-    public static function run(string $name, callable $fn): void
+    public static function runTest(string $name, callable $fn): void
     {
         if (self::$records === null) {
             throw new \LogicException('Test files are run with vendor/bin/baretest, not directly.');

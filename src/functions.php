@@ -12,7 +12,7 @@ use Baretest\Worker\Skip;
 if (!function_exists('Baretest\test')) {
     function test(string $name, callable $fn): void
     {
-        Session::run($name, $fn);
+        Session::runTest($name, $fn);
     }
 
     function equal($expected, $actual): void

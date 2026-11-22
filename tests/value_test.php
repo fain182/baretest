@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Value;
+use Baretest\Output\Value;
 use function Baretest\{test, equal};
 
 test('render', function () {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Worker;
 
 /** Finds the whole call in a test file that failed, even when it spans several lines. */
 final class CallSite
@@ -13,7 +13,7 @@ final class CallSite
     public static function find(): array
     {
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
-            if (isset($frame['file']) && strpos($frame['file'], __DIR__ . DIRECTORY_SEPARATOR) !== 0) {
+            if (isset($frame['file']) && strpos($frame['file'], dirname(__DIR__) . DIRECTORY_SEPARATOR) !== 0) {
                 return ['file' => $frame['file']] + self::findCall($frame['file'], $frame['line'], $frame['function']);
             }
         }

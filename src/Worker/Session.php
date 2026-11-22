@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Worker;
+
+use Baretest\Output\Value;
 
 /**
  * The state of one test file, in the process that runs it. Every finished test is

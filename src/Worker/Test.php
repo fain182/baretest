@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Worker;
 
 /** One running test, in the process that runs its file. */
 final class Test

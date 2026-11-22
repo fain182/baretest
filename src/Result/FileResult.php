@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Result;
 
 /** What happened when one test file ran in its own process. */
 final class FileResult

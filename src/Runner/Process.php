@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Runner;
+
+use Baretest\Result\FileResult;
 
 /** Runs a test file in a fresh PHP process and reads back what it recorded. */
 final class Process
@@ -16,7 +18,7 @@ final class Process
         $output = tempnam(sys_get_temp_dir(), 'baretest');
         $start = microtime(true);
         $process = proc_open(
-            [...self::buildCommand(), __DIR__ . '/worker.php', $file, $records, self::findAutoload()],
+            [...self::buildCommand(), dirname(__DIR__) . '/Worker/worker.php', $file, $records, self::findAutoload()],
             [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $output, 'w'], 2 => ['redirect', 1]],
             $pipes,
         );

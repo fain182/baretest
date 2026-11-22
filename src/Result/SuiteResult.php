@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Result;
 
 /** What happened to every test file of a run, in the order they ran. */
 final class SuiteResult implements \IteratorAggregate

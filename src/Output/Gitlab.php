@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Output;
+
+use Baretest\Result\FileResult;
+use Baretest\Result\SuiteResult;
 
 /** The JUnit XML report that GitLab reads. */
 final class Gitlab

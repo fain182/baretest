@@ -2,7 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Runner;
+
+use Baretest\Output\Github;
+use Baretest\Output\Gitlab;
+use Baretest\Output\Report;
+use Baretest\Result\FileResult;
+use Baretest\Result\SuiteResult;
 
 final class Cli
 {

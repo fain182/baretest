@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Process;
+use Baretest\Runner\Process;
 use function Baretest\{test, equal};
 
 /** What PHP prints when it runs $code with $command. */

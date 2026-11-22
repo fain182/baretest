@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest;
+namespace Baretest\Output;
 
 /** Shows PHP values byte by byte, and finds where two of them first differ. */
 final class Value

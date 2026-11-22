@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Baretest;
 
+use Baretest\Worker\Failure;
+use Baretest\Worker\Session;
+use Baretest\Worker\Skip;
+
 // Composer's autoload.php loads this file in the worker, and a test file can load it again.
 if (!function_exists('Baretest\test')) {
     function test(string $name, callable $fn): void

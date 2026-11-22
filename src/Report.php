@@ -14,6 +14,7 @@ final class Report
     private int $failedFiles = 0;
     private int $tests = 0;
     private int $failed = 0;
+    private int $skipped = 0;
     private int $emptyFiles = 0;
     private float $start;
     /** @var list<FileResult> */
@@ -54,6 +55,7 @@ final class Report
         $this->files++;
         $this->tests += $result->countTests();
         $this->failed += $result->countFailed();
+        $this->skipped += $result->countSkipped();
 
         $failures = $result->listFailures();
         $ok = $failures === [] && !$result->hasNoTests();
@@ -85,6 +87,7 @@ final class Report
             default => $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file')
                 . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : ''),
         };
+        $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
         $this->write($this->mark($ok) . ' ' . $text . '  ' . $time . "\n");
         if ($this->ci === 'gitlab') {
             fwrite(STDOUT, Junit::render($this->results));
@@ -98,16 +101,24 @@ final class Report
 
     private function summarize(FileResult $result, bool $ok): string
     {
-        return match (true) {
+        $text = match (true) {
             $result->hasNoTests() => 'no tests',
             $ok => self::count($result->countTests(), 'test'),
             default => $result->countFailed() . ' of ' . $result->countTests() . ' failed',
         };
+        $skipped = $result->countSkipped();
+        return $skipped > 0 ? $text . ', ' . $skipped . ' skipped' : $text;
     }
 
-    /** The failures of a file, in the order their tests started. */
+    /** The skipped tests of a file, then its failures, each in the order their tests started. */
     private function renderEntries(FileResult $result): string
     {
+        $skips = '';
+        foreach ($result->tests as $test) {
+            if ($test['skipped'] !== null) {
+                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $this->paint('2', $test['skipped']) . "\n";
+            }
+        }
         $out = '';
         foreach ($result->tests as $test) {
             if ($test['failure'] !== null) {
@@ -117,7 +128,7 @@ final class Report
         if ($result->stopped !== null) {
             $out .= $this->renderBlock($result->stopped['title'], $result->stopped['failure']) . "\n";
         }
-        return $out === '' ? '' : "\n" . $out;
+        return $skips . ($out === '' ? '' : "\n" . $out);
     }
 
     private function renderOutput(FileResult $result): string

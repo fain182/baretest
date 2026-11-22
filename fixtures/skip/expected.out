@@ -1,0 +1,20 @@
+✗ fixtures/skip/skip_test.php  2 of 8 failed, 4 skipped  0.00s
+  - skipped  needs mbstring
+  - after a check  not on this PHP
+  - parent › skipped child  child reason
+  - inside throws  from throws
+
+  ✗ failed then skipped › child  (fixtures/skip/skip_test.php:16)
+       16 │ test('child', fn () => equal(1, 2));
+
+       expected  1    (int)
+            got  2    (int)
+
+✗ fixtures/skip/top_test.php  1 of 2 failed  0.00s
+
+  ✗ outside a test  (fixtures/skip/top_test.php:6)
+       6 │ skip('whole file');
+
+       skip() was called outside a test; to skip a whole file, put its tests inside one test
+
+✗ 3 of 10 tests failed in 2 of 2 files, 4 skipped  0.00s

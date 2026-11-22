@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baretest;
 
 require_once __DIR__ . '/Failure.php';
+require_once __DIR__ . '/Skip.php';
 require_once __DIR__ . '/Value.php';
 require_once __DIR__ . '/Session.php';
 
@@ -26,8 +27,8 @@ if (!function_exists('Baretest\test')) {
     {
         try {
             $fn();
-        } catch (Failure $failure) {
-            throw $failure;
+        } catch (Failure | Skip $stop) {
+            throw $stop;
         } catch (\Throwable $thrown) {
             if ($thrown instanceof $class) {
                 return $thrown;
@@ -40,5 +41,10 @@ if (!function_exists('Baretest\test')) {
     function fail(string $message): never
     {
         Session::fail($message);
+    }
+
+    function skip(string $reason): never
+    {
+        Session::skip($reason);
     }
 }

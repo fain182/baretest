@@ -12,7 +12,7 @@ final class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
-    /** @var list<array{name: string, seq: int, failure: ?array, subtestFailed: bool}> */
+    /** @var list<array{name: string, seq: int, failure: ?array, subtestFailed: bool, skipped: ?string}> */
     private static array $active = [];
     /** @var resource|null */
     private static $records = null;
@@ -50,11 +50,13 @@ final class Session
         }
         error_clear_last();
         $start = microtime(true);
-        self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null, 'subtestFailed' => false];
+        self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null, 'subtestFailed' => false, 'skipped' => null];
         try {
             $fn();
         } catch (Failure) {
             // already registered where it was raised
+        } catch (Skip $skip) {
+            self::$active[array_key_last(self::$active)]['skipped'] = $skip->getMessage();
         } catch (\Throwable $e) {
             self::register(self::describe($e));
         }
@@ -63,7 +65,8 @@ final class Session
         if (self::$active !== [] && ($test['failure'] !== null || $test['subtestFailed'])) {
             self::$active[array_key_last(self::$active)]['subtestFailed'] = true;
         }
-        self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure'], 'subtestFailed' => $test['subtestFailed']]);
+        $skipped = $test['failure'] === null && !$test['subtestFailed'] ? $test['skipped'] : null;
+        self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure'], 'subtestFailed' => $test['subtestFailed'], 'skipped' => $skipped]);
     }
 
     public static function failValues(mixed $expected, mixed $got): never
@@ -82,6 +85,14 @@ final class Session
     public static function fail(string $message): never
     {
         self::raise(['message' => $message]);
+    }
+
+    public static function skip(string $reason): never
+    {
+        if (self::$active === []) {
+            self::fail('skip() was called outside a test; to skip a whole file, put its tests inside one test');
+        }
+        throw new Skip($reason);
     }
 
     private static function raise(array $failure): never

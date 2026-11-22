@@ -8,7 +8,7 @@ namespace Baretest;
 final class FileResult
 {
     /**
-     * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool}> $tests in the order they started
+     * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started
      * @param ?array{title: string, failure: array} $stopped set when the file failed outside any test
      */
     public function __construct(
@@ -46,6 +46,11 @@ final class FileResult
     {
         $failed = count(array_filter($this->tests, self::hasFailed(...)));
         return $failed + ($this->stopped !== null ? 1 : 0);
+    }
+
+    public function countSkipped(): int
+    {
+        return count(array_filter($this->tests, static fn (array $test): bool => $test['skipped'] !== null));
     }
 
     /** @return list<array{title: string, failure: array}> */

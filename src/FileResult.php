@@ -8,7 +8,7 @@ namespace Baretest;
 final class FileResult
 {
     /**
-     * @param list<array{path: list<string>, time: float, failure: ?array}> $tests in the order they finished
+     * @param list<array{path: list<string>, time: float, failure: ?array}> $tests in the order they started
      * @param ?array{title: string, failure: array} $stopped set when the file failed outside any test
      */
     public function __construct(

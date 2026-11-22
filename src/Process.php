@@ -35,6 +35,7 @@ final class Process
                 default => null,
             };
         }
+        usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
         if (!$done && $stopped === null) {
             $stopped = ['title' => 'crashed', 'failure' => ['message' => self::describeCrash($code, (string) file_get_contents($output))]];
         }

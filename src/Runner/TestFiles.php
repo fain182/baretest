@@ -20,18 +20,24 @@ final class TestFiles
                 $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
                 foreach ($iterator as $file) {
                     if (substr($file->getFilename(), -9) === '_test.php') {
-                        $found[] = realpath($file->getPathname());
+                        $found[] = realpath($file->getPathname()) ?: self::reportMissing($file->getPathname());
                     }
                 }
                 sort($found);
                 array_push($files, ...$found);
             } else {
-                throw new \InvalidArgumentException("no such file or directory: $path");
+                self::reportMissing($path);
             }
         }
         if ($files === []) {
             throw new \InvalidArgumentException('no *_test.php files in ' . implode(', ', $paths));
         }
         return array_values(array_unique($files));
+    }
+
+    /** @return never */
+    private static function reportMissing(string $path)
+    {
+        throw new \InvalidArgumentException("no such file or directory: $path");
     }
 }

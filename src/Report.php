@@ -66,7 +66,7 @@ final class Report
             $this->failedFiles++;
         }
 
-        $time = $this->paint('90', sprintf('%.2fs', $result->time));
+        $time = $this->paint('2', sprintf('%.2fs', $result->time));
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
         $this->write($this->renderEntries($result));
         $this->write($this->renderOutput($result));
@@ -80,7 +80,7 @@ final class Report
 
     public function finish(): void
     {
-        $time = $this->paint('90', sprintf('%.2fs', microtime(true) - $this->start));
+        $time = $this->paint('2', sprintf('%.2fs', microtime(true) - $this->start));
         $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;
         $text = match (true) {
             $ok => self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file'),
@@ -117,7 +117,7 @@ final class Report
         $skips = '';
         foreach ($result->tests as $test) {
             if ($test['skipped'] !== null) {
-                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint('90', '(skipped)') . "\n";
+                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint('2', '(skipped)') . "\n";
             }
         }
         $out = '';
@@ -137,9 +137,9 @@ final class Report
         if ($result->output === '') {
             return '';
         }
-        $out = '  ' . $this->paint('90', 'output') . "\n";
+        $out = '  ' . $this->paint('2', 'output') . "\n";
         foreach (explode("\n", rtrim($result->output, "\n")) as $line) {
-            $out .= self::DETAIL_INDENT . $this->paint('90', '│') . ($line === '' ? '' : ' ' . $line) . "\n";
+            $out .= self::DETAIL_INDENT . $this->paint('2', '│') . ($line === '' ? '' : ' ' . $line) . "\n";
         }
         return $out . "\n";
     }
@@ -150,13 +150,13 @@ final class Report
         $line = $failure['line'] ?? null;
         $out = '  ' . $this->mark(false) . ' ' . $this->paint('1', $title);
         if ($location !== null) {
-            $out .= '  ' . $this->paint('90', '(' . $location . ')');
+            $out .= '  ' . $this->paint('2', '(' . $location . ')');
         }
         $out .= "\n";
         $source = $location !== null && $line !== null ? $this->readSource($failure['file'], $line, $failure['lastLine'] ?? $line) : [];
         $width = strlen((string) array_key_last($source));
         foreach ($source as $number => $code) {
-            $out .= self::DETAIL_INDENT . $this->paint('90', str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
+            $out .= self::DETAIL_INDENT . $this->paint('2', str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
         return $out . "\n" . (isset($failure['expected']) ? $this->renderValues($failure) : $this->renderMessage($failure));
     }
@@ -174,8 +174,8 @@ final class Report
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::measureWidth($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
-        $out = $label . $pad($expected) . $this->paint('90', '(' . $failure['expectedType'] . ')') . "\n"
-            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint('90', '(' . $failure['gotType'] . ')') . "\n";
+        $out = $label . $pad($expected) . $this->paint('2', '(' . $failure['expectedType'] . ')') . "\n"
+            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint('2', '(' . $failure['gotType'] . ')') . "\n";
         return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint('31', '^') . "\n";
     }
 

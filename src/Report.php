@@ -22,7 +22,7 @@ final class Report
     private array $sources = [];
 
     /** @param resource $out */
-    public function __construct(private $out, private bool $color, private bool $verbose, private ?string $ci)
+    public function __construct(private $out, private bool $color, private ?string $ci)
     {
         $this->start = microtime(true);
     }
@@ -105,28 +105,19 @@ final class Report
         };
     }
 
-    /** The failures of a file, and with -v its other tests too, in the order they started. */
+    /** The failures of a file, in the order their tests started. */
     private function renderEntries(FileResult $result): string
     {
         $out = '';
-        $afterBlock = false;
-        $block = function (string $title, array $failure) use (&$out, &$afterBlock): void {
-            $out .= ($afterBlock ? '' : "\n") . $this->renderBlock($title, $failure) . "\n";
-            $afterBlock = true;
-        };
         foreach ($result->tests as $test) {
-            $title = FileResult::formatTitle($test);
             if ($test['failure'] !== null) {
-                $block($title, $test['failure']);
-            } elseif ($this->verbose) {
-                $out .= '  ' . $this->mark(!FileResult::hasFailed($test)) . ' ' . $title . "\n";
-                $afterBlock = false;
+                $out .= $this->renderBlock(FileResult::formatTitle($test), $test['failure']) . "\n";
             }
         }
         if ($result->stopped !== null) {
-            $block($result->stopped['title'], $result->stopped['failure']);
+            $out .= $this->renderBlock($result->stopped['title'], $result->stopped['failure']) . "\n";
         }
-        return $out === '' || $afterBlock ? $out : $out . "\n";
+        return $out === '' ? '' : "\n" . $out;
     }
 
     private function renderOutput(FileResult $result): string

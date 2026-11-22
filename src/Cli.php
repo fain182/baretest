@@ -12,13 +12,13 @@ require_once __DIR__ . '/Report.php';
 
 final class Cli
 {
-    private const USAGE = 'usage: baretest [-v] [--ci=github|gitlab] [PATH...]';
+    private const USAGE = 'usage: baretest [--ci=github|gitlab] [PATH...]';
 
     /** @param list<string> $argv */
     public static function run(array $argv): int
     {
         try {
-            [$verbose, $ci, $paths] = self::parse(array_slice($argv, 1));
+            [$ci, $paths] = self::parse(array_slice($argv, 1));
             if (!function_exists('proc_open')) {
                 throw new \RuntimeException('proc_open() is disabled in php.ini (disable_functions), and baretest runs each test file in its own process');
             }
@@ -26,7 +26,7 @@ final class Cli
 
             $out = $ci === 'gitlab' ? STDERR : STDOUT;
             $noColor = getenv('NO_COLOR');
-            $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''), $verbose, $ci);
+            $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''), $ci);
             foreach ($files as $file) {
                 $report->add(Process::run($file, Report::makeRelative($file)));
             }
@@ -38,16 +38,13 @@ final class Cli
         }
     }
 
-    /** @return array{bool, ?string, list<string>} */
+    /** @return array{?string, list<string>} */
     private static function parse(array $args): array
     {
-        $verbose = false;
         $ci = null;
         $paths = [];
         foreach ($args as $arg) {
-            if ($arg === '-v') {
-                $verbose = true;
-            } elseif (str_starts_with($arg, '--ci=')) {
+            if (str_starts_with($arg, '--ci=')) {
                 $ci = substr($arg, 5);
                 if (!in_array($ci, ['github', 'gitlab'], true)) {
                     throw new \InvalidArgumentException("unknown --ci target \"$ci\"\n" . self::USAGE);
@@ -58,7 +55,7 @@ final class Cli
                 $paths[] = $arg;
             }
         }
-        return [$verbose, $ci, $paths];
+        return [$ci, $paths];
     }
 
     /** @return list<string> absolute paths, each file once */

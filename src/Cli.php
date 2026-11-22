@@ -7,6 +7,7 @@ namespace Baretest;
 require_once __DIR__ . '/Value.php';
 require_once __DIR__ . '/FileResult.php';
 require_once __DIR__ . '/Process.php';
+require_once __DIR__ . '/Github.php';
 require_once __DIR__ . '/Junit.php';
 require_once __DIR__ . '/Report.php';
 
@@ -26,11 +27,19 @@ final class Cli
 
             $out = $ci === 'gitlab' ? STDERR : STDOUT;
             $noColor = getenv('NO_COLOR');
-            $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''), $ci);
+            $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''));
+            $results = [];
             foreach ($files as $file) {
-                $report->add(Process::run($file, Report::makeRelative($file)));
+                $results[] = $result = Process::run($file, Report::makeRelative($file));
+                $report->add($result);
+                if ($ci === 'github') {
+                    fwrite($out, Github::render($result));
+                }
             }
             $report->finish();
+            if ($ci === 'gitlab') {
+                fwrite(STDOUT, Junit::render($results));
+            }
             return $report->getExitCode();
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");

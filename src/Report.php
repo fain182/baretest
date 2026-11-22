@@ -18,22 +18,18 @@ final class Report
     private int $skipped = 0;
     private int $emptyFiles = 0;
     private float $start;
-    /** @var list<FileResult> */
-    private array $results = [];
     /** @var array<string, list<string>> */
     private array $sources = [];
 
     /** @var resource */
     private $out;
     private bool $color;
-    private ?string $ci;
 
     /** @param resource $out */
-    public function __construct($out, bool $color, ?string $ci)
+    public function __construct($out, bool $color)
     {
         $this->out = $out;
         $this->color = $color;
-        $this->ci = $ci;
         $this->start = microtime(true);
     }
 
@@ -60,14 +56,12 @@ final class Report
 
     public function add(FileResult $result): void
     {
-        $this->results[] = $result;
         $this->files++;
         $this->tests += $result->countTests();
         $this->failed += $result->countFailed();
         $this->skipped += $result->countSkipped();
 
-        $failures = $result->listFailures();
-        $ok = $failures === [] && !$result->hasNoTests();
+        $ok = $result->listFailures() === [] && !$result->hasNoTests();
         if ($result->hasNoTests()) {
             $this->emptyFiles++;
         } elseif (!$ok) {
@@ -78,12 +72,6 @@ final class Report
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
         $this->write($this->renderEntries($result));
         $this->write($this->renderOutput($result));
-
-        if ($this->ci === 'github') {
-            foreach ($failures as $entry) {
-                $this->write(self::renderAnnotation($result, $entry['title'], $entry['failure']) . "\n");
-            }
-        }
     }
 
     public function finish(): void
@@ -100,9 +88,6 @@ final class Report
         }
         $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
         $this->write($this->mark($ok) . ' ' . $this->paint('1', $text) . '  ' . $time . "\n");
-        if ($this->ci === 'gitlab') {
-            fwrite(STDOUT, Junit::render($this->results));
-        }
     }
 
     public function getExitCode(): int
@@ -241,26 +226,6 @@ final class Report
         $indents = array_map(static fn (string $code): int => strspn($code, " \t"), array_filter($lines, static fn (string $code): bool => $code !== ''));
         $indent = $indents === [] ? 0 : min($indents);
         return array_map(static fn (string $code): string => (string) substr($code, $indent), $lines);
-    }
-
-    private static function renderAnnotation(FileResult $result, string $title, array $failure): string
-    {
-        $file = isset($failure['file']) ? self::makeRelative($failure['file']) : $result->file;
-        $properties = 'file=' . self::escape($file, true)
-            . (isset($failure['line']) ? ',line=' . $failure['line'] : '')
-            . ',title=' . self::escape($title, true);
-        return '::error ' . $properties . '::' . self::escape(self::describe($failure), false);
-    }
-
-    private static function escape(string $text, bool $property): string
-    {
-        $from = ['%', "\r", "\n"];
-        $to = ['%25', '%0D', '%0A'];
-        if ($property) {
-            array_push($from, ':', ',');
-            array_push($to, '%3A', '%2C');
-        }
-        return str_replace($from, $to, $text);
     }
 
     private static function count(int $n, string $noun): string

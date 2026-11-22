@@ -4,7 +4,7 @@ use function Baretest\{test, equal};
 
 // Each directory in fixtures/ is run with the arguments in its `args` file (default: the
 // directory itself); the whole output and the exit code must match expected.out and expected.code.
-// SNAPSHOT_UPDATE=1 rewrites the expected files.
+// SNAPSHOT_REPLACE=1 rewrites the expected files.
 
 $root = dirname(__DIR__);
 
@@ -23,7 +23,7 @@ foreach (glob($root . '/fixtures/*', GLOB_ONLYDIR) as $dir) {
         $code = proc_close($process);
         $output = preg_replace(['/\b\d+\.\d\ds\b/', '/time="\d+\.\d+"/'], ['0.00s', 'time="0.000"'], $output);
 
-        if (getenv('SNAPSHOT_UPDATE')) {
+        if (getenv('SNAPSHOT_REPLACE')) {
             file_put_contents("$dir/expected.out", $output);
             file_put_contents("$dir/expected.code", "$code\n");
         }

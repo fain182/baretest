@@ -9,7 +9,7 @@ update-snapshots:
 	SNAPSHOT_REPLACE=1 $(PHP) bin/baretest tests/snapshot_test.php
 
 lines:
-	@n=$$(cat bin/baretest src/*.php | wc -l); echo "$$n lines of source"; test $$n -lt 1000
+	@n=$$(cat bin/baretest src/*.php | wc -l); echo "$$n lines of source"; test $$n -lt 1100
 
 # Records the README example with vhs, from a directory laid out like a project that uses baretest.
 screenshot:

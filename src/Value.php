@@ -7,6 +7,8 @@ namespace Baretest;
 /** Shows PHP values byte by byte, and finds where two of them first differ. */
 final class Value
 {
+    private const VALUE_WIDTH = 48;
+    private const CONTEXT_WIDTH = 16;
     private const UTF8 = '~[\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2}|.~s';
 
     private const ZERO_WIDTH = '~[\p{Mn}\p{Me}\x{200B}-\x{200F}\x{FE00}-\x{FE0F}]~u';
@@ -68,6 +70,47 @@ final class Value
     }
 
     /** One token per character: valid UTF-8 as it is, anything else escaped. */
+    /** Cuts long values to a window around the caret, the same window for both. */
+    public static function cut(string $expected, string $got, ?int $caret): array
+    {
+        $a = self::splitCharacters($expected);
+        $b = self::splitCharacters($got);
+        if (max(self::measureWidth($expected), self::measureWidth($got)) <= self::VALUE_WIDTH) {
+            return [$expected, $got, $caret];
+        }
+        $index = 0;
+        for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
+            $column += self::measureWidth($b[$index]);
+        }
+        $start = $index;
+        for ($context = 0; $start > 0 && $context + self::measureWidth($b[$start - 1]) <= self::CONTEXT_WIDTH; $start--) {
+            $context += self::measureWidth($b[$start - 1]);
+        }
+        $window = static function (array $characters) use ($start): string {
+            $rest = array_slice($characters, $start);
+            $room = self::VALUE_WIDTH - ($start > 0 ? 1 : 0);
+            if (self::measureWidth(implode('', $rest)) <= $room) {
+                return ($start > 0 ? '…' : '') . implode('', $rest);
+            }
+            $shown = '';
+            foreach ($rest as $character) {
+                $room -= self::measureWidth($character);
+                if ($room < 1) {
+                    break;
+                }
+                $shown .= $character;
+            }
+            return ($start > 0 ? '…' : '') . $shown . '…';
+        };
+        $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
+        return [$window($a), $window($b), $caret === null ? null : self::measureWidth($before)];
+    }
+
+    private static function splitCharacters(string $text): array
+    {
+        return preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: str_split($text);
+    }
+
     private static function tokenize(string $text): array
     {
         preg_match_all(self::UTF8, $text, $matches);

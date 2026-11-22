@@ -7,8 +7,6 @@ namespace Baretest;
 /** Writes the output described in the README, one file at a time. */
 final class Report
 {
-    private const VALUE_WIDTH = 48;
-    private const CONTEXT_WIDTH = 16;
     private const DETAIL_INDENT = '       ';
 
     private int $files = 0;
@@ -143,7 +141,7 @@ final class Report
 
     private function renderValues(array $failure): string
     {
-        [$expected, $got, $caret] = self::cut($failure['expected'], $failure['got'], $failure['caret']);
+        [$expected, $got, $caret] = Value::cut($failure['expected'], $failure['got'], $failure['caret']);
         $width = max(Value::measureWidth($expected), Value::measureWidth($got)) + 4;
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::measureWidth($value));
         $label = self::DETAIL_INDENT . 'expected  ';
@@ -151,47 +149,6 @@ final class Report
         $out = $label . $pad($expected) . $this->paint('2', '(' . $failure['expectedType'] . ')') . "\n"
             . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint('2', '(' . $failure['gotType'] . ')') . "\n";
         return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint('31', '^') . "\n";
-    }
-
-    /** Cuts long values to a window around the caret, the same window for both. */
-    private static function cut(string $expected, string $got, ?int $caret): array
-    {
-        $a = self::splitCharacters($expected);
-        $b = self::splitCharacters($got);
-        if (max(Value::measureWidth($expected), Value::measureWidth($got)) <= self::VALUE_WIDTH) {
-            return [$expected, $got, $caret];
-        }
-        $index = 0;
-        for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
-            $column += Value::measureWidth($b[$index]);
-        }
-        $start = $index;
-        for ($context = 0; $start > 0 && $context + Value::measureWidth($b[$start - 1]) <= self::CONTEXT_WIDTH; $start--) {
-            $context += Value::measureWidth($b[$start - 1]);
-        }
-        $window = static function (array $characters) use ($start): string {
-            $rest = array_slice($characters, $start);
-            $room = self::VALUE_WIDTH - ($start > 0 ? 1 : 0);
-            if (Value::measureWidth(implode('', $rest)) <= $room) {
-                return ($start > 0 ? '…' : '') . implode('', $rest);
-            }
-            $shown = '';
-            foreach ($rest as $character) {
-                $room -= Value::measureWidth($character);
-                if ($room < 1) {
-                    break;
-                }
-                $shown .= $character;
-            }
-            return ($start > 0 ? '…' : '') . $shown . '…';
-        };
-        $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
-        return [$window($a), $window($b), $caret === null ? null : Value::measureWidth($before)];
-    }
-
-    private static function splitCharacters(string $text): array
-    {
-        return preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: str_split($text);
     }
 
     /** @return array<int, string> lines $first to $last by number, without the indentation they share */

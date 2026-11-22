@@ -103,7 +103,7 @@ class Session
     /** @return never */
     private static function raise(array $failure)
     {
-        self::register($failure + CallSite::find());
+        self::register($failure + CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
         throw new Failure($failure['message']);
     }
 

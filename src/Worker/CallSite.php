@@ -13,10 +13,14 @@ class CallSite
     /** @var array<string, list<string>> the lines of each test file, with strings and comments blanked out */
     private static array $code = [];
 
-    /** The lines of the test code that called into baretest. */
-    public static function find(): array
+    /**
+     * The lines of the test code that called into baretest.
+     *
+     * @param list<array{file?: string, line?: int, function: string}> $frames from debug_backtrace(), innermost first
+     */
+    public static function find(array $frames): array
     {
-        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+        foreach ($frames as $frame) {
             if (isset($frame['file']) && strpos($frame['file'], dirname(__DIR__) . DIRECTORY_SEPARATOR) !== 0) {
                 return ['file' => $frame['file']] + self::findCall($frame['file'], $frame['line'], $frame['function']);
             }

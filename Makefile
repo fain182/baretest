@@ -1,9 +1,12 @@
 PHP ?= php
 
-.PHONY: test lines screenshot
+.PHONY: test lines update-snapshots screenshot
 
 test: lines
 	$(PHP) bin/baretest
+
+update-snapshots:
+	SNAPSHOT_REPLACE=1 $(PHP) bin/baretest tests/snapshot_test.php
 
 lines:
 	@n=$$(cat bin/baretest src/*.php | wc -l); echo "$$n lines of source"; test $$n -lt 1000

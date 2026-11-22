@@ -2,6 +2,7 @@
     "name": "fain182/baretest",
     "description": "A small test runner for PHP libraries. No dependencies, no extensions.",
     "type": "library",
+    "license": "MIT",
     "keywords": ["test", "testing", "test-runner"],
     "require": {
         "php": ">=8.1"

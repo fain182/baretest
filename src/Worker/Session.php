@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 use Baretest\Output\Literal;
+use Baretest\Result\Records;
 
 /**
  * The state of one test file, in the process that runs it. Every finished test is
@@ -16,15 +17,14 @@ final class Session
 
     /** @var list<Test> the running test and the tests around it, outermost first */
     private static array $active = [];
-    /** @var resource|null */
-    private static $records = null;
+    private static ?Records $records = null;
     private static bool $finished = false;
     private static bool $fileFailed = false;
     private static int $started = 0;
 
     public static function runFile(string $file, string $recordsPath): void
     {
-        self::$records = fopen($recordsPath, 'ab');
+        self::$records = new Records($recordsPath);
         error_reporting(E_ALL);
         // Errors become failures; PHP's own copy would show up again as the file's output.
         ini_set('display_errors', '0');
@@ -42,7 +42,7 @@ final class Session
             self::register(self::describe($e), 'uncaught exception');
         }
         self::$finished = true;
-        self::write(['t' => 'done']);
+        self::$records->write(['t' => 'done']);
     }
 
     public static function runTest(string $name, callable $fn): void
@@ -67,7 +67,7 @@ final class Session
         if (self::$active !== [] && $test->hasFailed()) {
             self::$active[array_key_last(self::$active)]->markSubtestFailed();
         }
-        self::write($test->toRecord($path));
+        self::$records->write($test->toRecord($path));
     }
 
     /** @return never */
@@ -142,7 +142,7 @@ final class Session
         if (self::$active === []) {
             if (!self::$fileFailed) {
                 self::$fileFailed = true;
-                self::write(['t' => 'file', 'title' => $title, 'failure' => $failure]);
+                self::$records->write(['t' => 'file', 'title' => $title, 'failure' => $failure]);
             }
             return;
         }
@@ -152,10 +152,5 @@ final class Session
     private static function describe(\Throwable $e): array
     {
         return ['label' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()];
-    }
-
-    private static function write(array $record): void
-    {
-        fwrite(self::$records, base64_encode(serialize($record)) . "\n");
     }
 }

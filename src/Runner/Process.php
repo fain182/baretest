@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Runner;
 
 use Baretest\Result\FileResult;
+use Baretest\Result\Records;
 
 /** Runs a test file in a fresh PHP process and reads back what it recorded. */
 final class Process
@@ -31,8 +32,7 @@ final class Process
         $tests = [];
         $stopped = null;
         $done = false;
-        foreach (file($records, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
-            $record = unserialize(base64_decode($line), ['allowed_classes' => false]);
+        foreach (Records::read($records) as $record) {
             $type = $record['t'] ?? null;
             if ($type === 'test') {
                 $tests[] = $record;

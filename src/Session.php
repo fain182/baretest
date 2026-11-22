@@ -12,7 +12,7 @@ final class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
-    /** @var list<array{name: string, seq: int, failure: ?array, subtestFailed: bool, skipped: ?string}> */
+    /** @var list<Test> the running test and the tests around it, outermost first */
     private static array $active = [];
     /** @var resource|null */
     private static $records = null;
@@ -49,24 +49,23 @@ final class Session
             throw new \LogicException('Test files are run with vendor/bin/baretest, not directly.');
         }
         error_clear_last();
-        $start = microtime(true);
-        self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null, 'subtestFailed' => false, 'skipped' => null];
+        $test = new Test($name, self::$started++);
+        self::$active[] = $test;
         try {
             $fn();
         } catch (Failure $failure) {
             // already registered where it was raised
         } catch (Skip $skip) {
-            self::$active[array_key_last(self::$active)]['skipped'] = $skip->getMessage();
+            $test->skip($skip->getMessage());
         } catch (\Throwable $e) {
             self::register(self::describe($e));
         }
         $path = array_column(self::$active, 'name');
-        $test = array_pop(self::$active);
-        if (self::$active !== [] && ($test['failure'] !== null || $test['subtestFailed'])) {
-            self::$active[array_key_last(self::$active)]['subtestFailed'] = true;
+        array_pop(self::$active);
+        if (self::$active !== [] && $test->hasFailed()) {
+            self::$active[array_key_last(self::$active)]->markSubtestFailed();
         }
-        $skipped = $test['failure'] === null && !$test['subtestFailed'] ? $test['skipped'] : null;
-        self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure'], 'subtestFailed' => $test['subtestFailed'], 'skipped' => $skipped]);
+        self::write($test->toRecord($path));
     }
 
     /** @return never */
@@ -145,7 +144,7 @@ final class Session
             }
             return;
         }
-        self::$active[array_key_last(self::$active)]['failure'] ??= $failure;
+        self::$active[array_key_last(self::$active)]->fail($failure);
     }
 
     private static function describe(\Throwable $e): array

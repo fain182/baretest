@@ -7,7 +7,8 @@ namespace Baretest;
 /** Writes the output described in the README, one file at a time. */
 final class Report
 {
-    private const VALUE_WIDTH = 60;
+    private const VALUE_WIDTH = 48;
+    private const CONTEXT_WIDTH = 16;
     private const DETAIL_INDENT = '       ';
 
     private int $files = 0;
@@ -183,17 +184,33 @@ final class Report
     {
         $a = self::splitCharacters($expected);
         $b = self::splitCharacters($got);
-        if (max(count($a), count($b)) <= self::VALUE_WIDTH) {
+        if (max(Value::measureWidth($expected), Value::measureWidth($got)) <= self::VALUE_WIDTH) {
             return [$expected, $got, $caret];
         }
         $index = 0;
         for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
             $column += Value::measureWidth($b[$index]);
         }
-        $start = max(0, $index - 20);
-        $window = static fn (array $characters): string => ($start > 0 ? '…' : '')
-            . implode('', array_slice($characters, $start, self::VALUE_WIDTH))
-            . ($start + self::VALUE_WIDTH < count($characters) ? '…' : '');
+        $start = $index;
+        for ($context = 0; $start > 0 && $context + Value::measureWidth($b[$start - 1]) <= self::CONTEXT_WIDTH; $start--) {
+            $context += Value::measureWidth($b[$start - 1]);
+        }
+        $window = static function (array $characters) use ($start): string {
+            $rest = array_slice($characters, $start);
+            $room = self::VALUE_WIDTH - ($start > 0 ? 1 : 0);
+            if (Value::measureWidth(implode('', $rest)) <= $room) {
+                return ($start > 0 ? '…' : '') . implode('', $rest);
+            }
+            $shown = '';
+            foreach ($rest as $character) {
+                $room -= Value::measureWidth($character);
+                if ($room < 1) {
+                    break;
+                }
+                $shown .= $character;
+            }
+            return ($start > 0 ? '…' : '') . $shown . '…';
+        };
         $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
         return [$window($a), $window($b), $caret === null ? null : Value::measureWidth($before)];
     }

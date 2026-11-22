@@ -19,7 +19,7 @@ final class FileResult
 
     public function __construct(string $file, array $tests, ?array $stopped, float $time, string $output)
     {
-        $this->file = $file;
+        $this->file = self::makeRelative($file);
         $this->tests = $tests;
         $this->stopped = $stopped;
         $this->time = $time;

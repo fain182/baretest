@@ -10,7 +10,7 @@ final class Process
     /** @var ?list<string> */
     private static ?array $php = null;
 
-    public static function run(string $file, string $display): FileResult
+    public static function run(string $file): FileResult
     {
         $records = tempnam(sys_get_temp_dir(), 'baretest');
         $output = tempnam(sys_get_temp_dir(), 'baretest');
@@ -49,7 +49,7 @@ final class Process
         unlink($records);
         unlink($output);
 
-        return new FileResult($display, $tests, $stopped, $time, $printed);
+        return new FileResult($file, $tests, $stopped, $time, $printed);
     }
 
     /**

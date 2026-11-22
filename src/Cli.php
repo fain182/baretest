@@ -19,7 +19,7 @@ final class Cli
             $report = new Report(stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
             $results = new SuiteResult();
             foreach ($files as $file) {
-                $results->append(Process::run($file, FileResult::makeRelative($file)));
+                $results->append(Process::run($file));
                 $report->printFile($results->getLast());
                 Github::annotate($results->getLast());
             }

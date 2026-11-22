@@ -36,7 +36,7 @@ final class Report
         $this->start = microtime(true);
     }
 
-    public function add(FileResult $result): void
+    public function printFile(FileResult $result): void
     {
         $this->files++;
         $this->tests += $result->countTests();
@@ -56,7 +56,7 @@ final class Report
         $this->write($this->renderOutput($result));
     }
 
-    public function finish(): void
+    public function printSummary(): void
     {
         $time = $this->paint(self::DIM, sprintf('%.2fs', microtime(true) - $this->start));
         $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;

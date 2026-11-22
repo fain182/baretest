@@ -53,12 +53,6 @@ final class FileResult
         return implode(' › ', $test['path']);
     }
 
-    /** @param array{failure: ?array, subtestFailed: bool} $test */
-    public static function hasFailed(array $test): bool
-    {
-        return $test['failure'] !== null || $test['subtestFailed'];
-    }
-
     public function hasNoTests(): bool
     {
         return $this->tests === [] && $this->stopped === null;
@@ -71,7 +65,7 @@ final class FileResult
 
     public function countFailed(): int
     {
-        $failed = count(array_filter($this->tests, [self::class, 'hasFailed']));
+        $failed = count(array_filter($this->tests, static fn (array $test): bool => $test['failure'] !== null || $test['subtestFailed']));
         return $failed + ($this->stopped !== null ? 1 : 0);
     }
 

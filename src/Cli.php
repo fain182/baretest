@@ -16,16 +16,19 @@ final class Cli
             $files = TestFiles::find(array_slice($argv, 1));
 
             $noColor = getenv('NO_COLOR');
-            $report = new Report(STDOUT, stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
+            $report = new Report(stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
             $results = new SuiteResult();
             foreach ($files as $file) {
                 $results->append(Process::run($file, FileResult::makeRelative($file)));
                 $report->printFile($results->getLast());
                 Github::annotate($results->getLast());
             }
-            $report->printSummary();
+            $report->printSummary($results);
             Gitlab::save($results);
-            return $results->hasFileWithoutTests() ? 2 : ($results->hasFailures() ? 1 : 0);
+            if ($results->countFiles(static fn (FileResult $file): bool => $file->hasNoTests()) > 0) {
+                return 2;
+            }
+            return $results->countFiles(static fn (FileResult $file): bool => $file->hasFailures()) > 0 ? 1 : 0;
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
             return 2;

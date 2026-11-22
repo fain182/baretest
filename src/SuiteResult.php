@@ -20,27 +20,18 @@ final class SuiteResult implements \IteratorAggregate
         return $this->files[array_key_last($this->files)];
     }
 
-    public function hasFailures(): bool
+    /** @param ?callable(FileResult): bool $filter */
+    public function countFiles(?callable $filter = null): int
     {
-        foreach ($this->files as $file) {
-            if ($file->hasFailures()) {
-                return true;
-            }
-        }
-        return false;
+        return count($filter === null ? $this->files : array_filter($this->files, $filter));
     }
 
-    public function hasFileWithoutTests(): bool
+    /** @param callable(FileResult): int $count */
+    public function sum(callable $count): int
     {
-        foreach ($this->files as $file) {
-            if ($file->hasNoTests()) {
-                return true;
-            }
-        }
-        return false;
+        return array_sum(array_map($count, $this->files));
     }
 
-    /** @return \ArrayIterator<int, FileResult> */
     public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->files);

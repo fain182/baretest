@@ -14,61 +14,46 @@ final class Report
     private const GREEN = '32';
     private const YELLOW = '33';
 
-    private int $files = 0;
-    private int $failedFiles = 0;
-    private int $tests = 0;
-    private int $failed = 0;
-    private int $skipped = 0;
-    private int $emptyFiles = 0;
     private float $start;
     /** @var array<string, list<string>> */
     private array $sources = [];
 
-    /** @var resource */
-    private $out;
     private bool $color;
 
-    /** @param resource $out */
-    public function __construct($out, bool $color)
+    public function __construct(bool $color)
     {
-        $this->out = $out;
         $this->color = $color;
         $this->start = microtime(true);
     }
 
     public function printFile(FileResult $result): void
     {
-        $this->files++;
-        $this->tests += $result->countTests();
-        $this->failed += $result->countFailed();
-        $this->skipped += $result->countSkipped();
-
         $ok = !$result->hasFailures() && !$result->hasNoTests();
-        if ($result->hasNoTests()) {
-            $this->emptyFiles++;
-        } elseif (!$ok) {
-            $this->failedFiles++;
-        }
-
         $time = $this->paint(self::DIM, sprintf('%.2fs', $result->time));
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
         $this->write($this->renderEntries($result));
         $this->write($this->renderOutput($result));
     }
 
-    public function printSummary(): void
+    public function printSummary(SuiteResult $results): void
     {
         $time = $this->paint(self::DIM, sprintf('%.2fs', microtime(true) - $this->start));
-        $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;
+        $files = $results->countFiles();
+        $failedFiles = $results->countFiles(static fn (FileResult $file): bool => $file->hasFailures());
+        $emptyFiles = $results->countFiles(static fn (FileResult $file): bool => $file->hasNoTests());
+        $tests = $results->sum(static fn (FileResult $file): int => $file->countTests());
+        $skipped = $results->sum(static fn (FileResult $file): int => $file->countSkipped());
+        $ok = $failedFiles === 0 && $emptyFiles === 0;
         if ($ok) {
-            $text = self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file');
-        } elseif ($this->failedFiles === 0) {
-            $text = $this->emptyFiles . ' of ' . self::count($this->files, 'file') . ' did not run any test';
+            $text = self::count($tests, 'test') . ' in ' . self::count($files, 'file');
+        } elseif ($failedFiles === 0) {
+            $text = $emptyFiles . ' of ' . self::count($files, 'file') . ' did not run any test';
         } else {
-            $text = $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file')
-                . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : '');
+            $text = $results->sum(static fn (FileResult $file): int => $file->countFailed()) . ' of ' . self::count($tests, 'test')
+                . ' failed in ' . $failedFiles . ' of ' . self::count($files, 'file')
+                . ($emptyFiles > 0 ? ', ' . $emptyFiles . ' did not run any test' : '');
         }
-        $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
+        $text .= $skipped > 0 ? ', ' . $skipped . ' skipped' : '';
         $this->write($this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $time . "\n");
     }
 
@@ -176,6 +161,6 @@ final class Report
 
     private function write(string $text): void
     {
-        fwrite($this->out, $text);
+        fwrite(STDOUT, $text);
     }
 }

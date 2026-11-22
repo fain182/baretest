@@ -1,6 +1,6 @@
 # baretest
 
-A small test runner for PHP libraries. No dependencies, no extensions, PHP 8.0 to 8.6.
+A small test runner for PHP libraries. No dependencies, no extensions, PHP 7.4 to 8.6.
 
 You can learn all of it in five minutes and read its source in an afternoon.
 
@@ -42,7 +42,7 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 
 | | baretest | PHPUnit 13 | Pest 5 |
 |---|---|---|---|
-| PHP versions | 8.0 – 8.6 | 8.4.1 and later | 8.4 and later |
+| PHP versions | 7.4 – 8.6 | 8.4.1 and later | 8.4 and later |
 | API to learn | 5 functions | 176 assertion methods | 16 functions and 131 expectations |
 | Extensions required | none, runs on PHP built with `--disable-all` | dom, filter, json, libxml, mbstring, xmlwriter | those of PHPUnit, which it is built on |
 | Test files isolated from each other | always, one process per file | opt-in, one process per test | not supported |

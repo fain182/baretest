@@ -19,7 +19,7 @@ final class Literal
             case is_string($value): return '"' . implode('', self::tokenize($value)) . '"';
             case is_array($value): return self::renderArray($value);
             case $value instanceof \UnitEnum: return get_class($value) . '::' . $value->name;
-            case is_object($value): return get_class($value) . '#' . spl_object_id($value);
+            case is_object($value): return self::describeType($value) . '#' . spl_object_id($value);
             default: return self::describeType($value);
         }
     }

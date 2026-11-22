@@ -21,7 +21,6 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 
 ## Open questions
 
-- How long values are cut so that the `^` stays aligned.
 
 ## Testing baretest
 

@@ -1,2 +1,0 @@
-baretest: unknown option --bogus
-usage: baretest [--ci=github|gitlab] [PATH...]

@@ -83,17 +83,17 @@ A warning, notice or deprecation fails the test, unless it was silenced with `@`
 ### Running
 
 ```
-vendor/bin/baretest [--ci=github|gitlab] [PATH...]
+vendor/bin/baretest [PATH...]
 ```
 
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
 - Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
 - Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
-- `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
-- `--ci=gitlab` writes a JUnit XML report to stdout and the usual output to stderr, so the job log stays readable: `vendor/bin/baretest --ci=gitlab > report.xml`, then point `artifacts:reports:junit` at `report.xml` with `artifacts:when: always`.
+- On GitHub Actions (`GITHUB_ACTIONS=true`) it also prints an `::error` line for each failure, which GitHub shows as an annotation on the code.
+- On GitLab CI (`GITLAB_CI=true`) it also writes a JUnit XML report to `baretest-junit.xml` in the current directory: point `artifacts:reports:junit` at it, with `artifacts:when: always`.
 
-Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that runs no tests).
+Exit code: `0` all passed, `1` some failed, `2` the runner could not run (a missing path, a file that runs no tests).
 
 ### Table tests
 
@@ -152,7 +152,7 @@ Shared setup is a function. A repeated check is a function. A test that needs a 
 - fixtures, setup/teardown hooks, dependency injection: use a function
 - code coverage
 - configuration files
-- plugins, custom reporters, other output formats: a new `--ci` target is for a new platform, not a new style
+- plugins, custom reporters, other output formats: a new CI platform can be supported, a new style cannot
 - watch mode
 - running files in parallel
 - stopping at the first failure

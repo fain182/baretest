@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Output;
 
-use Baretest\Result\FileResult;
+use Baretest\Result\Failure;
 use Baretest\Result\SuiteResult;
 
 /** The JUnit XML report that GitLab reads. */
@@ -32,7 +32,7 @@ final class Gitlab
                 $result->time,
             );
             foreach ($result->tests as $test) {
-                $failure = $test->failure ?? ($test->subtestFailed ? ['message' => 'a subtest failed'] : null);
+                $failure = $test->failure ?? ($test->subtestFailed ? new Failure(['message' => 'a subtest failed']) : null);
                 $xml .= self::renderTestCase($result->file, $test->title, $test->time, $failure, $test->skipped);
             }
             $xml .= "  </testsuite>\n";
@@ -40,7 +40,7 @@ final class Gitlab
         return $xml . "</testsuites>\n";
     }
 
-    private static function renderTestCase(string $file, string $name, float $time, ?array $failure, ?string $skipped = null): string
+    private static function renderTestCase(string $file, string $name, float $time, ?Failure $failure, ?string $skipped = null): string
     {
         $open = sprintf('    <testcase classname="%s" name="%s" time="%.3f"', self::escape($file), self::escape($name), $time);
         if ($skipped !== null) {
@@ -49,8 +49,8 @@ final class Gitlab
         if ($failure === null) {
             return $open . "/>\n";
         }
-        $location = FileResult::formatLocation($failure) ?? $file;
-        $message = FileResult::describe($failure);
+        $location = $failure->formatLocation() ?? $file;
+        $message = $failure->describe();
         return $open . ">\n      <failure message=\"" . self::escape(explode("\n", $message)[0]) . '">'
             . self::escape($location . "\n" . $message) . "</failure>\n    </testcase>\n";
     }

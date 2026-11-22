@@ -9,11 +9,11 @@ final class TestResult
 {
     public string $title;
     public float $time;
-    public ?array $failure;
+    public ?Failure $failure;
     public bool $subtestFailed;
     public ?string $skipped;
 
-    public function __construct(string $title, float $time, ?array $failure, bool $subtestFailed, ?string $skipped)
+    public function __construct(string $title, float $time, ?Failure $failure, bool $subtestFailed, ?string $skipped)
     {
         $this->title = $title;
         $this->time = $time;

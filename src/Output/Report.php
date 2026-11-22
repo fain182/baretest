@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Output;
 
+use Baretest\Result\Failure;
 use Baretest\Result\FileResult;
 use Baretest\Result\SuiteResult;
 
@@ -33,9 +34,8 @@ final class Report
     {
         $ok = !$result->hasFailures() && !$result->hasNoTests();
         $time = $this->paint(self::DIM, sprintf('%.2fs', $result->time));
-        $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
-        $this->write($this->renderEntries($result));
-        $this->write($this->renderOutput($result));
+        $header = $this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n";
+        fwrite(STDOUT, $header . $this->renderEntries($result) . $this->renderOutput($result));
     }
 
     public function printSummary(SuiteResult $results): void
@@ -56,7 +56,7 @@ final class Report
                 . ' failed in ' . $failedFiles . ' of ' . self::count($files, 'file')
                 . ($emptyFiles > 0 ? ', ' . $emptyFiles . ' did not run any test' : '');
         }
-        $this->write($this->mark($ok) . ' ' . $this->paint(self::BOLD, self::addSkipped($text, $skipped)) . '  ' . $time . "\n");
+        fwrite(STDOUT, $this->mark($ok) . ' ' . $this->paint(self::BOLD, self::addSkipped($text, $skipped)) . '  ' . $time . "\n");
     }
 
     private function summarize(FileResult $result, bool $ok): string
@@ -102,37 +102,37 @@ final class Report
         return $out . "\n";
     }
 
-    private function renderBlock(string $title, array $failure): string
+    private function renderBlock(string $title, Failure $failure): string
     {
-        $location = FileResult::formatLocation($failure);
+        $location = $failure->formatLocation();
         $out = '  ' . $this->mark(false) . ' ' . $this->paint(self::BOLD, $title);
         if ($location !== null) {
             $out .= '  ' . $this->paint(self::DIM, '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $location !== null ? $this->readSource($failure['file'], $failure['line'], $failure['lastLine'] ?? $failure['line']) : [];
+        $source = $location !== null ? $this->readSource($failure->file, $failure->line, $failure->lastLine) : [];
         $width = strlen((string) array_key_last($source));
         foreach ($source as $number => $code) {
             $out .= self::DETAIL_INDENT . $this->paint(self::DIM, str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
-        return $out . "\n" . (isset($failure['expected']) ? $this->renderValues($failure) : $this->renderMessage($failure));
+        return $out . "\n" . ($failure->expected !== null ? $this->renderValues($failure) : $this->renderMessage($failure));
     }
 
-    private function renderMessage(array $failure): string
+    private function renderMessage(Failure $failure): string
     {
-        $lines = explode("\n", FileResult::describe($failure));
+        $lines = explode("\n", $failure->describe());
         return self::DETAIL_INDENT . implode("\n" . self::DETAIL_INDENT, $lines) . "\n";
     }
 
-    private function renderValues(array $failure): string
+    private function renderValues(Failure $failure): string
     {
-        [$expected, $got, $caret] = Columns::cut($failure['expected'], $failure['got'], $failure['caret']);
+        [$expected, $got, $caret] = Columns::cut($failure->expected, $failure->got, $failure->caret);
         $width = max(Columns::measure($expected), Columns::measure($got)) + 4;
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Columns::measure($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
-        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $failure['expectedType'] . ')') . "\n"
-            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $failure['gotType'] . ')') . "\n";
+        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $failure->expectedType . ')') . "\n"
+            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $failure->gotType . ')') . "\n";
         return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint(self::RED, '^') . "\n";
     }
 
@@ -162,10 +162,5 @@ final class Report
     private function paint(string $code, string $text): string
     {
         return $this->color ? "\e[{$code}m{$text}\e[0m" : $text;
-    }
-
-    private function write(string $text): void
-    {
-        fwrite(STDOUT, $text);
     }
 }

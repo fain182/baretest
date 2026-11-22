@@ -27,21 +27,6 @@ final class FileResult
         return strncmp($path, $prefix, strlen($prefix)) === 0 ? substr($path, strlen($prefix)) : $path;
     }
 
-    /** file:line of a failure, relative to the working directory. */
-    public static function formatLocation(array $failure): ?string
-    {
-        if (!isset($failure['file'])) {
-            return null;
-        }
-        return self::makeRelative($failure['file']) . ':' . $failure['line'];
-    }
-
-    public static function describe(array $failure): string
-    {
-        $label = $failure['label'] ?? null;
-        return $label === null ? $failure['message'] : ($failure['message'] === '' ? $label : $label . ': ' . $failure['message']);
-    }
-
     public function hasNoTests(): bool
     {
         return $this->tests === [];

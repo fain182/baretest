@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Runner;
 
+use Baretest\Result\Failure;
 use Baretest\Result\FileResult;
 use Baretest\Result\Records;
 use Baretest\Result\TestResult;
@@ -46,7 +47,8 @@ final class Process
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
         $tests = array_map(
-            static fn (array $test): TestResult => new TestResult(TestResult::formatTitle($test['path']), $test['time'], $test['failure'], $test['subtestFailed'], $test['skipped']),
+            static fn (array $test): TestResult => new TestResult(TestResult::formatTitle($test['path']), $test['time'],
+                $test['failure'] === null ? null : new Failure($test['failure']), $test['subtestFailed'], $test['skipped']),
             $tests,
         );
         $printed = (string) file_get_contents($output);
@@ -63,7 +65,7 @@ final class Process
     /** A failure outside any test, listed after the tests as one more failed test. */
     private static function buildFailedTest(string $title, array $failure): TestResult
     {
-        return new TestResult($title, 0.0, $failure, false, null);
+        return new TestResult($title, 0.0, new Failure($failure), false, null);
     }
 
     /**

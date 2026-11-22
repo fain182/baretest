@@ -121,7 +121,7 @@ vendor/bin/baretest [-v] [--ci=github|gitlab] [PATH...]
 - `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
 - `--ci=gitlab` writes a JUnit XML report to stdout and the usual output to stderr, so the job log stays readable: `vendor/bin/baretest --ci=gitlab > report.xml`, then point `artifacts:reports:junit` at `report.xml` with `artifacts:when: always`.
 
-Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that does not return tests).
+Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that runs no tests).
 
 ## Output
 

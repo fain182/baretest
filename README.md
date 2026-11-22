@@ -28,7 +28,7 @@ baretest is the test runner for libraries. If you are not writing one, use PHPUn
 These are how baretest is developed and how proposals are judged.
 
 1. **Runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
-2. **One way to do each thing.** No configuration, two flags, no option that changes what a test means.
+2. **One way to do each thing.** No configuration, one flag, no option that changes what a test means.
 3. **The README is the documentation.** A PHP programmer reads it and knows everything. If a feature cannot be explained here in a few lines, it does not belong in baretest.
 4. **Small on purpose.** Under 1,000 lines, so that anyone who depends on it can read the whole source in an afternoon and trust it.
 5. **Simple is not harsh.** Lines of code spent on a clearer message or more precise feedback are well spent, even against principle 4.
@@ -111,12 +111,11 @@ Shared setup is a function. A repeated check is a function. A test that needs a 
 ## Running
 
 ```
-vendor/bin/baretest [-v] [--ci=github|gitlab] [PATH...]
+vendor/bin/baretest [--ci=github|gitlab] [PATH...]
 ```
 
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
 - Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner, so global state does not leak between files.
-- `-v` also lists the tests that pass.
 - Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
 - `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
 - `--ci=gitlab` writes a JUnit XML report to stdout and the usual output to stderr, so the job log stays readable: `vendor/bin/baretest --ci=gitlab > report.xml`, then point `artifacts:reports:junit` at `report.xml` with `artifacts:when: always`.
@@ -152,7 +151,7 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 ✗ 4 of 214 tests failed in 2 of 9 files  0.41s
 ```
 
-- One line per file, `✓` or `✗`, so you see progress. `-v` adds one line per test.
+- One line per file, `✓` or `✗`, so you see progress.
 - Each failure sits under its file and starts with the test name and its `file:line`. Below it, the line that failed with its number, what was expected and what was got.
 - Values are written as PHP would, followed by their type: strings in double quotes with `\n`, `\t` and `\xE0` for invisible characters and invalid bytes.
 - A `^` marks the first element or byte that differs. Long values are cut around it.

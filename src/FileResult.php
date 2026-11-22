@@ -12,11 +12,11 @@ final class FileResult
      * @param ?array{title: string, failure: array} $stopped set when the file failed outside any test
      */
     public function __construct(
-        public readonly string $file,
-        public readonly array $tests,
-        public readonly ?array $stopped,
-        public readonly float $time,
-        public readonly string $output,
+        public string $file,
+        public array $tests,
+        public ?array $stopped,
+        public float $time,
+        public string $output,
     ) {
     }
 
@@ -44,7 +44,7 @@ final class FileResult
 
     public function countFailed(): int
     {
-        $failed = count(array_filter($this->tests, self::hasFailed(...)));
+        $failed = count(array_filter($this->tests, [self::class, 'hasFailed']));
         return $failed + ($this->stopped !== null ? 1 : 0);
     }
 

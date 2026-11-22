@@ -1,7 +1,9 @@
 ARG PHP_VERSION=8.3
 FROM php:${PHP_VERSION}-cli
 
-RUN mkdir /tmp/php-src \
+# PHP 8.0 images are built on Debian bullseye, whose packages moved to archive.debian.org.
+RUN if grep -q bullseye /etc/os-release; then sed -i 's|deb.debian.org|archive.debian.org|' /etc/apt/sources.list; fi \
+    && mkdir /tmp/php-src \
     && tar -xf /usr/src/php.tar.xz -C /tmp/php-src --strip-components=1 \
     && apt-get update \
     && apt-get install -y --no-install-recommends $PHPIZE_DEPS \

@@ -74,7 +74,7 @@ final class Value
 
     private static function renderArray(array $array): string
     {
-        $list = array_is_list($array);
+        $list = array_values($array) === $array;
         $parts = [];
         foreach ($array as $key => $value) {
             $parts[] = ($list ? '' : self::renderKey($key)) . self::render($value);
@@ -89,7 +89,7 @@ final class Value
 
     private static function findArrayOffset(array $expected, array $got): int
     {
-        $list = array_is_list($got);
+        $list = array_values($got) === $got;
         $expectedKeys = array_keys($expected);
         $column = 1;
         foreach (array_keys($got) as $i => $key) {

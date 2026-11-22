@@ -38,12 +38,14 @@ if (!function_exists('Baretest\test')) {
         Session::fail(sprintf('expected %s to be thrown, nothing was thrown', $class));
     }
 
-    function fail(string $message): never
+    /** @return never */
+    function fail(string $message)
     {
         Session::fail($message);
     }
 
-    function skip(string $reason): never
+    /** @return never */
+    function skip(string $reason)
     {
         Session::skip($reason);
     }

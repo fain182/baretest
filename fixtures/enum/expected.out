@@ -1,0 +1,9 @@
+✗ fixtures/enum/enum_test.php  1 of 1 failed  0.00s
+
+  ✗ enum  (fixtures/enum/enum_test.php:7)
+       7 │ test('enum', fn () => equal(Suit::Hearts, 'Hearts'));
+
+       expected  Suit::Hearts    (Suit)
+            got  "Hearts"        (string)
+
+✗ 1 of 1 test failed in 1 of 1 file  0.00s

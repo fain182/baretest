@@ -1,6 +1,6 @@
 <?php
 
-use function Baretest\{test, equal};
+use function Baretest\{test, equal, skip};
 
 // Each directory in fixtures/ is run with the arguments in its `args` file (default: the
 // directory itself); the whole output and the exit code must match expected.out and expected.code.
@@ -10,6 +10,9 @@ $root = dirname(__DIR__);
 
 foreach (glob($root . '/fixtures/*', GLOB_ONLYDIR) as $dir) {
     test(basename($dir), function () use ($root, $dir) {
+        if (basename($dir) === 'enum' && PHP_VERSION_ID < 80100) {
+            skip('enums need PHP 8.1');
+        }
         $name = 'fixtures/' . basename($dir);
         $args = is_file("$dir/args") ? preg_split('/\s+/', trim(file_get_contents("$dir/args"))) : [$name];
         $process = proc_open(

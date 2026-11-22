@@ -28,8 +28,8 @@ final class Session
         // Errors become failures; PHP's own copy would show up again as the file's output.
         ini_set('display_errors', '0');
         ini_set('log_errors', '0');
-        set_error_handler(self::onError(...));
-        register_shutdown_function(self::onShutdown(...));
+        set_error_handler(\Closure::fromCallable([self::class, 'onError']));
+        register_shutdown_function(\Closure::fromCallable([self::class, 'onShutdown']));
 
         try {
             (static function (string $file): void {
@@ -70,7 +70,8 @@ final class Session
         self::write(['t' => 'test', 'seq' => $test['seq'], 'path' => $path, 'time' => microtime(true) - $start, 'failure' => $test['failure'], 'subtestFailed' => $test['subtestFailed'], 'skipped' => $skipped]);
     }
 
-    public static function failValues(mixed $expected, mixed $got): never
+    /** @return never */
+    public static function failValues(mixed $expected, mixed $got)
     {
         $failure = [
             'expected' => Value::render($expected),
@@ -83,12 +84,14 @@ final class Session
         self::raise($failure);
     }
 
-    public static function fail(string $message): never
+    /** @return never */
+    public static function fail(string $message)
     {
         self::raise(['message' => $message]);
     }
 
-    public static function skip(string $reason): never
+    /** @return never */
+    public static function skip(string $reason)
     {
         if (self::$active === []) {
             self::fail('skip() was called outside a test; to skip a whole file, put its tests inside one test');
@@ -96,7 +99,8 @@ final class Session
         throw new Skip($reason);
     }
 
-    private static function raise(array $failure): never
+    /** @return never */
+    private static function raise(array $failure)
     {
         self::register($failure + self::findCallSite());
         throw new Failure($failure['message']);

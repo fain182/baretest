@@ -8,6 +8,11 @@ namespace Baretest;
 final class Report
 {
     private const DETAIL_INDENT = '       ';
+    private const BOLD = '1';
+    private const DIM = '2';
+    private const RED = '31';
+    private const GREEN = '32';
+    private const YELLOW = '33';
 
     private int $files = 0;
     private int $failedFiles = 0;
@@ -45,7 +50,7 @@ final class Report
             $this->failedFiles++;
         }
 
-        $time = $this->paint('2', sprintf('%.2fs', $result->time));
+        $time = $this->paint(self::DIM, sprintf('%.2fs', $result->time));
         $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
         $this->write($this->renderEntries($result));
         $this->write($this->renderOutput($result));
@@ -53,7 +58,7 @@ final class Report
 
     public function finish(): void
     {
-        $time = $this->paint('2', sprintf('%.2fs', microtime(true) - $this->start));
+        $time = $this->paint(self::DIM, sprintf('%.2fs', microtime(true) - $this->start));
         $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;
         if ($ok) {
             $text = self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file');
@@ -64,7 +69,7 @@ final class Report
                 . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : '');
         }
         $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
-        $this->write($this->mark($ok) . ' ' . $this->paint('1', $text) . '  ' . $time . "\n");
+        $this->write($this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $time . "\n");
     }
 
     private function summarize(FileResult $result, bool $ok): string
@@ -84,7 +89,7 @@ final class Report
         $skips = '';
         foreach ($result->tests as $test) {
             if ($test['skipped'] !== null) {
-                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint('2', '(skipped)') . "\n";
+                $skips .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
             }
         }
         $out = '';
@@ -99,9 +104,9 @@ final class Report
         if ($result->output === '') {
             return '';
         }
-        $out = '  ' . $this->paint('2', 'output') . "\n";
+        $out = '  ' . $this->paint(self::DIM, 'output') . "\n";
         foreach (explode("\n", rtrim($result->output, "\n")) as $line) {
-            $out .= self::DETAIL_INDENT . $this->paint('2', '│') . ($line === '' ? '' : ' ' . $line) . "\n";
+            $out .= self::DETAIL_INDENT . $this->paint(self::DIM, '│') . ($line === '' ? '' : ' ' . $line) . "\n";
         }
         return $out . "\n";
     }
@@ -110,15 +115,15 @@ final class Report
     {
         $location = FileResult::formatLocation($failure);
         $line = $failure['line'] ?? null;
-        $out = '  ' . $this->mark(false) . ' ' . $this->paint('1', $title);
+        $out = '  ' . $this->mark(false) . ' ' . $this->paint(self::BOLD, $title);
         if ($location !== null) {
-            $out .= '  ' . $this->paint('2', '(' . $location . ')');
+            $out .= '  ' . $this->paint(self::DIM, '(' . $location . ')');
         }
         $out .= "\n";
         $source = $location !== null && $line !== null ? $this->readSource($failure['file'], $line, $failure['lastLine'] ?? $line) : [];
         $width = strlen((string) array_key_last($source));
         foreach ($source as $number => $code) {
-            $out .= self::DETAIL_INDENT . $this->paint('2', str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
+            $out .= self::DETAIL_INDENT . $this->paint(self::DIM, str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
         return $out . "\n" . (isset($failure['expected']) ? $this->renderValues($failure) : $this->renderMessage($failure));
     }
@@ -136,9 +141,9 @@ final class Report
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::measureWidth($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
-        $out = $label . $pad($expected) . $this->paint('2', '(' . $failure['expectedType'] . ')') . "\n"
-            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint('2', '(' . $failure['gotType'] . ')') . "\n";
-        return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint('31', '^') . "\n";
+        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $failure['expectedType'] . ')') . "\n"
+            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $failure['gotType'] . ')') . "\n";
+        return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint(self::RED, '^') . "\n";
     }
 
     /** @return array<int, string> lines $first to $last by number, without the indentation they share */
@@ -161,7 +166,7 @@ final class Report
 
     private function mark(bool $ok): string
     {
-        return $ok ? $this->paint('32', '✓') : $this->paint('31', '✗');
+        return $ok ? $this->paint(self::GREEN, '✓') : $this->paint(self::RED, '✗');
     }
 
     private function paint(string $code, string $text): string

@@ -6,15 +6,15 @@ You can learn all of it in five minutes and read its source in an afternoon.
 
 ![baretest output in a terminal: one passing file, one with three failures](docs/output.png)
 
-## Install
+## Getting started
+
+Install it:
 
 ```
 composer require --dev fain182/baretest
 ```
 
-## A test
-
-A test file ends in `_test.php` and calls `test()` once for each test:
+Write a test file. Its name ends in `_test.php`, and it calls `test()` once for each test:
 
 ```php
 <?php // tests/slug_test.php
@@ -35,20 +35,6 @@ Run it:
 ```
 vendor/bin/baretest
 ```
-
-That is the whole API:
-
-| | |
-|---|---|
-| `test($name, $fn)` | runs `$fn` as a test; inside another test, as a subtest |
-| `equal($expected, $actual)` | fails the test unless the two are identical (`===`) |
-| `throws($class, $fn)` | fails the test unless `$fn` throws `$class`; returns the exception |
-| `fail($message)` | fails the test |
-| `skip($reason)` | stops the test and reports it as skipped, with `$reason` |
-
-A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
-
-A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
 
 ## Why
 
@@ -76,7 +62,25 @@ What you can count on, and what every change to baretest is judged against.
 5. **Clear feedback comes first.** Lines spent on a clearer message or more precise feedback are worth it, even against promise 4.
 6. **It will not change under you.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and keep the promises above.
 
-## Running
+## Documentation
+
+### API
+
+Five functions in the `Baretest` namespace are the whole API:
+
+| | |
+|---|---|
+| `test($name, $fn)` | runs `$fn` as a test; inside another test, as a subtest |
+| `equal($expected, $actual)` | fails the test unless the two are identical (`===`) |
+| `throws($class, $fn)` | fails the test unless `$fn` throws `$class`; returns the exception |
+| `fail($message)` | fails the test |
+| `skip($reason)` | stops the test and reports it as skipped, with `$reason` |
+
+A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
+
+A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
+
+### Running
 
 ```
 vendor/bin/baretest [--ci=github|gitlab] [PATH...]
@@ -91,7 +95,7 @@ vendor/bin/baretest [--ci=github|gitlab] [PATH...]
 
 Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that runs no tests).
 
-## Table tests
+### Table tests
 
 A table is a `foreach`. Call `test()` for each row, so a failure says which row failed:
 
@@ -108,7 +112,7 @@ test('splits', function () {
 });
 ```
 
-## Skipping a test
+### Skipping a test
 
 A test that cannot run here calls `skip()` with the reason. The condition is PHP:
 
@@ -123,7 +127,7 @@ test('lowercases accented letters', function () {
 
 A skipped test does not fail the run, and it is always listed under its file with its reason. A test whose subtest failed stays failed even if it then calls `skip()`. Outside a test, `skip()` fails the file: to skip a whole file, put its tests inside one test.
 
-## Expected warnings
+### Expected warnings
 
 Silence the call with `@` and read the warning with `error_get_last()`:
 
@@ -137,7 +141,7 @@ test('rejects odd-length input', function () {
 
 `error_get_last()` is cleared before each test and subtest. Within one test it keeps the last warning until another one replaces it, so call `error_clear_last()` between two checks.
 
-## Everything else is PHP
+### Everything else is PHP
 
 Shared setup is a function. A repeated check is a function. A test that needs a temporary file creates it and deletes it in `finally`. baretest has no hooks for any of this, because PHP already does it.
 

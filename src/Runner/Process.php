@@ -24,6 +24,8 @@ final class Process
             $pipes,
         );
         if ($process === false) {
+            unlink($records);
+            unlink($output);
             throw new \RuntimeException('could not start ' . PHP_BINARY);
         }
         $code = proc_close($process);

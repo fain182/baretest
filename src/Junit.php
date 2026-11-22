@@ -21,23 +21,23 @@ final class Junit
             );
             foreach ($result->tests as $test) {
                 $failure = $test['failure'] ?? ($test['subtestFailed'] ? ['message' => 'a subtest failed'] : null);
-                $xml .= self::testCase($result->file, FileResult::title($test), $test['time'], $failure);
+                $xml .= self::renderTestCase($result->file, FileResult::formatTitle($test), $test['time'], $failure);
             }
             if ($result->stopped !== null) {
-                $xml .= self::testCase($result->file, $result->stopped['title'], 0.0, $result->stopped['failure']);
+                $xml .= self::renderTestCase($result->file, $result->stopped['title'], 0.0, $result->stopped['failure']);
             }
             $xml .= "  </testsuite>\n";
         }
         return $xml . "</testsuites>\n";
     }
 
-    private static function testCase(string $file, string $name, float $time, ?array $failure): string
+    private static function renderTestCase(string $file, string $name, float $time, ?array $failure): string
     {
         $open = sprintf('    <testcase classname="%s" name="%s" time="%.3f"', self::escape($file), self::escape($name), $time);
         if ($failure === null) {
             return $open . "/>\n";
         }
-        $location = Report::location($failure) ?? $file;
+        $location = Report::formatLocation($failure) ?? $file;
         $message = Report::describe($failure);
         return $open . ">\n      <failure message=\"" . self::escape(explode("\n", $message)[0]) . '">'
             . self::escape($location . "\n" . $message) . "</failure>\n    </testcase>\n";

@@ -21,7 +21,7 @@ final class FileResult
     }
 
     /** @param array{path: list<string>} $test */
-    public static function title(array $test): string
+    public static function formatTitle(array $test): string
     {
         return implode(' › ', $test['path']);
     }
@@ -49,12 +49,12 @@ final class FileResult
     }
 
     /** @return list<array{title: string, failure: array}> */
-    public function failures(): array
+    public function listFailures(): array
     {
         $failures = [];
         foreach ($this->tests as $test) {
             if ($test['failure'] !== null) {
-                $failures[] = ['title' => self::title($test), 'failure' => $test['failure']];
+                $failures[] = ['title' => self::formatTitle($test), 'failure' => $test['failure']];
             }
         }
         return $this->stopped === null ? $failures : [...$failures, $this->stopped];

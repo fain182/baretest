@@ -19,7 +19,7 @@ final class Value
             is_bool($value) => $value ? 'true' : 'false',
             is_int($value) => (string) $value,
             is_float($value) => is_nan($value) ? 'NAN' : (is_infinite($value) ? ($value > 0 ? 'INF' : '-INF') : var_export($value, true)),
-            is_string($value) => '"' . implode('', self::tokens($value)) . '"',
+            is_string($value) => '"' . implode('', self::tokenize($value)) . '"',
             is_array($value) => self::renderArray($value),
             $value instanceof \UnitEnum => $value::class . '::' . $value->name,
             is_object($value) => $value::class . '#' . spl_object_id($value),
@@ -28,34 +28,34 @@ final class Value
     }
 
     /** Column in render($got) of the first element or byte that differs from $expected. */
-    public static function offset(mixed $expected, mixed $got): ?int
+    public static function findOffset(mixed $expected, mixed $got): ?int
     {
         if (is_string($expected) && is_string($got)) {
-            $a = self::tokens($expected);
-            $b = self::tokens($got);
+            $a = self::tokenize($expected);
+            $b = self::tokenize($got);
             $column = 1;
             foreach ($b as $i => $token) {
                 if (($a[$i] ?? null) !== $token) {
                     break;
                 }
-                $column += self::width($token);
+                $column += self::measureWidth($token);
             }
             return $column;
         }
         if (is_array($expected) && is_array($got)) {
-            return self::arrayOffset($expected, $got);
+            return self::findArrayOffset($expected, $got);
         }
         return null;
     }
 
     /** Terminal columns: wide East Asian characters and emoji take two, combining marks none. */
-    public static function width(string $text): int
+    public static function measureWidth(string $text): int
     {
         return preg_match_all('~[^\x80-\xBF]~', $text) - (int) preg_match_all(self::ZERO_WIDTH, $text) + (int) preg_match_all(self::WIDE, $text);
     }
 
     /** One token per character: valid UTF-8 as it is, anything else escaped. */
-    private static function tokens(string $text): array
+    private static function tokenize(string $text): array
     {
         preg_match_all(self::UTF8, $text, $matches);
         return array_map(static function (string $char): string {
@@ -87,7 +87,7 @@ final class Value
         return self::render($key) . ' => ';
     }
 
-    private static function arrayOffset(array $expected, array $got): int
+    private static function findArrayOffset(array $expected, array $got): int
     {
         $list = array_is_list($got);
         $expectedKeys = array_keys($expected);
@@ -96,11 +96,11 @@ final class Value
             if (($expectedKeys[$i] ?? null) !== $key) {
                 return $column;
             }
-            $prefix = $list ? 0 : self::width(self::renderKey($key));
+            $prefix = $list ? 0 : self::measureWidth(self::renderKey($key));
             if ($expected[$key] !== $got[$key]) {
-                return $column + $prefix + (self::offset($expected[$key], $got[$key]) ?? 0);
+                return $column + $prefix + (self::findOffset($expected[$key], $got[$key]) ?? 0);
             }
-            $column += $prefix + self::width(self::render($got[$key])) + 2;
+            $column += $prefix + self::measureWidth(self::render($got[$key])) + 2;
         }
         return $got === [] ? $column : $column - 2;
     }

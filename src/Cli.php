@@ -28,10 +28,10 @@ final class Cli
             $noColor = getenv('NO_COLOR');
             $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''), $verbose, $ci);
             foreach ($files as $file) {
-                $report->add(Process::run($file, Report::relative($file)));
+                $report->add(Process::run($file, Report::makeRelative($file)));
             }
             $report->finish();
-            return $report->exitCode();
+            return $report->getExitCode();
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
             return 2;

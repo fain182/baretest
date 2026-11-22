@@ -27,19 +27,19 @@ final class Report
         $this->start = microtime(true);
     }
 
-    public static function relative(string $path): string
+    public static function makeRelative(string $path): string
     {
         $prefix = getcwd() . DIRECTORY_SEPARATOR;
         return str_starts_with($path, $prefix) ? substr($path, strlen($prefix)) : $path;
     }
 
     /** file:line of a failure, relative to the working directory. */
-    public static function location(array $failure): ?string
+    public static function formatLocation(array $failure): ?string
     {
         if (!isset($failure['file'])) {
             return null;
         }
-        return self::relative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
+        return self::makeRelative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
     }
 
     public static function describe(array $failure): string
@@ -55,7 +55,7 @@ final class Report
         $this->tests += $result->countTests();
         $this->failed += $result->countFailed();
 
-        $failures = $result->failures();
+        $failures = $result->listFailures();
         $ok = $failures === [] && !$result->hasNoTests();
         if ($result->hasNoTests()) {
             $this->emptyFiles++;
@@ -64,13 +64,13 @@ final class Report
         }
 
         $time = $this->paint('2', sprintf('%.2fs', $result->time));
-        $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summary($result, $ok) . '  ' . $time . "\n");
-        $this->write($this->entries($result));
-        $this->write($this->output($result));
+        $this->write($this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n");
+        $this->write($this->renderEntries($result));
+        $this->write($this->renderOutput($result));
 
         if ($this->ci === 'github') {
             foreach ($failures as $entry) {
-                $this->write(self::annotation($result, $entry['title'], $entry['failure']) . "\n");
+                $this->write(self::renderAnnotation($result, $entry['title'], $entry['failure']) . "\n");
             }
         }
     }
@@ -91,12 +91,12 @@ final class Report
         }
     }
 
-    public function exitCode(): int
+    public function getExitCode(): int
     {
         return $this->emptyFiles > 0 ? 2 : ($this->failedFiles > 0 ? 1 : 0);
     }
 
-    private function summary(FileResult $result, bool $ok): string
+    private function summarize(FileResult $result, bool $ok): string
     {
         return match (true) {
             $result->hasNoTests() => 'no tests',
@@ -106,16 +106,16 @@ final class Report
     }
 
     /** The failures of a file, and with -v its other tests too, in the order they started. */
-    private function entries(FileResult $result): string
+    private function renderEntries(FileResult $result): string
     {
         $out = '';
         $afterBlock = false;
         $block = function (string $title, array $failure) use (&$out, &$afterBlock): void {
-            $out .= ($afterBlock ? '' : "\n") . $this->block($title, $failure) . "\n";
+            $out .= ($afterBlock ? '' : "\n") . $this->renderBlock($title, $failure) . "\n";
             $afterBlock = true;
         };
         foreach ($result->tests as $test) {
-            $title = FileResult::title($test);
+            $title = FileResult::formatTitle($test);
             if ($test['failure'] !== null) {
                 $block($title, $test['failure']);
             } elseif ($this->verbose) {
@@ -129,7 +129,7 @@ final class Report
         return $out === '' || $afterBlock ? $out : $out . "\n";
     }
 
-    private function output(FileResult $result): string
+    private function renderOutput(FileResult $result): string
     {
         if ($result->output === '') {
             return '';
@@ -141,33 +141,33 @@ final class Report
         return $out . "\n";
     }
 
-    private function block(string $title, array $failure): string
+    private function renderBlock(string $title, array $failure): string
     {
-        $location = self::location($failure);
+        $location = self::formatLocation($failure);
         $line = $failure['line'] ?? null;
         $out = '  ' . $this->mark(false) . ' ' . $title;
         if ($location !== null) {
             $out .= '  ' . $this->paint('2', '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $location !== null && $line !== null ? $this->sourceLine($failure['file'], $line) : null;
+        $source = $location !== null && $line !== null ? $this->readSourceLine($failure['file'], $line) : null;
         if ($source !== null) {
             $out .= self::DETAIL_INDENT . $this->paint('2', $line . ' │') . ' ' . $source . "\n";
         }
-        return $out . "\n" . (isset($failure['expected']) ? $this->values($failure) : $this->message($failure));
+        return $out . "\n" . (isset($failure['expected']) ? $this->renderValues($failure) : $this->renderMessage($failure));
     }
 
-    private function message(array $failure): string
+    private function renderMessage(array $failure): string
     {
         $lines = explode("\n", self::describe($failure));
         return self::DETAIL_INDENT . implode("\n" . self::DETAIL_INDENT, $lines) . "\n";
     }
 
-    private function values(array $failure): string
+    private function renderValues(array $failure): string
     {
         [$expected, $got, $caret] = self::cut($failure['expected'], $failure['got'], $failure['caret']);
-        $width = max(Value::width($expected), Value::width($got)) + 4;
-        $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::width($value));
+        $width = max(Value::measureWidth($expected), Value::measureWidth($got)) + 4;
+        $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Value::measureWidth($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
         $out = $label . $pad($expected) . $this->paint('2', '(' . $failure['expectedType'] . ')') . "\n"
@@ -178,38 +178,38 @@ final class Report
     /** Cuts long values to a window around the caret, the same window for both. */
     private static function cut(string $expected, string $got, ?int $caret): array
     {
-        $a = self::characters($expected);
-        $b = self::characters($got);
+        $a = self::splitCharacters($expected);
+        $b = self::splitCharacters($got);
         if (max(count($a), count($b)) <= self::VALUE_WIDTH) {
             return [$expected, $got, $caret];
         }
         $index = 0;
         for ($column = 0; $index < count($b) && $column < ($caret ?? 0); $index++) {
-            $column += Value::width($b[$index]);
+            $column += Value::measureWidth($b[$index]);
         }
         $start = max(0, $index - 20);
         $window = static fn (array $characters): string => ($start > 0 ? '…' : '')
             . implode('', array_slice($characters, $start, self::VALUE_WIDTH))
             . ($start + self::VALUE_WIDTH < count($characters) ? '…' : '');
         $before = ($start > 0 ? '…' : '') . implode('', array_slice($b, $start, $index - $start));
-        return [$window($a), $window($b), $caret === null ? null : Value::width($before)];
+        return [$window($a), $window($b), $caret === null ? null : Value::measureWidth($before)];
     }
 
-    private static function characters(string $text): array
+    private static function splitCharacters(string $text): array
     {
         return preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: str_split($text);
     }
 
-    private function sourceLine(string $file, int $line): ?string
+    private function readSourceLine(string $file, int $line): ?string
     {
         $this->sources[$file] ??= is_readable($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [];
         $source = $this->sources[$file][$line - 1] ?? null;
         return $source === null ? null : trim($source);
     }
 
-    private static function annotation(FileResult $result, string $title, array $failure): string
+    private static function renderAnnotation(FileResult $result, string $title, array $failure): string
     {
-        $file = isset($failure['file']) ? self::relative($failure['file']) : $result->file;
+        $file = isset($failure['file']) ? self::makeRelative($failure['file']) : $result->file;
         $properties = 'file=' . self::escape($file, true)
             . (isset($failure['line']) ? ',line=' . $failure['line'] : '')
             . ',title=' . self::escape($title, true);

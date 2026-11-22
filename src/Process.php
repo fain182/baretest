@@ -16,7 +16,7 @@ final class Process
         $output = tempnam(sys_get_temp_dir(), 'baretest');
         $start = microtime(true);
         $process = proc_open(
-            [...self::php(), __DIR__ . '/worker.php', $file, $records],
+            [...self::buildCommand(), __DIR__ . '/worker.php', $file, $records],
             [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $output, 'w'], 2 => ['redirect', 1]],
             $pipes,
         );
@@ -54,7 +54,7 @@ final class Process
      * PHP with the settings of this process: the same php.ini, or none, and a -d only for the
      * settings that differ from it, since some values (`a=href,form=`) do not survive the ini parser.
      */
-    private static function php(): array
+    private static function buildCommand(): array
     {
         if (self::$php !== null) {
             return self::$php;

@@ -39,6 +39,6 @@ test('offset', function () {
         'combining'      => ["e\u{301}x", "e\u{301}y", 2],
     ];
     foreach ($cases as $name => [$expected, $got, $offset]) {
-        test($name, fn () => equal($offset, Value::offset($expected, $got)));
+        test($name, fn () => equal($offset, Value::findOffset($expected, $got)));
     }
 });

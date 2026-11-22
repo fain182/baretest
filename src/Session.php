@@ -73,7 +73,7 @@ final class Session
             'got' => Value::render($got),
             'expectedType' => get_debug_type($expected),
             'gotType' => get_debug_type($got),
-            'caret' => Value::offset($expected, $got),
+            'caret' => Value::findOffset($expected, $got),
         ];
         $failure['message'] = sprintf('expected %s (%s), got %s (%s)', $failure['expected'], $failure['expectedType'], $failure['got'], $failure['gotType']);
         self::raise($failure);
@@ -86,7 +86,7 @@ final class Session
 
     private static function raise(array $failure): never
     {
-        self::register($failure + self::callSite());
+        self::register($failure + self::findCallSite());
         throw new Failure($failure['message']);
     }
 
@@ -140,7 +140,7 @@ final class Session
     }
 
     /** The line of the test code that called into baretest. */
-    private static function callSite(): array
+    private static function findCallSite(): array
     {
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
             if (isset($frame['file']) && !str_starts_with($frame['file'], __DIR__ . DIRECTORY_SEPARATOR)) {

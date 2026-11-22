@@ -38,7 +38,7 @@ final class Report
         $this->failed += $result->countFailed();
         $this->skipped += $result->countSkipped();
 
-        $ok = $result->listFailures() === [] && !$result->hasNoTests();
+        $ok = !$result->hasFailures() && !$result->hasNoTests();
         if ($result->hasNoTests()) {
             $this->emptyFiles++;
         } elseif (!$ok) {
@@ -65,11 +65,6 @@ final class Report
         }
         $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
         $this->write($this->mark($ok) . ' ' . $this->paint('1', $text) . '  ' . $time . "\n");
-    }
-
-    public function getExitCode(): int
-    {
-        return $this->emptyFiles > 0 ? 2 : ($this->failedFiles > 0 ? 1 : 0);
     }
 
     private function summarize(FileResult $result, bool $ok): string

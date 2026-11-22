@@ -80,6 +80,11 @@ final class FileResult
         return count(array_filter($this->tests, static fn (array $test): bool => $test['skipped'] !== null));
     }
 
+    public function hasFailures(): bool
+    {
+        return $this->listFailures() !== [];
+    }
+
     /** @return list<array{title: string, failure: array}> */
     public function listFailures(): array
     {

@@ -29,10 +29,25 @@ final class Cli
             if (getenv('GITLAB_CI') === 'true' && @file_put_contents('baretest-junit.xml', Junit::render($results)) === false) {
                 throw new \RuntimeException('cannot write baretest-junit.xml: ' . error_get_last()['message']);
             }
-            return $report->getExitCode();
+            return self::computeExitCode($results);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
             return 2;
         }
+    }
+
+    /** @param list<FileResult> $results */
+    private static function computeExitCode(array $results): int
+    {
+        $code = 0;
+        foreach ($results as $result) {
+            if ($result->hasNoTests()) {
+                return 2;
+            }
+            if ($result->hasFailures()) {
+                $code = 1;
+            }
+        }
+        return $code;
     }
 }

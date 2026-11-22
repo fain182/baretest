@@ -26,6 +26,27 @@ final class FileResult
         $this->output = $output;
     }
 
+    public static function makeRelative(string $path): string
+    {
+        $prefix = getcwd() . DIRECTORY_SEPARATOR;
+        return strncmp($path, $prefix, strlen($prefix)) === 0 ? substr($path, strlen($prefix)) : $path;
+    }
+
+    /** file:line of a failure, relative to the working directory. */
+    public static function formatLocation(array $failure): ?string
+    {
+        if (!isset($failure['file'])) {
+            return null;
+        }
+        return self::makeRelative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
+    }
+
+    public static function describe(array $failure): string
+    {
+        $label = $failure['label'] ?? null;
+        return $label === null ? $failure['message'] : ($failure['message'] === '' ? $label : $label . ': ' . $failure['message']);
+    }
+
     /** @param array{path: list<string>} $test */
     public static function formatTitle(array $test): string
     {

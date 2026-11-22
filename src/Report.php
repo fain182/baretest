@@ -33,27 +33,6 @@ final class Report
         $this->start = microtime(true);
     }
 
-    public static function makeRelative(string $path): string
-    {
-        $prefix = getcwd() . DIRECTORY_SEPARATOR;
-        return strncmp($path, $prefix, strlen($prefix)) === 0 ? substr($path, strlen($prefix)) : $path;
-    }
-
-    /** file:line of a failure, relative to the working directory. */
-    public static function formatLocation(array $failure): ?string
-    {
-        if (!isset($failure['file'])) {
-            return null;
-        }
-        return self::makeRelative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
-    }
-
-    public static function describe(array $failure): string
-    {
-        $label = $failure['label'] ?? null;
-        return $label === null ? $failure['message'] : ($failure['message'] === '' ? $label : $label . ': ' . $failure['message']);
-    }
-
     public function add(FileResult $result): void
     {
         $this->files++;
@@ -141,7 +120,7 @@ final class Report
 
     private function renderBlock(string $title, array $failure): string
     {
-        $location = self::formatLocation($failure);
+        $location = FileResult::formatLocation($failure);
         $line = $failure['line'] ?? null;
         $out = '  ' . $this->mark(false) . ' ' . $this->paint('1', $title);
         if ($location !== null) {
@@ -158,7 +137,7 @@ final class Report
 
     private function renderMessage(array $failure): string
     {
-        $lines = explode("\n", self::describe($failure));
+        $lines = explode("\n", FileResult::describe($failure));
         return self::DETAIL_INDENT . implode("\n" . self::DETAIL_INDENT, $lines) . "\n";
     }
 

@@ -41,8 +41,8 @@ final class Junit
         if ($failure === null) {
             return $open . "/>\n";
         }
-        $location = Report::formatLocation($failure) ?? $file;
-        $message = Report::describe($failure);
+        $location = FileResult::formatLocation($failure) ?? $file;
+        $message = FileResult::describe($failure);
         return $open . ">\n      <failure message=\"" . self::escape(explode("\n", $message)[0]) . '">'
             . self::escape($location . "\n" . $message) . "</failure>\n    </testcase>\n";
     }

@@ -12,11 +12,11 @@ final class Github
         $out = '';
         foreach ($result->listFailures() as $entry) {
             $failure = $entry['failure'];
-            $file = isset($failure['file']) ? Report::makeRelative($failure['file']) : $result->file;
+            $file = isset($failure['file']) ? FileResult::makeRelative($failure['file']) : $result->file;
             $properties = 'file=' . self::escape($file, true)
                 . (isset($failure['line']) ? ',line=' . $failure['line'] : '')
                 . ',title=' . self::escape($entry['title'], true);
-            $out .= '::error ' . $properties . '::' . self::escape(Report::describe($failure), false) . "\n";
+            $out .= '::error ' . $properties . '::' . self::escape(FileResult::describe($failure), false) . "\n";
         }
         return $out;
     }

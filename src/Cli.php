@@ -30,7 +30,7 @@ final class Cli
             $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''));
             $results = [];
             foreach ($files as $file) {
-                $results[] = $result = Process::run($file, Report::makeRelative($file));
+                $results[] = $result = Process::run($file, FileResult::makeRelative($file));
                 $report->add($result);
                 if ($ci === 'github') {
                     fwrite($out, Github::render($result));

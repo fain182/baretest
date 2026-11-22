@@ -65,6 +65,17 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 
 <sub>Measured in November 2026 with `composer require` of the latest releases. baretest's size is checked in CI.</sub>
 
+## Promises
+
+What you can count on, and what every change to baretest is judged against.
+
+1. **It runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
+2. **One way to do each thing.** No configuration and one flag, so a test means the same in every project.
+3. **This README is all the documentation.** Read it once and you know everything. A feature that cannot be explained here in a few lines does not belong in baretest.
+4. **You can read all of it.** Under 1,000 lines of source, so you can read what you depend on in an afternoon and trust it.
+5. **Clear feedback comes first.** Lines spent on a clearer message or more precise feedback are worth it, even against promise 4.
+6. **It will not change under you.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and keep the promises above.
+
 ## Running
 
 ```
@@ -143,14 +154,3 @@ Shared setup is a function. A repeated check is a function. A test that needs a 
 - stopping at the first failure
 
 A request for any of these will be closed with a link to this section.
-
-## Principles
-
-These are how baretest is developed and how proposals are judged.
-
-1. **Runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
-2. **One way to do each thing.** No configuration, one flag, no option that changes what a test means.
-3. **The README is the documentation.** A PHP programmer reads it and knows everything. If a feature cannot be explained here in a few lines, it does not belong in baretest.
-4. **Small on purpose.** Under 1,000 lines, so that anyone who depends on it can read the whole source in an afternoon and trust it.
-5. **Simple is not harsh.** Lines of code spent on a clearer message or more precise feedback are well spent, even against principle 4.
-6. **Change needs a strong reason.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and fit the principles above.

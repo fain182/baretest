@@ -1,13 +1,13 @@
 # baretest
 
-A minimal test runner for PHP libraries. `README.md` is the contract: what it shows is what baretest does, and nothing more. Change the README first when behaviour changes, and judge every proposal against its Principles section.
+A minimal test runner for PHP libraries. `README.md` is the contract: what it shows is what baretest does, and nothing more. Change the README first when behaviour changes, and judge every proposal against its Promises section.
 
 ## Constraints
 
 - PHP 8.1 to 8.6, no Composer dependencies.
 - No extensions. A PHP built with `--disable-all` has only `Core, date, pcre, hash, json, Reflection, standard, SPL`; use nothing else. Not even `mbstring`: values are shown and compared byte by byte, and the `^` marks a byte.
 - `tokenizer` and `pcntl` are absent. `proc_open` exists but can be listed in `disable_functions`: then exit with code 2 and a message that says so.
-- Source under 1,000 lines (README, principle 4). Check it with a `make` target that CI runs.
+- Source under 1,000 lines (README, promise 4). Check it with a `make` target that CI runs.
 
 ## Decisions the README does not explain
 

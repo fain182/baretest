@@ -132,8 +132,8 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
   ✗ splits › trailing comma  (tests/split_test.php:14)
        14 │ test($name, fn () => equal($expected, explode($separator, $input)));
 
-       expected  ['a', 'b']        (array)
-            got  ['a', 'b', '']    (array)
+       expected  ["a", "b"]        (array)
+            got  ["a", "b", ""]    (array)
                             ^
 
   ✗ splits › invalid bytes  (tests/split_test.php:14)

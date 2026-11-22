@@ -4,13 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest;
 
-require_once __DIR__ . '/Failure.php';
-require_once __DIR__ . '/Skip.php';
-require_once __DIR__ . '/Value.php';
-require_once __DIR__ . '/CallSite.php';
-require_once __DIR__ . '/Session.php';
-
-// The worker loads this file, and so does Composer's autoload.php when a test file requires it.
+// Composer's autoload.php loads this file in the worker, and a test file can load it again.
 if (!function_exists('Baretest\test')) {
     function test(string $name, callable $fn): void
     {

@@ -16,7 +16,7 @@ final class Process
         $output = tempnam(sys_get_temp_dir(), 'baretest');
         $start = microtime(true);
         $process = proc_open(
-            [...self::buildCommand(), __DIR__ . '/worker.php', $file, $records],
+            [...self::buildCommand(), __DIR__ . '/worker.php', $file, $records, self::findAutoload()],
             [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $output, 'w'], 2 => ['redirect', 1]],
             $pipes,
         );
@@ -75,6 +75,11 @@ final class Process
             }
         }
         return self::$php = $php;
+    }
+
+    private static function findAutoload(): string
+    {
+        return dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2) . '/autoload.php';
     }
 
     private static function describeCrash(int $code, string $output): string

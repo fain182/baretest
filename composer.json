@@ -9,6 +9,10 @@
     },
     "bin": ["bin/baretest"],
     "autoload": {
+        "psr-4": {"Baretest\\": "src/"},
         "files": ["src/functions.php"]
+    },
+    "autoload-dev": {
+        "psr-4": {"Baretest\\Tests\\": "tests/"}
     }
 }

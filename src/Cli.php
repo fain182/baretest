@@ -4,14 +4,6 @@ declare(strict_types=1);
 
 namespace Baretest;
 
-require_once __DIR__ . '/Value.php';
-require_once __DIR__ . '/FileResult.php';
-require_once __DIR__ . '/Process.php';
-require_once __DIR__ . '/TestFiles.php';
-require_once __DIR__ . '/Github.php';
-require_once __DIR__ . '/Junit.php';
-require_once __DIR__ . '/Report.php';
-
 final class Cli
 {
     private const USAGE = 'usage: baretest [--ci=github|gitlab] [PATH...]';

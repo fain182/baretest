@@ -2,10 +2,13 @@ PHP ?= php
 
 .PHONY: test lines update-snapshots screenshot
 
-test: lines
+test: lines vendor/autoload.php
 	$(PHP) bin/baretest
 
-update-snapshots:
+vendor/autoload.php: composer.json
+	composer dump-autoload --dev
+
+update-snapshots: vendor/autoload.php
 	SNAPSHOT_REPLACE=1 $(PHP) bin/baretest tests/snapshot_test.php
 
 lines:

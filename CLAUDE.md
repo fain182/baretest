@@ -13,6 +13,7 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 
 - One process per test file, never optional: a fatal error, `exit()` or segfault in a file must become that file's failure, and the other files still run.
 - Expected warnings use `@` and `error_get_last()`. The error handler returns `false` when `!(error_reporting() & $level)`, so PHP records the suppressed warning; any other warning fails the test. Call `error_clear_last()` before each test and subtest. Checked on PHP 8.1 and 8.3.
+- For a call spread over several lines, `debug_backtrace()` reports its last line on PHP 8.1 and its first from 8.2. The worker finds the whole call by counting parentheses from the function's name, so every version shows the same lines.
 - A failure stops its test by throwing. A test that wraps code in `catch (\Throwable)` would swallow it: decide how to make that visible before 1.0.
 - The output in the README is the reference layout: labels right-aligned in one column, the type in parentheses after every value, the failing line as `14 │ code`, `✓`/`✗` everywhere, failures indented under their file.
 - Differential testing (native vs polyfill outcomes) stays out of baretest; it lives in each polyfill's own tests.
@@ -20,7 +21,6 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 
 ## Open questions
 
-- Which line `debug_backtrace()` reports for a call spread over several lines, on 8.1 and 8.6: verify before deciding which code to show.
 - How long values are cut so that the `^` stays aligned.
 
 ## Testing baretest

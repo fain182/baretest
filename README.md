@@ -169,7 +169,7 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 ```
 
 - One line per file, `✓` or `✗`, so you see progress. Under it, a `-` line for each skipped test, with its reason and `(skipped)`.
-- Each failure sits under its file and starts with the test name and its `file:line`. Below it, the line that failed with its number, what was expected and what was got.
+- Each failure sits under its file and starts with the test name and its `file:line`. Below it, the call that failed with its line numbers, all of them when it spans several lines, what was expected and what was got.
 - Values are written as PHP would, followed by their type: strings in double quotes with `\n`, `\t` and `\xE0` for invisible characters and invalid bytes.
 - A `^` marks the first element or byte that differs. Long values are cut around it.
 - An unexpected warning or exception shows its level or class, its message and the `file:line` where it was raised.

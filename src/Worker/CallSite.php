@@ -29,8 +29,9 @@ final class CallSite
         $lines = self::$sources[$file] ??= is_readable($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [];
         $pattern = '~\b' . preg_quote(substr((string) strrchr('\\' . $function, '\\'), 1), '~') . '\s*\(~';
         for ($start = $line - 1; $start >= max(0, $line - self::CALL_LINES); $start--) {
-            if (preg_match($pattern, $lines[$start] ?? '', $match, PREG_OFFSET_CAPTURE)) {
-                $end = self::findCallEnd($lines, $start, $match[0][1] + strlen($match[0][0]));
+            preg_match_all($pattern, $lines[$start] ?? '', $matches, PREG_OFFSET_CAPTURE);
+            foreach (array_reverse($matches[0]) as [$call, $offset]) {
+                $end = self::findCallEnd($lines, $start, $offset + strlen($call));
                 if ($end !== null && $end + 1 >= $line) {
                     return ['line' => $start + 1, 'lastLine' => $end + 1];
                 }

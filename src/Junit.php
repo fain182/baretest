@@ -7,8 +7,18 @@ namespace Baretest;
 /** The JUnit XML report that GitLab reads. */
 final class Junit
 {
+    private const FILE = 'baretest-junit.xml';
+
     /** @param list<FileResult> $results */
-    public static function render(array $results): string
+    public static function save(array $results): void
+    {
+        if (getenv('GITLAB_CI') === 'true' && @file_put_contents(self::FILE, self::render($results)) === false) {
+            throw new \RuntimeException('cannot write ' . self::FILE . ': ' . error_get_last()['message']);
+        }
+    }
+
+    /** @param list<FileResult> $results */
+    private static function render(array $results): string
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<testsuites>\n";
         foreach ($results as $result) {

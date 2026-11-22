@@ -21,14 +21,10 @@ final class Cli
             foreach ($files as $file) {
                 $results[] = $result = Process::run($file, FileResult::makeRelative($file));
                 $report->printFile($result);
-                if (getenv('GITHUB_ACTIONS') === 'true') {
-                    fwrite(STDOUT, Github::render($result));
-                }
+                Github::annotate($result);
             }
             $report->printSummary();
-            if (getenv('GITLAB_CI') === 'true' && @file_put_contents('baretest-junit.xml', Junit::render($results)) === false) {
-                throw new \RuntimeException('cannot write baretest-junit.xml: ' . error_get_last()['message']);
-            }
+            Junit::save($results);
             return self::computeExitCode($results);
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");

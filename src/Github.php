@@ -7,7 +7,14 @@ namespace Baretest;
 /** The workflow commands that GitHub Actions shows as annotations on the failing lines. */
 final class Github
 {
-    public static function render(FileResult $result): string
+    public static function annotate(FileResult $result): void
+    {
+        if (getenv('GITHUB_ACTIONS') === 'true') {
+            fwrite(STDOUT, self::render($result));
+        }
+    }
+
+    private static function render(FileResult $result): string
     {
         $out = '';
         foreach ($result->listFailures() as $entry) {

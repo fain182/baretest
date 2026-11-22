@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Result;
 
 /** What happened when one test file ran in its own process. */
-final class FileResult
+class FileResult
 {
     public string $file;
     /** @var list<TestResult> in the order they started, then any failure outside a test */

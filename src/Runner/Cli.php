@@ -10,7 +10,7 @@ use Baretest\Output\Report;
 use Baretest\Result\FileResult;
 use Baretest\Result\SuiteResult;
 
-final class Cli
+class Cli
 {
     /** @param list<string> $argv */
     public static function run(array $argv): int

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 /** One running test, in the process that runs its file. */
-final class Test
+class Test
 {
     public string $name;
     private int $seq;

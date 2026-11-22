@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 /** Finds the whole call in a test file that failed, even when it spans several lines. */
-final class CallSite
+class CallSite
 {
     private const CALL_LINES = 10;
 

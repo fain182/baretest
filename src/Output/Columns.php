@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Output;
 
 /** Lays out text in terminal columns. */
-final class Columns
+class Columns
 {
     private const VALUE_WIDTH = 48;
     private const CONTEXT_WIDTH = 16;

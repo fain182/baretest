@@ -9,7 +9,7 @@ use Baretest\Result\FileResult;
 use Baretest\Result\SuiteResult;
 
 /** Writes the output described in the README, one file at a time. */
-final class Report
+class Report
 {
     private const DETAIL_INDENT = '       ';
     private const BOLD = '1';

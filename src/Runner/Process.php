@@ -10,7 +10,7 @@ use Baretest\Result\Records;
 use Baretest\Result\TestResult;
 
 /** Runs a test file in a fresh PHP process and reads back what it recorded. */
-final class Process
+class Process
 {
     /** @var ?list<string> */
     private static ?array $command = null;

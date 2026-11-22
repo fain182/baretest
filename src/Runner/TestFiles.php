@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Runner;
 
 /** The *_test.php files to run: the given files, and those found under the given directories, or under tests/. */
-final class TestFiles
+class TestFiles
 {
     /** @return list<string> absolute paths, each file once */
     public static function find(array $paths): array

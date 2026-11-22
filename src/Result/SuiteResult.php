@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Result;
 
 /** What happened to every test file of a run, in the order they ran. */
-final class SuiteResult implements \IteratorAggregate
+class SuiteResult implements \IteratorAggregate
 {
     /** @var list<FileResult> */
     private array $files = [];

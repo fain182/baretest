@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Result;
 
 /** Why a test failed: a message, where in the code, and for equal() the two values. */
-final class Failure
+class Failure
 {
     public string $message;
     public ?string $label;

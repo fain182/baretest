@@ -7,7 +7,7 @@ namespace Baretest\Output;
 use Baretest\Result\FileResult;
 
 /** The workflow commands that GitHub Actions shows as annotations on the failing lines. */
-final class Github
+class Github
 {
     public static function annotate(FileResult $result): void
     {

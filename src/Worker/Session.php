@@ -12,7 +12,7 @@ use Baretest\Result\Records;
  * The state of one test file, in the process that runs it. Every finished test is
  * appended to the records file at once, so that a crash loses only the test it hit.
  */
-final class Session
+class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
 

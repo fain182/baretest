@@ -8,7 +8,7 @@ use Baretest\Result\Failure;
 use Baretest\Result\SuiteResult;
 
 /** The JUnit XML report that GitLab reads. */
-final class Gitlab
+class Gitlab
 {
     private const FILE = 'baretest-junit.xml';
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Result;
 
 /** The file through which a worker tells the runner what happened, one record per line. */
-final class Records
+class Records
 {
     /** @var resource */
     private $handle;

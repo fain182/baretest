@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Result;
 
 /** What happened to one test, or to the code of its file outside any test. */
-final class TestResult
+class TestResult
 {
     public string $title;
     public float $time;

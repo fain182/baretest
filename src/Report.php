@@ -89,7 +89,7 @@ final class Report
                 . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : ''),
         };
         $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
-        $this->write($this->mark($ok) . ' ' . $text . '  ' . $time . "\n");
+        $this->write($this->mark($ok) . ' ' . $this->paint('1', $text) . '  ' . $time . "\n");
         if ($this->ci === 'gitlab') {
             fwrite(STDOUT, Junit::render($this->results));
         }
@@ -148,7 +148,7 @@ final class Report
     {
         $location = self::formatLocation($failure);
         $line = $failure['line'] ?? null;
-        $out = '  ' . $this->mark(false) . ' ' . $title;
+        $out = '  ' . $this->mark(false) . ' ' . $this->paint('1', $title);
         if ($location !== null) {
             $out .= '  ' . $this->paint('90', '(' . $location . ')');
         }

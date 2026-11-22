@@ -1,46 +1,16 @@
 # baretest
 
-A small test runner for PHP. No dependencies, no extensions, PHP 8.1 to 8.6.
+A small test runner for PHP libraries. No dependencies, no extensions, PHP 8.1 to 8.6.
 
 You can learn all of it in five minutes and read its source in an afternoon.
 
-## Why
-
-PHPUnit and Pest do far more than baretest, and for an application they are the right choice. A library has different needs: it supports many PHP versions, it may have to run where few extensions are installed, and its tests should be as easy to read as its code.
-
-| | baretest | PHPUnit 13 | Pest 5 |
-|---|---|---|---|
-| PHP versions | 8.1 – 8.6 | 8.4.1 and later | 8.4 and later |
-| API to learn | 5 functions | 176 assertion methods | 16 functions and 131 expectations |
-| Extensions required | none | dom, filter, json, libxml, mbstring, xmlwriter | those of PHPUnit, which it is built on |
-| Test files isolated from each other | always, one process per file | opt-in, one process per test | not supported |
-| Packages installed | 1 | 28 | 63 |
-| Lines of PHP installed | under 1,000 | about 175,000 | about 333,000 |
-
-<sub>Measured in November 2026 with `composer require` of the latest releases. baretest's size is a goal it holds itself to, not yet a measurement.</sub>
-
-Each test file runs in its own PHP process. A fatal error, an `exit()` or a crash in one file is reported as that file's failure, and the other files still run.
-
-baretest is the test runner for libraries. If you are not writing one, use PHPUnit or Pest.
-
-## Principles
-
-These are how baretest is developed and how proposals are judged.
-
-1. **Runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
-2. **One way to do each thing.** No configuration, one flag, no option that changes what a test means.
-3. **The README is the documentation.** A PHP programmer reads it and knows everything. If a feature cannot be explained here in a few lines, it does not belong in baretest.
-4. **Small on purpose.** Under 1,000 lines, so that anyone who depends on it can read the whole source in an afternoon and trust it.
-5. **Simple is not harsh.** Lines of code spent on a clearer message or more precise feedback are well spent, even against principle 4.
-6. **Change needs a strong reason.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and fit the principles above.
+![baretest output in a terminal: one passing file, one with three failures](docs/output.png)
 
 ## Install
 
 ```
 composer require --dev fain182/baretest
 ```
-
-It needs nothing beyond what every PHP build has: no `dom`, `tokenizer`, `xml` or other extensions. It also runs on a PHP built with `--disable-all`.
 
 ## A test
 
@@ -60,6 +30,12 @@ test('rejects empty input', function () {
 });
 ```
 
+Run it:
+
+```
+vendor/bin/baretest
+```
+
 That is the whole API:
 
 | | |
@@ -73,6 +49,40 @@ That is the whole API:
 A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
 
 A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
+
+## Why
+
+PHPUnit and Pest do far more than baretest, and for an application they are the right choice. A library has different needs: it supports many PHP versions, it may have to run where few extensions are installed, and its tests should be as easy to read as its code.
+
+| | baretest | PHPUnit 13 | Pest 5 |
+|---|---|---|---|
+| PHP versions | 8.1 – 8.6 | 8.4.1 and later | 8.4 and later |
+| API to learn | 5 functions | 176 assertion methods | 16 functions and 131 expectations |
+| Extensions required | none, runs on PHP built with `--disable-all` | dom, filter, json, libxml, mbstring, xmlwriter | those of PHPUnit, which it is built on |
+| Test files isolated from each other | always, one process per file | opt-in, one process per test | not supported |
+| Packages installed | 1 | 28 | 63 |
+| Lines of PHP installed | under 1,000 | about 175,000 | about 333,000 |
+
+<sub>Measured in November 2026 with `composer require` of the latest releases. baretest's size is checked in CI.</sub>
+
+A fatal error, an `exit()` or a crash in one test file is reported as that file's failure, and the other files still run.
+
+baretest is the test runner for libraries. If you are not writing one, use PHPUnit or Pest.
+
+## Running
+
+```
+vendor/bin/baretest [--ci=github|gitlab] [PATH...]
+```
+
+- `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
+- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner.
+- Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
+- Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
+- `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
+- `--ci=gitlab` writes a JUnit XML report to stdout and the usual output to stderr, so the job log stays readable: `vendor/bin/baretest --ci=gitlab > report.xml`, then point `artifacts:reports:junit` at `report.xml` with `artifacts:when: always`.
+
+Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that runs no tests).
 
 ## Table tests
 
@@ -124,59 +134,6 @@ test('rejects odd-length input', function () {
 
 Shared setup is a function. A repeated check is a function. A test that needs a temporary file creates it and deletes it in `finally`. baretest has no hooks for any of this, because PHP already does it.
 
-## Running
-
-```
-vendor/bin/baretest [--ci=github|gitlab] [PATH...]
-```
-
-- `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
-- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner, so global state does not leak between files.
-- Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
-- `--ci=github` adds an `::error` line for each failure, which GitHub Actions shows as an annotation on the code.
-- `--ci=gitlab` writes a JUnit XML report to stdout and the usual output to stderr, so the job log stays readable: `vendor/bin/baretest --ci=gitlab > report.xml`, then point `artifacts:reports:junit` at `report.xml` with `artifacts:when: always`.
-
-Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad arguments, a file that runs no tests).
-
-## Output
-
-![baretest output in a terminal: one passing file, one with three failures](docs/output.png)
-
-```
-✓ tests/encoding_test.php  38 tests, 1 skipped  0.05s
-  - lowercases accented letters  needs mbstring  (skipped)
-✗ tests/split_test.php  4 of 41 failed  0.07s
-
-  ✗ splits › trailing comma  (tests/split_test.php:14)
-       14 │ test($name, fn () => equal($expected, explode($separator, $input)));
-
-       expected  ["a", "b"]        (array)
-            got  ["a", "b", ""]    (array)
-                            ^
-
-  ✗ splits › invalid bytes  (tests/split_test.php:14)
-       14 │ test($name, fn () => equal($expected, explode($separator, $input)));
-
-       expected  "b\xE0c"        (string)
-            got  "b\xE0\xA0c"    (string)
-                       ^
-
-  ✗ counts pieces  (tests/split_test.php:30)
-       30 │ equal(3, count_pieces('a,b,c'));
-
-       expected  3      (int)
-            got  "3"    (string)
-
-✗ 4 of 214 tests failed in 2 of 9 files, 1 skipped  0.41s
-```
-
-- One line per file, `✓` or `✗`, so you see progress. Under it, a `-` line for each skipped test, with its reason and `(skipped)`.
-- Each failure sits under its file and starts with the test name and its `file:line`. Below it, the call that failed with its line numbers, all of them when it spans several lines, what was expected and what was got.
-- Values are written as PHP would, followed by their type: strings in double quotes with `\n`, `\t` and `\xE0` for invisible characters and invalid bytes.
-- A `^` marks the first element or byte that differs. Long values are cut around it to 48 columns, so that each line fits in a terminal 80 columns wide.
-- An unexpected warning or exception shows its level or class, its message and the `file:line` where it was raised.
-- Anything a test file prints, with `echo` or `var_dump()`, is shown under the file, each line after a `│`.
-
 ## Not included, on purpose
 
 - assertions beyond `equal` and `throws`: write the check in PHP and call `fail()`
@@ -190,3 +147,14 @@ Exit code: `0` all passed, `1` some failed, `2` the runner could not run (bad ar
 - stopping at the first failure
 
 A request for any of these will be closed with a link to this section.
+
+## Principles
+
+These are how baretest is developed and how proposals are judged.
+
+1. **Runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
+2. **One way to do each thing.** No configuration, one flag, no option that changes what a test means.
+3. **The README is the documentation.** A PHP programmer reads it and knows everything. If a feature cannot be explained here in a few lines, it does not belong in baretest.
+4. **Small on purpose.** Under 1,000 lines, so that anyone who depends on it can read the whole source in an afternoon and trust it.
+5. **Simple is not harsh.** Lines of code spent on a clearer message or more precise feedback are well spent, even against principle 4.
+6. **Change needs a strong reason.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and fit the principles above.

@@ -152,9 +152,10 @@ final class Report
             $out .= '  ' . $this->paint('2', '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $location !== null && $line !== null ? $this->readSourceLine($failure['file'], $line) : null;
-        if ($source !== null) {
-            $out .= self::DETAIL_INDENT . $this->paint('2', $line . ' │') . ' ' . $source . "\n";
+        $source = $location !== null && $line !== null ? $this->readSource($failure['file'], $line, $failure['lastLine'] ?? $line) : [];
+        $width = strlen((string) array_key_last($source));
+        foreach ($source as $number => $code) {
+            $out .= self::DETAIL_INDENT . $this->paint('2', str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
         return $out . "\n" . (isset($failure['expected']) ? $this->renderValues($failure) : $this->renderMessage($failure));
     }
@@ -202,11 +203,17 @@ final class Report
         return preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: str_split($text);
     }
 
-    private function readSourceLine(string $file, int $line): ?string
+    /** @return array<int, string> lines $first to $last by number, without the indentation they share */
+    private function readSource(string $file, int $first, int $last): array
     {
         $this->sources[$file] ??= is_readable($file) ? (file($file, FILE_IGNORE_NEW_LINES) ?: []) : [];
-        $source = $this->sources[$file][$line - 1] ?? null;
-        return $source === null ? null : trim($source);
+        $lines = [];
+        for ($number = $first; $number <= $last && isset($this->sources[$file][$number - 1]); $number++) {
+            $lines[$number] = rtrim($this->sources[$file][$number - 1]);
+        }
+        $indents = array_map(static fn (string $code): int => strspn($code, " \t"), array_filter($lines, static fn (string $code): bool => $code !== ''));
+        $indent = $indents === [] ? 0 : min($indents);
+        return array_map(static fn (string $code): string => (string) substr($code, $indent), $lines);
     }
 
     private static function renderAnnotation(FileResult $result, string $title, array $failure): string

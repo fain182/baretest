@@ -33,6 +33,15 @@ final class Report
         return str_starts_with($path, $prefix) ? substr($path, strlen($prefix)) : $path;
     }
 
+    /** file:line of a failure, relative to the working directory. */
+    public static function location(array $failure): ?string
+    {
+        if (!isset($failure['file'])) {
+            return null;
+        }
+        return self::relative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '');
+    }
+
     public static function describe(array $failure): string
     {
         $label = $failure['label'] ?? null;
@@ -102,7 +111,7 @@ final class Report
             $afterBlock = true;
         };
         foreach ($result->tests as $test) {
-            $title = implode(' › ', $test['path']);
+            $title = FileResult::title($test);
             if ($test['failure'] !== null) {
                 $block($title, $test['failure']);
             } elseif ($this->verbose) {
@@ -118,14 +127,14 @@ final class Report
 
     private function block(string $title, array $failure): string
     {
-        $file = isset($failure['file']) ? self::relative($failure['file']) : null;
+        $location = self::location($failure);
         $line = $failure['line'] ?? null;
         $out = '  ' . $this->mark(false) . ' ' . $title;
-        if ($file !== null) {
-            $out .= '  ' . $this->paint('2', '(' . $file . ($line !== null ? ':' . $line : '') . ')');
+        if ($location !== null) {
+            $out .= '  ' . $this->paint('2', '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $file !== null && $line !== null ? $this->sourceLine($failure['file'], $line) : null;
+        $source = $location !== null && $line !== null ? $this->sourceLine($failure['file'], $line) : null;
         if ($source !== null) {
             $out .= self::DETAIL_INDENT . $this->paint('2', $line . ' │') . ' ' . $source . "\n";
         }

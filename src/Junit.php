@@ -20,7 +20,7 @@ final class Junit
                 $result->time,
             );
             foreach ($result->tests as $test) {
-                $xml .= self::testCase($result->file, implode(' › ', $test['path']), $test['time'], $test['failure']);
+                $xml .= self::testCase($result->file, FileResult::title($test), $test['time'], $test['failure']);
             }
             if ($result->stopped !== null) {
                 $xml .= self::testCase($result->file, $result->stopped['title'], 0.0, $result->stopped['failure']);
@@ -36,7 +36,7 @@ final class Junit
         if ($failure === null) {
             return $open . "/>\n";
         }
-        $location = isset($failure['file']) ? Report::relative($failure['file']) . (isset($failure['line']) ? ':' . $failure['line'] : '') : $file;
+        $location = Report::location($failure) ?? $file;
         $message = Report::describe($failure);
         return $open . ">\n      <failure message=\"" . self::escape(strtok($message, "\n")) . '">'
             . self::escape($location . "\n" . $message) . "</failure>\n    </testcase>\n";

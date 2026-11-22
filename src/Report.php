@@ -23,16 +23,24 @@ final class Report
     /** @var array<string, list<string>> */
     private array $sources = [];
 
+    /** @var resource */
+    private $out;
+    private bool $color;
+    private ?string $ci;
+
     /** @param resource $out */
-    public function __construct(private $out, private bool $color, private ?string $ci)
+    public function __construct($out, bool $color, ?string $ci)
     {
+        $this->out = $out;
+        $this->color = $color;
+        $this->ci = $ci;
         $this->start = microtime(true);
     }
 
     public static function makeRelative(string $path): string
     {
         $prefix = getcwd() . DIRECTORY_SEPARATOR;
-        return str_starts_with($path, $prefix) ? substr($path, strlen($prefix)) : $path;
+        return strncmp($path, $prefix, strlen($prefix)) === 0 ? substr($path, strlen($prefix)) : $path;
     }
 
     /** file:line of a failure, relative to the working directory. */
@@ -82,12 +90,14 @@ final class Report
     {
         $time = $this->paint('2', sprintf('%.2fs', microtime(true) - $this->start));
         $ok = $this->failedFiles === 0 && $this->emptyFiles === 0;
-        $text = match (true) {
-            $ok => self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file'),
-            $this->failedFiles === 0 => $this->emptyFiles . ' of ' . self::count($this->files, 'file') . ' did not run any test',
-            default => $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file')
-                . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : ''),
-        };
+        if ($ok) {
+            $text = self::count($this->tests, 'test') . ' in ' . self::count($this->files, 'file');
+        } elseif ($this->failedFiles === 0) {
+            $text = $this->emptyFiles . ' of ' . self::count($this->files, 'file') . ' did not run any test';
+        } else {
+            $text = $this->failed . ' of ' . self::count($this->tests, 'test') . ' failed in ' . $this->failedFiles . ' of ' . self::count($this->files, 'file')
+                . ($this->emptyFiles > 0 ? ', ' . $this->emptyFiles . ' did not run any test' : '');
+        }
         $text .= $this->skipped > 0 ? ', ' . $this->skipped . ' skipped' : '';
         $this->write($this->mark($ok) . ' ' . $this->paint('1', $text) . '  ' . $time . "\n");
         if ($this->ci === 'gitlab') {
@@ -102,11 +112,11 @@ final class Report
 
     private function summarize(FileResult $result, bool $ok): string
     {
-        $text = match (true) {
-            $result->hasNoTests() => 'no tests',
-            $ok => self::count($result->countTests(), 'test'),
-            default => $result->countFailed() . ' of ' . $result->countTests() . ' failed',
-        };
+        if ($result->hasNoTests()) {
+            $text = 'no tests';
+        } else {
+            $text = $ok ? self::count($result->countTests(), 'test') : $result->countFailed() . ' of ' . $result->countTests() . ' failed';
+        }
         $skipped = $result->countSkipped();
         return $skipped > 0 ? $text . ', ' . $skipped . ' skipped' : $text;
     }

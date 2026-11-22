@@ -11,13 +11,19 @@ final class FileResult
      * @param list<array{path: list<string>, time: float, failure: ?array, subtestFailed: bool, skipped: ?string}> $tests in the order they started
      * @param ?array{title: string, failure: array} $stopped set when the file failed outside any test
      */
-    public function __construct(
-        public string $file,
-        public array $tests,
-        public ?array $stopped,
-        public float $time,
-        public string $output,
-    ) {
+    public string $file;
+    public array $tests;
+    public ?array $stopped;
+    public float $time;
+    public string $output;
+
+    public function __construct(string $file, array $tests, ?array $stopped, float $time, string $output)
+    {
+        $this->file = $file;
+        $this->tests = $tests;
+        $this->stopped = $stopped;
+        $this->time = $time;
+        $this->output = $output;
     }
 
     /** @param array{path: list<string>} $test */

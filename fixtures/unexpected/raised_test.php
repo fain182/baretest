@@ -3,8 +3,7 @@
 use function Baretest\{test, equal, throws, fail};
 
 test('unexpected warning', function () {
-    $x = [];
-    echo $x['missing'];
+    hex2bin('a');
 });
 
 test('unexpected deprecation', function () {
@@ -19,19 +18,19 @@ test('fail', fn () => fail("two\nlines"));
 
 test('throws, nothing thrown', fn () => throws(InvalidArgumentException::class, fn () => 1));
 
-test('throws, wrong class', fn () => throws(InvalidArgumentException::class, fn () => throw new RuntimeException('x')));
+test('throws, wrong class', fn () => throws(InvalidArgumentException::class, function () { throw new RuntimeException('x'); }));
 
 test('failure swallowed by the test', function () {
     try {
         equal(1, 2);
-    } catch (Throwable) {
+    } catch (Throwable $e) {
     }
 });
 
 test('warning swallowed by the test', function () {
     try {
         trigger_error('lost', E_USER_WARNING);
-    } catch (Throwable) {
+    } catch (Throwable $e) {
     }
 });
 

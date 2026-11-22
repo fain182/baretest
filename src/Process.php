@@ -30,13 +30,15 @@ final class Process
         $stopped = null;
         $done = false;
         foreach (file($records, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
-            $record = json_decode($line, true);
-            match ($record['t'] ?? null) {
-                'test' => $tests[] = $record,
-                'file' => $stopped = $record,
-                'done' => $done = true,
-                default => null,
-            };
+            $record = unserialize(base64_decode($line), ['allowed_classes' => false]);
+            $type = $record['t'] ?? null;
+            if ($type === 'test') {
+                $tests[] = $record;
+            } elseif ($type === 'file') {
+                $stopped = $record;
+            } elseif ($type === 'done') {
+                $done = true;
+            }
         }
         usort($tests, static fn (array $a, array $b): int => $a['seq'] <=> $b['seq']);
         $printed = (string) file_get_contents($output);
@@ -61,11 +63,11 @@ final class Process
         }
         $ini = php_ini_loaded_file();
         $php = $ini === false ? [PHP_BINARY, '-n'] : [PHP_BINARY, '-c', $ini];
-        $probe = proc_open([...$php, '-r', 'echo json_encode(ini_get_all(null, false));'], [1 => ['pipe', 'w']], $pipes);
+        $probe = proc_open([...$php, '-r', 'echo serialize(ini_get_all(null, false));'], [1 => ['pipe', 'w']], $pipes);
         if ($probe === false) {
             throw new \RuntimeException('could not start ' . PHP_BINARY);
         }
-        $defaults = json_decode(stream_get_contents($pipes[1]), true) ?? [];
+        $defaults = unserialize(stream_get_contents($pipes[1]), ['allowed_classes' => false]) ?: [];
         proc_close($probe);
         foreach (ini_get_all(null, false) as $name => $value) {
             if ($value !== null && ($defaults[$name] ?? null) !== $value) {

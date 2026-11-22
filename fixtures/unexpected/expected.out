@@ -8,45 +8,45 @@
 
 ✗ fixtures/unexpected/raised_test.php  8 of 9 failed  0.00s
 
-  ✗ unexpected warning  (fixtures/unexpected/raised_test.php:7)
-       7 │ echo $x['missing'];
+  ✗ unexpected warning  (fixtures/unexpected/raised_test.php:6)
+       6 │ hex2bin('a');
 
-       Warning: Undefined array key "missing"
+       Warning: hex2bin(): Hexadecimal input string must have an even length
 
-  ✗ unexpected deprecation  (fixtures/unexpected/raised_test.php:11)
-       11 │ trigger_error('old api', E_USER_DEPRECATED);
+  ✗ unexpected deprecation  (fixtures/unexpected/raised_test.php:10)
+       10 │ trigger_error('old api', E_USER_DEPRECATED);
 
        Deprecated: old api
 
-  ✗ uncaught exception  (fixtures/unexpected/raised_test.php:15)
-       15 │ throw new DomainException('boom');
+  ✗ uncaught exception  (fixtures/unexpected/raised_test.php:14)
+       14 │ throw new DomainException('boom');
 
        DomainException: boom
 
-  ✗ fail  (fixtures/unexpected/raised_test.php:18)
-       18 │ test('fail', fn () => fail("two\nlines"));
+  ✗ fail  (fixtures/unexpected/raised_test.php:17)
+       17 │ test('fail', fn () => fail("two\nlines"));
 
        two
        lines
 
-  ✗ throws, nothing thrown  (fixtures/unexpected/raised_test.php:20)
-       20 │ test('throws, nothing thrown', fn () => throws(InvalidArgumentException::class, fn () => 1));
+  ✗ throws, nothing thrown  (fixtures/unexpected/raised_test.php:19)
+       19 │ test('throws, nothing thrown', fn () => throws(InvalidArgumentException::class, fn () => 1));
 
        expected InvalidArgumentException to be thrown, nothing was thrown
 
-  ✗ throws, wrong class  (fixtures/unexpected/raised_test.php:22)
-       22 │ test('throws, wrong class', fn () => throws(InvalidArgumentException::class, fn () => throw new RuntimeException('x')));
+  ✗ throws, wrong class  (fixtures/unexpected/raised_test.php:21)
+       21 │ test('throws, wrong class', fn () => throws(InvalidArgumentException::class, function () { throw new RuntimeException('x'); }));
 
        expected InvalidArgumentException to be thrown, got RuntimeException: x
 
-  ✗ failure swallowed by the test  (fixtures/unexpected/raised_test.php:26)
-       26 │ equal(1, 2);
+  ✗ failure swallowed by the test  (fixtures/unexpected/raised_test.php:25)
+       25 │ equal(1, 2);
 
        expected  1    (int)
             got  2    (int)
 
-  ✗ warning swallowed by the test  (fixtures/unexpected/raised_test.php:33)
-       33 │ trigger_error('lost', E_USER_WARNING);
+  ✗ warning swallowed by the test  (fixtures/unexpected/raised_test.php:32)
+       32 │ trigger_error('lost', E_USER_WARNING);
 
        Warning: lost
 

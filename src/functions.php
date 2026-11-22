@@ -16,7 +16,7 @@ if (!function_exists('Baretest\test')) {
         Session::run($name, $fn);
     }
 
-    function equal(mixed $expected, mixed $actual): void
+    function equal($expected, $actual): void
     {
         if ($expected !== $actual) {
             Session::failValues($expected, $actual);
@@ -33,7 +33,7 @@ if (!function_exists('Baretest\test')) {
             if ($thrown instanceof $class) {
                 return $thrown;
             }
-            Session::fail(sprintf('expected %s to be thrown, got %s: %s', $class, $thrown::class, $thrown->getMessage()));
+            Session::fail(sprintf('expected %s to be thrown, got %s: %s', $class, get_class($thrown), $thrown->getMessage()));
         }
         Session::fail(sprintf('expected %s to be thrown, nothing was thrown', $class));
     }

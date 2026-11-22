@@ -12,23 +12,36 @@ final class Value
     private const ZERO_WIDTH = '~[\p{Mn}\p{Me}\x{200B}-\x{200F}\x{FE00}-\x{FE0F}]~u';
     private const WIDE = '~[\x{1100}-\x{115F}\x{2E80}-\x{303E}\x{3041}-\x{33FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{A000}-\x{A4CF}\x{AC00}-\x{D7A3}\x{F900}-\x{FAFF}\x{FE30}-\x{FE4F}\x{FF00}-\x{FF60}\x{FFE0}-\x{FFE6}\x{1F300}-\x{1F64F}\x{1F900}-\x{1F9FF}\x{20000}-\x{3FFFD}]~u';
 
-    public static function render(mixed $value): string
+    public static function render($value): string
     {
-        return match (true) {
-            $value === null => 'null',
-            is_bool($value) => $value ? 'true' : 'false',
-            is_int($value) => (string) $value,
-            is_float($value) => is_nan($value) ? 'NAN' : (is_infinite($value) ? ($value > 0 ? 'INF' : '-INF') : var_export($value, true)),
-            is_string($value) => '"' . implode('', self::tokenize($value)) . '"',
-            is_array($value) => self::renderArray($value),
-            $value instanceof \UnitEnum => $value::class . '::' . $value->name,
-            is_object($value) => $value::class . '#' . spl_object_id($value),
-            default => get_debug_type($value),
-        };
+        switch (true) {
+            case $value === null: return 'null';
+            case is_bool($value): return $value ? 'true' : 'false';
+            case is_int($value): return (string) $value;
+            case is_float($value): return is_nan($value) ? 'NAN' : (is_infinite($value) ? ($value > 0 ? 'INF' : '-INF') : var_export($value, true));
+            case is_string($value): return '"' . implode('', self::tokenize($value)) . '"';
+            case is_array($value): return self::renderArray($value);
+            case $value instanceof \UnitEnum: return get_class($value) . '::' . $value->name;
+            case is_object($value): return get_class($value) . '#' . spl_object_id($value);
+            default: return self::describeType($value);
+        }
+    }
+
+    /** What get_debug_type(), missing before PHP 8.0, returns. */
+    public static function describeType($value): string
+    {
+        if (is_object($value)) {
+            return explode("\0", get_class($value))[0];
+        }
+        if (is_resource($value)) {
+            return 'resource (' . get_resource_type($value) . ')';
+        }
+        $names = ['NULL' => 'null', 'boolean' => 'bool', 'integer' => 'int', 'double' => 'float'];
+        return $names[gettype($value)] ?? gettype($value);
     }
 
     /** Column in render($got) of the first element or byte that differs from $expected. */
-    public static function findOffset(mixed $expected, mixed $got): ?int
+    public static function findOffset($expected, $got): ?int
     {
         if (is_string($expected) && is_string($got)) {
             $a = self::tokenize($expected);
@@ -60,15 +73,15 @@ final class Value
         preg_match_all(self::UTF8, $text, $matches);
         return array_map(static function (string $char): string {
             $byte = ord($char[0]);
-            return match (true) {
-                $byte >= 0xC2 && strlen($char) > 1 => $char,
-                $char === "\n" => '\n',
-                $char === "\t" => '\t',
-                $char === "\r" => '\r',
-                $char === '\\', $char === '"', $char === '$' => '\\' . $char,
-                $byte >= 0x20 && $byte < 0x7F => $char,
-                default => sprintf('\x%02X', $byte),
-            };
+            switch (true) {
+                case $byte >= 0xC2 && strlen($char) > 1: return $char;
+                case $char === "\n": return '\n';
+                case $char === "\t": return '\t';
+                case $char === "\r": return '\r';
+                case $char === '\\' || $char === '"' || $char === '$': return '\\' . $char;
+                case $byte >= 0x20 && $byte < 0x7F: return $char;
+                default: return sprintf('\x%02X', $byte);
+            }
         }, $matches[0]);
     }
 
@@ -82,7 +95,8 @@ final class Value
         return '[' . implode(', ', $parts) . ']';
     }
 
-    private static function renderKey(int|string $key): string
+    /** @param int|string $key */
+    private static function renderKey($key): string
     {
         return self::render($key) . ' => ';
     }

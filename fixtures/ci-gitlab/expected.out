@@ -9,7 +9,7 @@
                   ^
 
   ✗ <xml> & "quotes"  (fixtures/ci-gitlab/ci_test.php:7)
-       7 │ test('<xml> & "quotes"', fn () => throw new Exception('a < b'));
+       7 │ test('<xml> & "quotes"', function () { throw new Exception('a < b'); });
 
        Exception: a < b
 

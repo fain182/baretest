@@ -35,7 +35,7 @@ final class Session
             (static function (string $file): void {
                 require $file;
             })($file);
-        } catch (Failure) {
+        } catch (Failure $failure) {
             // already registered where it was raised
         } catch (\Throwable $e) {
             self::register(self::describe($e), 'uncaught exception');
@@ -54,7 +54,7 @@ final class Session
         self::$active[] = ['name' => $name, 'seq' => self::$started++, 'failure' => null, 'subtestFailed' => false, 'skipped' => null];
         try {
             $fn();
-        } catch (Failure) {
+        } catch (Failure $failure) {
             // already registered where it was raised
         } catch (Skip $skip) {
             self::$active[array_key_last(self::$active)]['skipped'] = $skip->getMessage();
@@ -71,13 +71,13 @@ final class Session
     }
 
     /** @return never */
-    public static function failValues(mixed $expected, mixed $got)
+    public static function failValues($expected, $got)
     {
         $failure = [
             'expected' => Value::render($expected),
             'got' => Value::render($got),
-            'expectedType' => get_debug_type($expected),
-            'gotType' => get_debug_type($got),
+            'expectedType' => Value::describeType($expected),
+            'gotType' => Value::describeType($got),
             'caret' => Value::findOffset($expected, $got),
         ];
         $failure['message'] = sprintf('expected %s (%s), got %s (%s)', $failure['expected'], $failure['expectedType'], $failure['got'], $failure['gotType']);
@@ -111,12 +111,11 @@ final class Session
         if (!(error_reporting() & $level)) {
             return false;
         }
-        $label = match ($level) {
-            E_WARNING, E_USER_WARNING, E_CORE_WARNING, E_COMPILE_WARNING => 'Warning',
-            E_NOTICE, E_USER_NOTICE => 'Notice',
-            E_DEPRECATED, E_USER_DEPRECATED => 'Deprecated',
-            default => 'Error',
-        };
+        $label = [
+            E_WARNING => 'Warning', E_USER_WARNING => 'Warning', E_CORE_WARNING => 'Warning', E_COMPILE_WARNING => 'Warning',
+            E_NOTICE => 'Notice', E_USER_NOTICE => 'Notice',
+            E_DEPRECATED => 'Deprecated', E_USER_DEPRECATED => 'Deprecated',
+        ][$level] ?? 'Error';
         self::register(['label' => $label, 'message' => $message, 'file' => $file, 'line' => $line]);
         throw new Failure($message);
     }
@@ -152,14 +151,14 @@ final class Session
 
     private static function describe(\Throwable $e): array
     {
-        return ['label' => $e::class, 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()];
+        return ['label' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()];
     }
 
     /** The lines of the test code that called into baretest. */
     private static function findCallSite(): array
     {
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
-            if (isset($frame['file']) && !str_starts_with($frame['file'], __DIR__ . DIRECTORY_SEPARATOR)) {
+            if (isset($frame['file']) && strpos($frame['file'], __DIR__ . DIRECTORY_SEPARATOR) !== 0) {
                 return ['file' => $frame['file']] + self::findCall($frame['file'], $frame['line'], $frame['function']);
             }
         }
@@ -214,6 +213,6 @@ final class Session
 
     private static function write(array $record): void
     {
-        fwrite(self::$records, json_encode($record, JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR) . "\n");
+        fwrite(self::$records, base64_encode(serialize($record)) . "\n");
     }
 }

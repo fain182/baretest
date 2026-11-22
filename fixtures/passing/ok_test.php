@@ -8,9 +8,9 @@ test('equal', function () {
 });
 
 test('throws returns the exception', function () {
-    $e = throws(InvalidArgumentException::class, fn () => throw new InvalidArgumentException('bad'));
+    $e = throws(InvalidArgumentException::class, function () { throw new InvalidArgumentException('bad'); });
     equal('bad', $e->getMessage());
-    throws(Exception::class, fn () => throw new RuntimeException());
+    throws(Exception::class, function () { throw new RuntimeException(); });
 });
 
 test('expected warning', function () {

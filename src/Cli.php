@@ -44,12 +44,12 @@ final class Cli
         $ci = null;
         $paths = [];
         foreach ($args as $arg) {
-            if (str_starts_with($arg, '--ci=')) {
+            if (strncmp($arg, '--ci=', 5) === 0) {
                 $ci = substr($arg, 5);
                 if (!in_array($ci, ['github', 'gitlab'], true)) {
                     throw new \InvalidArgumentException("unknown --ci target \"$ci\"\n" . self::USAGE);
                 }
-            } elseif (str_starts_with($arg, '-')) {
+            } elseif (strncmp($arg, '-', 1) === 0) {
                 throw new \InvalidArgumentException("unknown option $arg\n" . self::USAGE);
             } else {
                 $paths[] = $arg;
@@ -69,7 +69,7 @@ final class Cli
                 $found = [];
                 $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
                 foreach ($iterator as $file) {
-                    if (str_ends_with($file->getFilename(), '_test.php')) {
+                    if (substr($file->getFilename(), -9) === '_test.php') {
                         $found[] = realpath($file->getPathname());
                     }
                 }

@@ -6,57 +6,33 @@ namespace Baretest;
 
 final class Cli
 {
-    private const USAGE = 'usage: baretest [--ci=github|gitlab] [PATH...]';
-
     /** @param list<string> $argv */
     public static function run(array $argv): int
     {
         try {
-            [$ci, $paths] = self::parse(array_slice($argv, 1));
             if (!function_exists('proc_open')) {
                 throw new \RuntimeException('proc_open() is disabled in php.ini (disable_functions), and baretest runs each test file in its own process');
             }
-            $files = TestFiles::find($paths);
+            $files = TestFiles::find(array_slice($argv, 1));
 
-            $out = $ci === 'gitlab' ? STDERR : STDOUT;
             $noColor = getenv('NO_COLOR');
-            $report = new Report($out, stream_isatty($out) && ($noColor === false || $noColor === ''));
+            $report = new Report(STDOUT, stream_isatty(STDOUT) && ($noColor === false || $noColor === ''));
             $results = [];
             foreach ($files as $file) {
                 $results[] = $result = Process::run($file, FileResult::makeRelative($file));
                 $report->add($result);
-                if ($ci === 'github') {
-                    fwrite($out, Github::render($result));
+                if (getenv('GITHUB_ACTIONS') === 'true') {
+                    fwrite(STDOUT, Github::render($result));
                 }
             }
             $report->finish();
-            if ($ci === 'gitlab') {
-                fwrite(STDOUT, Junit::render($results));
+            if (getenv('GITLAB_CI') === 'true' && @file_put_contents('baretest-junit.xml', Junit::render($results)) === false) {
+                throw new \RuntimeException('cannot write baretest-junit.xml: ' . error_get_last()['message']);
             }
             return $report->getExitCode();
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
             return 2;
         }
-    }
-
-    /** @return array{?string, list<string>} */
-    private static function parse(array $args): array
-    {
-        $ci = null;
-        $paths = [];
-        foreach ($args as $arg) {
-            if (strncmp($arg, '--ci=', 5) === 0) {
-                $ci = substr($arg, 5);
-                if (!in_array($ci, ['github', 'gitlab'], true)) {
-                    throw new \InvalidArgumentException("unknown --ci target \"$ci\"\n" . self::USAGE);
-                }
-            } elseif (strncmp($arg, '-', 1) === 0) {
-                throw new \InvalidArgumentException("unknown option $arg\n" . self::USAGE);
-            } else {
-                $paths[] = $arg;
-            }
-        }
-        return [$ci, $paths];
     }
 }

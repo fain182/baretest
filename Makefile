@@ -12,7 +12,8 @@ update-snapshots: vendor/autoload.php
 	SNAPSHOT_REPLACE=1 $(PHP) bin/baretest tests/snapshot_test.php
 
 lines:
-	@n=$$(cat bin/baretest $$(find src -name '*.php') | wc -l); echo "$$n lines of source"; test $$n -lt 1200
+	@n=$$(cat bin/baretest $$(find src -name '*.php') | grep -vE '^[[:space:]]*($$|//|#($$|[^!])|/\*|\*)' | wc -l); \
+		echo "$$n lines of code"; test $$n -lt 1000
 
 # Records the README example with vhs, from a directory laid out like a project that uses baretest.
 screenshot:

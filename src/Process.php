@@ -8,7 +8,7 @@ namespace Baretest;
 final class Process
 {
     /** @var ?list<string> */
-    private static ?array $php = null;
+    private static ?array $command = null;
 
     public static function run(string $file): FileResult
     {
@@ -58,12 +58,12 @@ final class Process
      */
     private static function buildCommand(): array
     {
-        if (self::$php !== null) {
-            return self::$php;
+        if (self::$command !== null) {
+            return self::$command;
         }
         $ini = php_ini_loaded_file();
-        $php = $ini === false ? [PHP_BINARY, '-n'] : [PHP_BINARY, '-c', $ini];
-        $probe = proc_open([...$php, '-r', 'echo serialize(ini_get_all(null, false));'], [1 => ['pipe', 'w']], $pipes);
+        $command = $ini === false ? [PHP_BINARY, '-n'] : [PHP_BINARY, '-c', $ini];
+        $probe = proc_open([...$command, '-r', 'echo serialize(ini_get_all(null, false));'], [1 => ['pipe', 'w']], $pipes);
         if ($probe === false) {
             throw new \RuntimeException('could not start ' . PHP_BINARY);
         }
@@ -71,10 +71,10 @@ final class Process
         proc_close($probe);
         foreach (ini_get_all(null, false) as $name => $value) {
             if ($value !== null && ($defaults[$name] ?? null) !== $value) {
-                array_push($php, '-d', "$name=$value");
+                array_push($command, '-d', "$name=$value");
             }
         }
-        return self::$php = $php;
+        return self::$command = $command;
     }
 
     private static function findAutoload(): string

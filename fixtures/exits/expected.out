@@ -9,7 +9,7 @@
 
   ✗ fatal error  (fixtures/exits/fatal_test.php(6) : eval()'d code:1)
 
-       Fatal error: Cannot redeclare strlen()
+       Fatal error: 'break' not in the 'loop' or 'switch' context
        while running: fatal
 
 ✓ fixtures/exits/ok_test.php  1 test  0.00s

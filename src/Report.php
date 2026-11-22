@@ -116,7 +116,7 @@ final class Report
         $skips = '';
         foreach ($result->tests as $test) {
             if ($test['skipped'] !== null) {
-                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $this->paint('2', $test['skipped']) . "\n";
+                $skips .= '  ' . $this->paint('33', '-') . ' ' . FileResult::formatTitle($test) . '  ' . $test['skipped'] . '  ' . $this->paint('2', '(skipped)') . "\n";
             }
         }
         $out = '';

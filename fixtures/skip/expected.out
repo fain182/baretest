@@ -1,8 +1,8 @@
 ✗ fixtures/skip/skip_test.php  2 of 8 failed, 4 skipped  0.00s
-  - skipped  needs mbstring
-  - after a check  not on this PHP
-  - parent › skipped child  child reason
-  - inside throws  from throws
+  - skipped  needs mbstring  (skipped)
+  - after a check  not on this PHP  (skipped)
+  - parent › skipped child  child reason  (skipped)
+  - inside throws  from throws  (skipped)
 
   ✗ failed then skipped › child  (fixtures/skip/skip_test.php:16)
        16 │ test('child', fn () => equal(1, 2));

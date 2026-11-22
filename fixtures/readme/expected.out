@@ -1,5 +1,5 @@
 ✓ fixtures/readme/encoding_test.php  3 tests, 1 skipped  0.00s
-  - lowercases accented letters  needs mbstring
+  - lowercases accented letters  needs mbstring  (skipped)
 ✗ fixtures/readme/split_test.php  4 of 5 failed  0.00s
 
   ✗ splits › trailing comma  (fixtures/readme/split_test.php:17)

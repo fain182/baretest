@@ -1,5 +1,5 @@
 ✗ fixtures/ci-gitlab/ci_test.php  5 of 7 failed, 1 skipped  0.00s
-  - skipped  a < b
+  - skipped  a < b  (skipped)
 
   ✗ fails, with: odd,chars  (fixtures/ci-gitlab/ci_test.php:6)
        6 │ test('fails, with: odd,chars', fn () => equal("50%\n", 'x'));

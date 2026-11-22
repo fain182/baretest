@@ -56,7 +56,7 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 What you can count on, and what every change to baretest is judged against.
 
 1. **It runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
-2. **One way to do each thing.** No configuration and one flag, so a test means the same in every project.
+2. **One way to do each thing.** No configuration and no flags, so a test means the same in every project.
 3. **This README is all the documentation.** Read it once and you know everything. A feature that cannot be explained here in a few lines does not belong in baretest.
 4. **You can read all of it.** Under 1,000 lines of source, so you can read what you depend on in an afternoon and trust it.
 5. **Clear feedback comes first.** Lines spent on a clearer message or more precise feedback are worth it, even against promise 4.
@@ -89,9 +89,11 @@ vendor/bin/baretest [PATH...]
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
 - Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
-- Output is coloured when it goes to a terminal, unless `NO_COLOR` is set.
-- On GitHub Actions (`GITHUB_ACTIONS=true`) it also prints an `::error` line for each failure, which GitHub shows as an annotation on the code.
-- On GitLab CI (`GITLAB_CI=true`) it also writes a JUnit XML report to `baretest-junit.xml` in the current directory: point `artifacts:reports:junit` at it, with `artifacts:when: always`.
+- The output fits where it runs, with nothing to set:
+  - in a terminal, it is coloured for people to read;
+  - in a pipe or a file, or with `NO_COLOR` set, it is the same text without colours;
+  - on GitHub Actions (`GITHUB_ACTIONS=true`), it also prints an `::error` line for each failure, which GitHub shows as an annotation on the code;
+  - on GitLab CI (`GITLAB_CI=true`), it also writes a JUnit XML report to `baretest-junit.xml` in the current directory: point `artifacts:reports:junit` at it, with `artifacts:when: always`.
 
 Exit code: `0` all passed, `1` some failed, `2` the runner could not run (a missing path, a file that runs no tests).
 

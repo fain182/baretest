@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Console\TerminalReport;
+use Baretest\Report\TerminalReport;
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;

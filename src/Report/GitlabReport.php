@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Ci;
+namespace Baretest\Report;
 
 use Baretest\Core\FileResult;
 use Baretest\Core\Report;

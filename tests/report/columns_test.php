@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Console\Columns;
+use Baretest\Report\Columns;
 
 use function Baretest\{test, equal};
 

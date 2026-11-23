@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Worker;
+namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Failure;
 use Baretest\Core\TestResult;

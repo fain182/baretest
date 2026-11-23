@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Worker\CallSite;
+use Baretest\Execution\Worker\CallSite;
 
 use function Baretest\{test, equal};
 
@@ -61,7 +61,7 @@ test('keeps the reported line when it cannot find the call', function () use ($f
 test('takes the first frame outside baretest, relative to the working directory', function () {
     $file = getcwd() . '/fixtures/passing/ok_test.php';
     $frames = [
-        ['file' => dirname(__DIR__, 2) . '/src/functions.php', 'line' => 3, 'function' => 'fail'],
+        ['file' => dirname(__DIR__, 3) . '/src/functions.php', 'line' => 3, 'function' => 'fail'],
         ['file' => $file, 'line' => 6, 'function' => 'equal'],
     ];
     $location = (new CallSite())->find($frames);
@@ -69,7 +69,7 @@ test('takes the first frame outside baretest, relative to the working directory'
 });
 
 test('finds nothing when every frame is in baretest', function () {
-    equal(null, (new CallSite())->find([['file' => dirname(__DIR__, 2) . '/src/functions.php', 'line' => 3, 'function' => 'x']]));
+    equal(null, (new CallSite())->find([['file' => dirname(__DIR__, 3) . '/src/functions.php', 'line' => 3, 'function' => 'x']]));
 });
 
 unlink($file);

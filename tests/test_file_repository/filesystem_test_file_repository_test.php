@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Filesystem\FilesystemTestFileRepository;
+use Baretest\TestFileRepository\FilesystemTestFileRepository;
 
 use function Baretest\{test, equal, throws};
 

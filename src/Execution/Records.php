@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Process;
+namespace Baretest\Execution;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;

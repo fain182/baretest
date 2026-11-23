@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Process;
+namespace Baretest\Execution;
 
 use Baretest\Core\Execution;
 use Baretest\Core\Failure;
@@ -30,7 +30,7 @@ class ChildProcessExecution implements Execution
         try {
             $start = microtime(true);
             $process = proc_open(
-                [...$this->buildCommand(), dirname(__DIR__) . '/Worker/worker.php', $file, $recordsPath, $this->autoload],
+                [...$this->buildCommand(), __DIR__ . '/Worker/worker.php', $file, $recordsPath, $this->autoload],
                 [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $outputPath, 'w'], 2 => ['redirect', 1]],
                 $pipes,
             );

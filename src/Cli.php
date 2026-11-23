@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Baretest;
 
-use Baretest\Ci\GithubReport;
-use Baretest\Ci\GitlabReport;
-use Baretest\Console\TerminalReport;
 use Baretest\Core\Suite;
-use Baretest\Filesystem\FilesystemTestFileRepository;
-use Baretest\Process\ChildProcessExecution;
+use Baretest\Execution\ChildProcessExecution;
+use Baretest\Report\GithubReport;
+use Baretest\Report\GitlabReport;
+use Baretest\Report\TerminalReport;
+use Baretest\TestFileRepository\FilesystemTestFileRepository;
 
 /** vendor/bin/baretest: picks the adapters for this environment and runs the suite. */
 class Cli

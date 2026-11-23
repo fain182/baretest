@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Console;
+namespace Baretest\Report;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\FileResult;

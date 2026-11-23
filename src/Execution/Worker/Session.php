@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Worker;
+namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
 use Baretest\Core\TestResult;
-use Baretest\Process\Records;
+use Baretest\Execution\Records;
 
 /**
  * The test file running in this process, and the test running in it. Any warning, exit() or

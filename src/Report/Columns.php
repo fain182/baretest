@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Console;
+namespace Baretest\Report;
 
 /** Lays out text in the columns of a terminal. */
 class Columns

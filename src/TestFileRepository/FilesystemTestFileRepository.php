@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Filesystem;
+namespace Baretest\TestFileRepository;
 
 use Baretest\Core\TestFileRepository;
 

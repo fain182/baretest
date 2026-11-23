@@ -2,7 +2,7 @@
 
 use Baretest\Core\FileResult;
 use Baretest\Core\TestResult;
-use Baretest\Process\ChildProcessExecution;
+use Baretest\Execution\ChildProcessExecution;
 
 use function Baretest\{test, equal};
 

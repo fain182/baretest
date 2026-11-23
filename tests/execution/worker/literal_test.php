@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Worker\Literal;
+use Baretest\Execution\Worker\Literal;
 
 use function Baretest\{test, equal};
 

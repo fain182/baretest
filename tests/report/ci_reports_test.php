@@ -1,7 +1,7 @@
 <?php
 
-use Baretest\Ci\GithubReport;
-use Baretest\Ci\GitlabReport;
+use Baretest\Report\GithubReport;
+use Baretest\Report\GitlabReport;
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\Location;

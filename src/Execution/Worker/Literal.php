@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Worker;
+namespace Baretest\Execution\Worker;
 
 /** PHP values as the failure of equal() shows them, byte by byte. */
 class Literal

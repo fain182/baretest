@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Worker;
+namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Location;
 
@@ -21,7 +21,7 @@ class CallSite
     /** @param list<array{file?: string, line?: int, function: string}> $frames from debug_backtrace(), innermost first */
     public function find(array $frames): ?Location
     {
-        $baretest = dirname(__DIR__) . DIRECTORY_SEPARATOR;
+        $baretest = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR;
         foreach ($frames as $frame) {
             if (isset($frame['file'], $frame['line']) && strpos($frame['file'], $baretest) !== 0) {
                 return $this->locate($frame['file'], $frame['line'], $frame['function']);

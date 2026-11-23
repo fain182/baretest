@@ -7,14 +7,14 @@ namespace Baretest\Core;
 /** What happened when one test file ran. */
 class FileResult
 {
-    private string $file;
+    private TestFile $file;
     /** @var list<TestResult> */
     private array $tests;
     private float $time;
     private string $output;
 
     /** @param list<TestResult> $tests in the order they started */
-    public function __construct(string $file, array $tests, float $time, string $output)
+    public function __construct(TestFile $file, array $tests, float $time, string $output)
     {
         $this->file = $file;
         $this->tests = $tests;
@@ -22,7 +22,7 @@ class FileResult
         $this->output = $output;
     }
 
-    public function getFile(): string
+    public function getFile(): TestFile
     {
         return $this->file;
     }

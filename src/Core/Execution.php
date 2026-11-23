@@ -6,5 +6,5 @@ namespace Baretest\Core;
 
 interface Execution
 {
-    public function run(string $file): FileResult;
+    public function run(TestFile $file): FileResult;
 }

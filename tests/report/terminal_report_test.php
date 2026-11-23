@@ -6,6 +6,7 @@ use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\Location;
 use Baretest\Core\SuiteResult;
+use Baretest\Core\TestFile;
 use Baretest\Core\TestResult;
 
 use function Baretest\{test, equal};
@@ -30,7 +31,7 @@ function headerOf(FileResult $file): string
 
 function fileOf(array $tests, string $output = ''): FileResult
 {
-    return new FileResult('a_test.php', $tests, 0.0, $output);
+    return new FileResult(new TestFile('a_test.php'), $tests, 0.0, $output);
 }
 
 /** What the terminal prints under the header of a file with this one failed test. */

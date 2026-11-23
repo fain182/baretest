@@ -7,6 +7,7 @@ namespace Baretest\Execution;
 use Baretest\Core\Execution;
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
+use Baretest\Core\TestFile;
 use Baretest\Core\TestResult;
 
 /** Runs each test file in a fresh PHP process, so that a crash fails only that file. */
@@ -23,14 +24,14 @@ class ChildProcessExecution implements Execution
         $this->autoload = $autoload;
     }
 
-    public function run(string $file): FileResult
+    public function run(TestFile $file): FileResult
     {
         $recordsPath = (string) tempnam(sys_get_temp_dir(), 'baretest');
         $outputPath = (string) tempnam(sys_get_temp_dir(), 'baretest');
         try {
             $start = microtime(true);
             $process = proc_open(
-                [...$this->buildCommand(), __DIR__ . '/Worker/worker.php', $file, $recordsPath, $this->autoload],
+                [...$this->buildCommand(), __DIR__ . '/Worker/worker.php', $file->getPath(), $recordsPath, $this->autoload],
                 [0 => ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'r'], 1 => ['file', $outputPath, 'w'], 2 => ['redirect', 1]],
                 $pipes,
             );

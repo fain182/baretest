@@ -6,13 +6,14 @@ use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\Location;
 use Baretest\Core\SuiteResult;
+use Baretest\Core\TestFile;
 use Baretest\Core\TestResult;
 
 use function Baretest\{test, equal, throws};
 
 function ciFile(): FileResult
 {
-    return new FileResult('tests/a_test.php', [
+    return new FileResult(new TestFile('tests/a_test.php'), [
         new TestResult('passes', 0.0, null),
         new TestResult('fails, with: odd,chars', 0.0, new Failure('expected "50%\n" (string), got "x" (string)', null, new Location('tests/a_test.php', 6, 6))),
         new TestResult('<xml> & "quotes"', 0.0, new Failure("a < b\nsecond line", 'Exception', new Location('tests/helper.php', 7, 7))),
@@ -74,7 +75,7 @@ XML, $xml);
 
 test('GitLab drops the control characters XML cannot hold', function () {
     $path = tempnam(sys_get_temp_dir(), 'junit');
-    $file = new FileResult('a_test.php', [new TestResult("bell\x07", 0.0, null)], 0.0, '');
+    $file = new FileResult(new TestFile('a_test.php'), [new TestResult("bell\x07", 0.0, null)], 0.0, '');
     (new GitlabReport($path))->finish(new SuiteResult([$file], 0.0));
     $xml = file_get_contents($path);
     unlink($path);

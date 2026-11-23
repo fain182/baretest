@@ -29,7 +29,7 @@ class GitlabReport implements Report
         foreach ($suite->listFiles() as $file) {
             $xml .= sprintf(
                 "  <testsuite name=\"%s\" tests=\"%d\" failures=\"%d\" skipped=\"%d\" time=\"%.3f\">\n",
-                self::escape($file->getFile()),
+                self::escape($file->getFile()->getPath()),
                 $file->countTests(),
                 $file->countFailed(),
                 $file->countSkipped(),
@@ -47,7 +47,7 @@ class GitlabReport implements Report
 
     private static function renderTestCase(FileResult $file, TestResult $test): string
     {
-        $open = sprintf('    <testcase classname="%s" name="%s" time="%.3f"', self::escape($file->getFile()), self::escape($test->getTitle()), $test->getTime());
+        $open = sprintf('    <testcase classname="%s" name="%s" time="%.3f"', self::escape($file->getFile()->getPath()), self::escape($test->getTitle()), $test->getTime());
         if ($test->isSkipped()) {
             return $open . ">\n      <skipped message=\"" . self::escape((string) $test->getSkipReason()) . "\"/>\n    </testcase>\n";
         }
@@ -55,7 +55,7 @@ class GitlabReport implements Report
         if ($cause === null) {
             return $open . "/>\n";
         }
-        $location = $cause->getLocation() === null ? $file->getFile() : $cause->getLocation()->format();
+        $location = $cause->getLocation() === null ? $file->getFile()->getPath() : $cause->getLocation()->format();
         $message = $cause->describe();
         return $open . ">\n      <failure message=\"" . self::escape(explode("\n", $message)[0]) . '">'
             . self::escape($location . "\n" . $message) . "</failure>\n    </testcase>\n";

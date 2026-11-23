@@ -43,7 +43,7 @@ class TerminalReport implements Report
         } else {
             $summary = $ok ? self::count($file->countTests(), 'test') : $file->countFailed() . ' of ' . $file->countTests() . ' failed';
         }
-        $out = $this->mark($ok) . ' ' . $file->getFile() . '  ' . self::addSkipped($summary, $file->countSkipped()) . '  ' . $this->formatTime($file->getTime()) . "\n";
+        $out = $this->mark($ok) . ' ' . $file->getFile()->getPath() . '  ' . self::addSkipped($summary, $file->countSkipped()) . '  ' . $this->formatTime($file->getTime()) . "\n";
         foreach ($file->listTests() as $test) {
             if ($test->isSkipped()) {
                 $out .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . $test->getTitle() . '  ' . $test->getSkipReason() . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";

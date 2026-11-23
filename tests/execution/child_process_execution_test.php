@@ -1,6 +1,7 @@
 <?php
 
 use Baretest\Core\FileResult;
+use Baretest\Core\TestFile;
 use Baretest\Core\TestResult;
 use Baretest\Execution\ChildProcessExecution;
 
@@ -12,7 +13,7 @@ function runFile(string $code): FileResult
     $file = tempnam(sys_get_temp_dir(), 'child') . '_test.php';
     file_put_contents($file, "<?php\nuse function Baretest\\{test, equal};\n" . $code);
     try {
-        return (new ChildProcessExecution(dirname(__DIR__, 2) . '/vendor/autoload.php'))->run($file);
+        return (new ChildProcessExecution(dirname(__DIR__, 2) . '/vendor/autoload.php'))->run(new TestFile($file));
     } finally {
         unlink($file);
     }

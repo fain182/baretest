@@ -25,7 +25,7 @@ class GithubReport implements Report
         foreach ($file->listFailures() as $test) {
             $failure = $test->getFailure();
             $location = $failure->getLocation();
-            $properties = 'file=' . self::escape($location === null ? $file->getFile() : $location->getFile(), true)
+            $properties = 'file=' . self::escape($location === null ? $file->getFile()->getPath() : $location->getFile(), true)
                 . ($location === null ? '' : ',line=' . $location->getLine())
                 . ',title=' . self::escape($test->getTitle(), true);
             fwrite($this->stream, '::error ' . $properties . '::' . self::escape($failure->describe(), false) . "\n");

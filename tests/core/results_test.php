@@ -3,6 +3,7 @@
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\SuiteResult;
+use Baretest\Core\TestFile;
 use Baretest\Core\TestResult;
 
 use function Baretest\{test, equal};
@@ -19,7 +20,7 @@ function failed(string $title = 'fails'): TestResult
 
 function aFile(TestResult ...$tests): FileResult
 {
-    return new FileResult('a_test.php', $tests, 0.0, '');
+    return new FileResult(new TestFile('a_test.php'), $tests, 0.0, '');
 }
 
 test('a test', function () {

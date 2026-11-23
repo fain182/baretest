@@ -9,7 +9,7 @@ use Baretest\Execution\ChildProcessExecution;
 use Baretest\Report\GithubReport;
 use Baretest\Report\GitlabReport;
 use Baretest\Report\TerminalReport;
-use Baretest\TestFileRepository\FilesystemTestFileRepository;
+use Baretest\TestFileRepository\StorageTestFileRepository;
 
 /** vendor/bin/baretest: picks the adapters for this environment and runs the suite. */
 class Cli
@@ -29,7 +29,7 @@ class Cli
             if (getenv('GITLAB_CI') === 'true') {
                 $reports[] = new GitlabReport('baretest-junit.xml');
             }
-            $suite = new Suite(new FilesystemTestFileRepository(array_slice($argv, 1)), new ChildProcessExecution($autoload), $reports);
+            $suite = new Suite(new StorageTestFileRepository(array_slice($argv, 1)), new ChildProcessExecution($autoload), $reports);
             return $suite->run()->computeExitCode();
         } catch (\InvalidArgumentException | \RuntimeException $e) {
             fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");

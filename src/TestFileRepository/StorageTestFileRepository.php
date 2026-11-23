@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Baretest\TestFileRepository;
 
+use Baretest\Core\TestFile;
 use Baretest\Core\TestFileRepository;
 
 /** The given files, and the *_test.php files under the given directories, or under tests/. */
-class FilesystemTestFileRepository implements TestFileRepository
+class StorageTestFileRepository implements TestFileRepository
 {
     /** @var list<string> */
     private array $paths;
@@ -27,7 +28,7 @@ class FilesystemTestFileRepository implements TestFileRepository
         if ($files === []) {
             throw new \InvalidArgumentException('no *_test.php files in ' . implode(', ', $this->paths));
         }
-        return array_values(array_unique($files));
+        return array_map(static fn (string $path): TestFile => new TestFile($path), array_values(array_unique($files)));
     }
 
     /** @return list<string> */

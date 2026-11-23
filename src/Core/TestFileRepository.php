@@ -6,6 +6,6 @@ namespace Baretest\Core;
 
 interface TestFileRepository
 {
-    /** @return list<string> paths relative to the working directory, each file once */
+    /** @return list<TestFile> each file once */
     public function listFiles(): array;
 }

@@ -4,7 +4,7 @@ Output output.gif
 Set Shell bash
 Set FontSize 16
 Set Width 1100
-Set Height 760
+Set Height 620
 Set Padding 24
 Set WindowBar Colorful
 Set Theme "Builtin Dark"
@@ -17,4 +17,4 @@ Show
 
 Type "vendor/bin/baretest"
 Enter
-Sleep 5s
+Sleep 2s

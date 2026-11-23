@@ -89,7 +89,7 @@ vendor/bin/baretest [PATH...]
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
 - Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
-- A test that stands out as slow is listed after the summary, with its share of the run: one that took at least half a second and ten times the median test of the run. The five slowest are shown, slowest first.
+- When every test passed, a test that stands out as slow is listed after the summary, with its share of the run: one that took at least half a second and ten times the median test of the run. The five slowest are shown, slowest first.
 - The output fits where it runs, with nothing to set:
   - in a terminal, it is coloured for people to read;
   - in a pipe or a file, or with `NO_COLOR` set, it is the same text without colours;

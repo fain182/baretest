@@ -126,6 +126,11 @@ test('suggests where to start when tests stand out as slow, with their share of 
     );
 });
 
+test('suggests no slow tests when the run failed, so the failures come first', function () {
+    $tests = [new TestResult('slow', 1.2, null), new TestResult('quick', 0.02, null), new TestResult('fails', 0.02, new Failure('no'))];
+    equal(false, strpos(printedIn(2.0, fileOf($tests)), 'feeling too slow') !== false);
+});
+
 test('paints in colours when asked', function () {
     $stream = fopen('php://memory', 'w+');
     (new TerminalReport($stream, true))->addFile(fileOf([ok()]));

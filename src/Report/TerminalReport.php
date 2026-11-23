@@ -73,7 +73,7 @@ class TerminalReport implements Report
         $time = sprintf('%.2fs', $suite->getTime());
         $rule = str_repeat('─', Columns::measure(($ok ? '✓' : '✗') . ' ' . $text . '  ' . $time));
         fwrite($this->stream, $this->paint(self::DIM, $rule) . "\n" . $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->paint(self::DIM, $time) . "\n");
-        $slowTests = $suite->listSlowTests();
+        $slowTests = $ok ? $suite->listSlowTests() : [];
         if ($slowTests !== []) {
             fwrite($this->stream, "\n" . $this->paint(self::YELLOW, '◷') . ' Tests feeling too slow? Start with:' . "\n");
         }

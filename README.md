@@ -89,7 +89,7 @@ vendor/bin/baretest [PATH...]
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
 - Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
-- When every test passed, a test that stands out as slow is listed after the summary, with its share of the run: one that took at least half a second and ten times the median test of the run. The five slowest are shown, slowest first.
+- When every test passed, the tests that stand out as slow are listed after the summary: see [Finding slow tests](#finding-slow-tests).
 - The output fits where it runs, with nothing to set:
   - in a terminal, it is coloured for people to read;
   - in a pipe or a file, or with `NO_COLOR` set, it is the same text without colours;
@@ -143,6 +143,14 @@ test('rejects odd-length input', function () {
 ```
 
 `error_get_last()` is cleared before each test and subtest. Within one test it keeps the last warning until another one replaces it, so call `error_clear_last()` between two checks.
+
+### Finding slow tests
+
+When every test passed and a few tests take most of the time, they are listed after the summary, with their share of the run, so you know where to start:
+
+![baretest output in a terminal: every test passed, and two slow tests listed after the summary](docs/slow.png)
+
+A test is listed when it took at least half a second and ten times as long as the median test of the run. The five slowest are shown, slowest first. A test with subtests is not listed, its subtests are. There is nothing to set: a suite that is slow as a whole lists nothing, because no test stands out.
 
 ### Everything else is PHP
 

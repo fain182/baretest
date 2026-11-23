@@ -16,8 +16,8 @@ class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
 
-    /** @var list<Test> the running test and the tests around it, outermost first */
-    private static array $active = [];
+    /** The innermost running test; the tests around it are its parents. */
+    private static ?Test $current = null;
     private static ?Records $records = null;
     private static bool $finished = false;
     private static bool $fileFailed = false;
@@ -52,8 +52,8 @@ class Session
             throw new \LogicException('Test files are run with vendor/bin/baretest, not directly.');
         }
         error_clear_last();
-        $test = new Test($name, self::$started++);
-        self::$active[] = $test;
+        $test = new Test($name, self::$started++, self::$current);
+        self::$current = $test;
         try {
             $fn();
         } catch (Failure $failure) {
@@ -63,12 +63,11 @@ class Session
         } catch (\Throwable $e) {
             self::register(self::describe($e));
         }
-        $path = array_column(self::$active, 'name');
-        array_pop(self::$active);
-        if (self::$active !== [] && $test->hasFailed()) {
-            self::$active[array_key_last(self::$active)]->markSubtestFailed();
+        self::$current = $test->getParent();
+        if (self::$current !== null && $test->hasFailed()) {
+            self::$current->markSubtestFailed();
         }
-        self::$records->write($test->buildRecord($path));
+        self::$records->write($test->buildRecord());
     }
 
     /** @return never */
@@ -94,7 +93,7 @@ class Session
     /** @return never */
     public static function skip(string $reason)
     {
-        if (self::$active === []) {
+        if (self::$current === null) {
             self::fail('skip() was called outside a test; to skip a whole file, put its tests inside one test');
         }
         throw new Skip($reason);
@@ -131,23 +130,23 @@ class Session
         $failure = $fatal
             ? ['label' => 'Fatal error', 'message' => $last['message'], 'file' => $last['file'], 'line' => $last['line']]
             : ['message' => 'the file called exit()'];
-        if (self::$active !== []) {
-            $failure['message'] .= "\nwhile running: " . TestResult::formatTitle(array_column(self::$active, 'name'));
+        if (self::$current !== null) {
+            $failure['message'] .= "\nwhile running: " . TestResult::formatTitle(self::$current->listPath());
         }
-        self::$active = [];
+        self::$current = null;
         self::register($failure, $fatal ? 'fatal error' : 'exit() called');
     }
 
     private static function register(array $failure, string $title = 'outside a test'): void
     {
-        if (self::$active === []) {
+        if (self::$current === null) {
             if (!self::$fileFailed) {
                 self::$fileFailed = true;
                 self::$records->write(['t' => 'file', 'title' => $title, 'failure' => $failure]);
             }
             return;
         }
-        self::$active[array_key_last(self::$active)]->fail($failure);
+        self::$current->fail($failure);
     }
 
     private static function describe(\Throwable $e): array

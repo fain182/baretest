@@ -7,18 +7,32 @@ namespace Baretest\Worker;
 /** One running test, in the process that runs its file. */
 class Test
 {
-    public string $name;
+    private string $name;
     private int $seq;
+    private ?Test $parent;
     private float $start;
     private ?array $failure = null;
     private bool $subtestFailed = false;
     private ?string $skipped = null;
 
-    public function __construct(string $name, int $seq)
+    public function __construct(string $name, int $seq, ?Test $parent)
     {
         $this->name = $name;
         $this->seq = $seq;
+        $this->parent = $parent;
         $this->start = microtime(true);
+    }
+
+    /** The test this one runs inside, if any. */
+    public function getParent(): ?Test
+    {
+        return $this->parent;
+    }
+
+    /** @return list<string> the names of this test and of the tests around it, outermost first */
+    public function listPath(): array
+    {
+        return $this->parent === null ? [$this->name] : [...$this->parent->listPath(), $this->name];
     }
 
     /** Keeps the first failure, the one that stopped the test even if the test caught it. */
@@ -42,13 +56,12 @@ class Test
         return $this->failure !== null || $this->subtestFailed;
     }
 
-    /** @param list<string> $path the names of this test and of the tests around it */
-    public function buildRecord(array $path): array
+    public function buildRecord(): array
     {
         return [
             't' => 'test',
             'seq' => $this->seq,
-            'path' => $path,
+            'path' => $this->listPath(),
             'time' => microtime(true) - $this->start,
             'failure' => $this->failure,
             'subtestFailed' => $this->subtestFailed,

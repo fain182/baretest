@@ -12,16 +12,17 @@ class Literal
         . '|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2}|.~s';
     private const ESCAPES = ["\n" => '\n', "\r" => '\r', "\t" => '\t', '\\' => '\\\\', '"' => '\"', '$' => '\$'];
 
-    public static function render($value): string
+    /** @param mixed $other the value $value is compared with: if either array is a map, both show their keys */
+    public static function render($value, $other = null): string
     {
         if (is_string($value)) {
             return '"' . implode('', self::tokenize($value)) . '"';
         }
         if (is_array($value)) {
-            $list = array_values($value) === $value;
+            $list = self::isList($value) && (!is_array($other) || self::isList($other));
             $entries = [];
             foreach ($value as $key => $item) {
-                $entries[] = ($list ? '' : self::renderKey($key)) . self::render($item);
+                $entries[] = ($list ? '' : self::renderKey($key)) . self::render($item, is_array($other) ? $other[$key] ?? null : null);
             }
             return '[' . implode(', ', $entries) . ']';
         }
@@ -69,7 +70,7 @@ class Literal
 
     private static function findArrayOffset(array $expected, array $got): int
     {
-        $list = array_values($got) === $got;
+        $list = self::isList($expected) && self::isList($got);
         $keys = array_keys($expected);
         $offset = 1;
         foreach (array_keys($got) as $i => $key) {
@@ -80,9 +81,14 @@ class Literal
             if ($expected[$key] !== $got[$key]) {
                 return $offset + (self::findOffset($expected[$key], $got[$key]) ?? 0);
             }
-            $offset += strlen(self::render($got[$key])) + 2;
+            $offset += strlen(self::render($got[$key], $expected[$key])) + 2;
         }
         return $got === [] ? $offset : $offset - 2;
+    }
+
+    private static function isList(array $value): bool
+    {
+        return array_values($value) === $value;
     }
 
     /** @param int|string $key */

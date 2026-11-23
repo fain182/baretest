@@ -28,6 +28,9 @@ test('renders', function () {
         $object = new ArrayObject();
         equal('ArrayObject#' . spl_object_id($object), Literal::render($object));
     });
+    test('the keys of a list compared with a map', function () {
+        equal(['[0 => "a", 1 => [1]]', '[0 => "a", 2 => ["x" => 1]]'], [Literal::render(['a', [1]], [0 => 'a', 2 => ['x' => 1]]), Literal::render([0 => 'a', 2 => ['x' => 1]], ['a', [1]])]);
+    });
     test('an enum case', function () {
         if (PHP_VERSION_ID < 80100) {
             Baretest\skip('enums need PHP 8.1');
@@ -55,6 +58,7 @@ test('finds the byte of the rendered got where the values first differ', functio
         'the end of a shorter got' => [[1, 2, 3], [1, 2], 5],
         'an empty got' => [[1], [], 1],
         'an element only got has' => [['a', 'b'], ['a', 'b', ''], 11],
+        'a key of a map compared with a list' => [['a', 'b'], [0 => 'a', 2 => 'b'], 11],
     ];
     foreach ($cases as $name => [$expected, $got, $offset]) {
         test($name, fn () => equal($offset, Literal::findOffset($expected, $got)));

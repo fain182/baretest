@@ -75,7 +75,7 @@ class Session
     /** @return never */
     public static function failValues($expected, $got)
     {
-        $comparison = new Comparison(Literal::render($expected), Literal::render($got), Literal::describeType($expected), Literal::describeType($got), Literal::findOffset($expected, $got));
+        $comparison = new Comparison(Literal::render($expected, $got), Literal::render($got, $expected), Literal::describeType($expected), Literal::describeType($got), Literal::findOffset($expected, $got));
         self::raise($comparison->describe(), $comparison);
     }
 

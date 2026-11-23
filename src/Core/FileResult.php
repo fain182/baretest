@@ -7,6 +7,8 @@ namespace Baretest\Core;
 /** What happened when one test file ran. */
 class FileResult
 {
+    private const CRASH_LINES = 10;
+
     private TestFile $file;
     /** @var list<TestResult> */
     private array $tests;
@@ -41,6 +43,17 @@ class FileResult
     public function getOutput(): string
     {
         return $this->output;
+    }
+
+    /** This file once its process ended without saying why: the crash, with the last lines it printed, is listed after the tests. */
+    public function crash(int $exitCode): self
+    {
+        $message = "the process ended unexpectedly (exit code $exitCode)";
+        $printed = trim($this->output);
+        if ($printed !== '') {
+            $message .= "\n" . implode("\n", array_slice(explode("\n", $printed), -self::CRASH_LINES));
+        }
+        return new self($this->file, [...$this->tests, new TestResult('crashed', 0.0, new Failure($message))], $this->time, '');
     }
 
     public function countTests(): int

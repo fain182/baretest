@@ -62,3 +62,18 @@ test('a suite', function () {
         equal([3, 1, 1, 1, 1], [$suite->countTests(), $suite->countFailed(), $suite->countFailedFiles(), $suite->countEmptyFiles(), $suite->countSkipped()]);
     });
 });
+
+test('a file that crashed', function () {
+    $printed = new FileResult(new TestFile('a_test.php'), [passed()], 0.0, implode("\n", range(1, 12)) . "\n");
+    test('lists the crash after its tests', function () {
+        $crashed = aFile(passed())->crash(3);
+        equal(['passes', 'crashed'], array_map(fn (TestResult $test) => $test->getTitle(), $crashed->listTests()));
+        equal('the process ended unexpectedly (exit code 3)', $crashed->listFailures()[0]->getFailure()->describe());
+    });
+    test('shows in the crash the last lines it printed, and no longer prints them', function () use ($printed) {
+        $crashed = $printed->crash(139);
+        equal("the process ended unexpectedly (exit code 139)\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12", $crashed->listFailures()[0]->getFailure()->describe());
+        equal('', $crashed->getOutput());
+    });
+    test('has failed', fn () => equal(true, aFile(passed())->crash(3)->hasFailures()));
+});

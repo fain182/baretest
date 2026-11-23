@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace Baretest\Execution;
 
 use Baretest\Core\Execution;
-use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\TestFile;
-use Baretest\Core\TestResult;
 
 /** Runs each test file in a fresh PHP process, so that a crash fails only that file. */
 class ChildProcessExecution implements Execution
 {
-    private const CRASH_LINES = 10;
-
     private string $autoload;
     /** @var ?list<string> */
     private ?array $command = null;
@@ -48,18 +44,8 @@ class ChildProcessExecution implements Execution
             unlink($recordsPath);
             unlink($outputPath);
         }
-        if ($crashed) {
-            $tests[] = new TestResult('crashed', 0.0, new Failure(self::describeCrash($code, $output)));
-            $output = '';
-        }
-        return new FileResult($file, $tests, $time, $output);
-    }
-
-    private static function describeCrash(int $code, string $output): string
-    {
-        $message = "the process ended unexpectedly (exit code $code)";
-        $lines = array_slice(explode("\n", trim($output)), -self::CRASH_LINES);
-        return trim($output) === '' ? $message : $message . "\n" . implode("\n", $lines);
+        $result = new FileResult($file, $tests, $time, $output);
+        return $crashed ? $result->crash($code) : $result;
     }
 
     /**

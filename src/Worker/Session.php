@@ -15,6 +15,11 @@ use Baretest\Result\Records;
 class Session
 {
     private const FATAL = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_PARSE | E_USER_ERROR | E_RECOVERABLE_ERROR;
+    private const LABELS = [
+        E_WARNING => 'Warning', E_USER_WARNING => 'Warning', E_CORE_WARNING => 'Warning', E_COMPILE_WARNING => 'Warning',
+        E_NOTICE => 'Notice', E_USER_NOTICE => 'Notice',
+        E_DEPRECATED => 'Deprecated', E_USER_DEPRECATED => 'Deprecated',
+    ];
 
     /** The innermost running test; the tests around it are its parents. */
     private static ?Test $current = null;
@@ -111,12 +116,7 @@ class Session
         if (!(error_reporting() & $level)) {
             return false;
         }
-        $label = [
-            E_WARNING => 'Warning', E_USER_WARNING => 'Warning', E_CORE_WARNING => 'Warning', E_COMPILE_WARNING => 'Warning',
-            E_NOTICE => 'Notice', E_USER_NOTICE => 'Notice',
-            E_DEPRECATED => 'Deprecated', E_USER_DEPRECATED => 'Deprecated',
-        ][$level] ?? 'Error';
-        self::failHere(['label' => $label, 'message' => $message, 'file' => $file, 'line' => $line]);
+        self::failHere(['label' => self::LABELS[$level] ?? 'Error', 'message' => $message, 'file' => $file, 'line' => $line]);
         throw new Failure($message);
     }
 

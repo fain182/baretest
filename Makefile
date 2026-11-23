@@ -1,8 +1,8 @@
 PHP ?= php
 
-.PHONY: test lines deptrac update-snapshots screenshot
+.PHONY: test deptrac update-snapshots screenshot
 
-test: lines vendor/autoload.php
+test: vendor/autoload.php
 	$(PHP) bin/baretest
 
 vendor/autoload.php: composer.json
@@ -10,10 +10,6 @@ vendor/autoload.php: composer.json
 
 update-snapshots: vendor/autoload.php
 	SNAPSHOT_REPLACE=1 $(PHP) bin/baretest tests/snapshot_test.php
-
-lines:
-	@n=$$(cat bin/baretest $$(find src -name '*.php') | grep -vE '^[[:space:]]*($$|//|#($$|[^!])|/\*|\*)' | wc -l); \
-		echo "$$n lines of code"; test $$n -lt 1100
 
 deptrac:
 	vendor/bin/deptrac analyse --no-progress

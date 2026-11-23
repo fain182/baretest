@@ -7,7 +7,7 @@ A minimal test runner for PHP libraries. `README.md` is the contract: what it sh
 - PHP 7.4 to 8.6, no Composer dependencies. Development tools such as deptrac go in `require-dev` only.
 - No extensions. A PHP built with `--disable-all` has only `Core, date, pcre, hash, Reflection, standard, SPL`, and `json` only from PHP 8.0; use nothing else. Not even `mbstring`: values are shown and compared byte by byte, and the `^` marks a byte.
 - `tokenizer` and `pcntl` are absent. `proc_open` exists but can be listed in `disable_functions`: then exit with code 2 and a message that says so.
-- Source under 1,100 lines of code, counted as cloc counts them: no blank lines, no comments (README, promise 4). Check it with a `make` target that CI runs, without depending on cloc.
+- Source about 1,000 lines of code, counted as cloc counts them: no blank lines, no comments (README, promise 4).
 
 ## Decisions the README does not explain
 

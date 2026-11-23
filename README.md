@@ -47,9 +47,9 @@ PHPUnit and Pest do far more than baretest, and for an application they are the 
 | Extensions required | none, runs on PHP built with `--disable-all` | dom, filter, json, libxml, mbstring, xmlwriter | those of PHPUnit, which it is built on |
 | Test files isolated from each other | always, one process per file | opt-in, one process per test | not supported |
 | Packages installed | 1 | 28 | 63 |
-| Lines of PHP code installed | under 1,100 | about 108,000 | about 216,000 |
+| Lines of PHP code installed | about 1,000 | about 108,000 | about 216,000 |
 
-<sub>Measured in November 2026 with `composer require` of the latest releases. Lines of code are counted as cloc counts them, without blank lines and comments. baretest's size is checked in CI.</sub>
+<sub>Measured in November 2026 with `composer require` of the latest releases. Lines of code are counted as cloc counts them, without blank lines and comments.</sub>
 
 ## Promises
 
@@ -58,7 +58,7 @@ What you can count on, and what every change to baretest is judged against.
 1. **It runs wherever PHP runs.** No dependencies, no extensions, every supported PHP version. A feature that needs anything more is out.
 2. **One way to do each thing.** No configuration and no flags, so a test means the same in every project.
 3. **This README is all the documentation.** Read it once and you know everything. A feature that cannot be explained here in a few lines does not belong in baretest.
-4. **You can read all of it.** Under 1,100 lines of code, so you can read what you depend on in an afternoon and trust it.
+4. **You can read all of it.** About 1,000 lines of code, so you can read what you depend on in an afternoon and trust it.
 5. **Clear feedback comes first.** Lines spent on a clearer message or more precise feedback are worth it, even against promise 4.
 6. **It will not change under you.** baretest is close to its final shape. A change must solve a real problem that cannot be solved in the test itself, and keep the promises above.
 

@@ -10,7 +10,7 @@ use Baretest\Core\FileResult;
 use Baretest\Core\TestResult;
 
 /** Runs each test file in a fresh PHP process, so that a crash fails only that file. */
-class ChildProcess implements Execution
+class ChildProcessExecution implements Execution
 {
     private const CRASH_LINES = 10;
 

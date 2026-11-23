@@ -10,7 +10,7 @@ use Baretest\Core\SuiteResult;
 use Baretest\Core\TestResult;
 
 /** The JUnit XML report that GitLab reads. */
-class Gitlab implements Report
+class GitlabReport implements Report
 {
     private string $path;
 

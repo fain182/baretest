@@ -1,6 +1,6 @@
 <?php
 
-use Baretest\Console\Terminal;
+use Baretest\Console\TerminalReport;
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
@@ -14,7 +14,7 @@ use function Baretest\{test, equal};
 function printed(FileResult ...$files): string
 {
     $stream = fopen('php://memory', 'w+');
-    $terminal = new Terminal($stream, false);
+    $terminal = new TerminalReport($stream, false);
     foreach ($files as $file) {
         $terminal->addFile($file);
     }
@@ -109,7 +109,7 @@ test('sums up the run', function () {
 
 test('paints in colours when asked', function () {
     $stream = fopen('php://memory', 'w+');
-    (new Terminal($stream, true))->addFile(fileOf([ok()]));
+    (new TerminalReport($stream, true))->addFile(fileOf([ok()]));
     rewind($stream);
     equal("\e[32m✓\e[0m a_test.php  1 test  \e[2m0.00s\e[0m\n", stream_get_contents($stream));
 });

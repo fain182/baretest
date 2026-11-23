@@ -9,7 +9,7 @@ use Baretest\Core\Report;
 use Baretest\Core\SuiteResult;
 
 /** The workflow commands that GitHub Actions shows as annotations on the failing lines. */
-class Github implements Report
+class GithubReport implements Report
 {
     /** @var resource */
     private $stream;

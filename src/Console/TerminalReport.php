@@ -12,7 +12,7 @@ use Baretest\Core\SuiteResult;
 use Baretest\Core\TestResult;
 
 /** The output described in the README, for people to read. */
-class Terminal implements Report
+class TerminalReport implements Report
 {
     private const INDENT = '       ';
     private const LABEL = self::INDENT . 'expected  ';

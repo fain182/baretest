@@ -7,7 +7,7 @@ namespace Baretest\Filesystem;
 use Baretest\Core\TestFileRepository;
 
 /** The given files, and the *_test.php files under the given directories, or under tests/. */
-class TestFiles implements TestFileRepository
+class FilesystemTestFileRepository implements TestFileRepository
 {
     /** @var list<string> */
     private array $paths;

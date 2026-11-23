@@ -1,7 +1,7 @@
 <?php
 
-use Baretest\Ci\Github;
-use Baretest\Ci\Gitlab;
+use Baretest\Ci\GithubReport;
+use Baretest\Ci\GitlabReport;
 use Baretest\Core\Failure;
 use Baretest\Core\FileResult;
 use Baretest\Core\Location;
@@ -24,7 +24,7 @@ function ciFile(): FileResult
 
 test('GitHub gets an annotation for each test that failed itself', function () {
     $stream = fopen('php://memory', 'w+');
-    $github = new Github($stream);
+    $github = new GithubReport($stream);
     $github->addFile(ciFile());
     $github->finish(new SuiteResult([ciFile()], 0.0));
     rewind($stream);
@@ -38,7 +38,7 @@ test('GitHub gets an annotation for each test that failed itself', function () {
 
 test('GitLab gets a JUnit report of the whole run', function () {
     $path = tempnam(sys_get_temp_dir(), 'junit');
-    (new Gitlab($path))->finish(new SuiteResult([ciFile()], 0.0));
+    (new GitlabReport($path))->finish(new SuiteResult([ciFile()], 0.0));
     $xml = file_get_contents($path);
     unlink($path);
     equal(<<<'XML'
@@ -75,13 +75,13 @@ XML, $xml);
 test('GitLab drops the control characters XML cannot hold', function () {
     $path = tempnam(sys_get_temp_dir(), 'junit');
     $file = new FileResult('a_test.php', [new TestResult("bell\x07", 0.0, null)], 0.0, '');
-    (new Gitlab($path))->finish(new SuiteResult([$file], 0.0));
+    (new GitlabReport($path))->finish(new SuiteResult([$file], 0.0));
     $xml = file_get_contents($path);
     unlink($path);
     equal(true, strpos($xml, 'name="bell"') !== false);
 });
 
 test('GitLab says when it cannot write the report', function () {
-    $e = throws(RuntimeException::class, fn () => (new Gitlab('/no/such/dir/junit.xml'))->finish(new SuiteResult([], 0.0)));
+    $e = throws(RuntimeException::class, fn () => (new GitlabReport('/no/such/dir/junit.xml'))->finish(new SuiteResult([], 0.0)));
     equal(0, strpos($e->getMessage(), 'cannot write /no/such/dir/junit.xml: '));
 });

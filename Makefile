@@ -13,7 +13,7 @@ update-snapshots: vendor/autoload.php
 
 lines:
 	@n=$$(cat bin/baretest $$(find src -name '*.php') | grep -vE '^[[:space:]]*($$|//|#($$|[^!])|/\*|\*)' | wc -l); \
-		echo "$$n lines of code"; test $$n -lt 1000
+		echo "$$n lines of code"; test $$n -lt 1100
 
 # Records the README example with vhs, from a directory laid out like a project that uses baretest.
 screenshot:

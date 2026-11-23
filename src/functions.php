@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Baretest;
 
-use Baretest\Worker\Failure;
 use Baretest\Worker\Session;
-use Baretest\Worker\Skip;
+use Baretest\Worker\SkipSignal;
+use Baretest\Worker\StopSignal;
 
 // Composer's autoload.php loads this file in the worker, and a test file can load it again.
 if (!function_exists('Baretest\test')) {
@@ -26,7 +26,7 @@ if (!function_exists('Baretest\test')) {
     {
         try {
             $fn();
-        } catch (Failure | Skip $stop) {
+        } catch (StopSignal | SkipSignal $stop) {
             throw $stop;
         } catch (\Throwable $thrown) {
             if ($thrown instanceof $class) {

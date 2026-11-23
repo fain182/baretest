@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 use Baretest\Output\Literal;
-use Baretest\Result;
+use Baretest\Result\Comparison;
+use Baretest\Result\Failure;
 use Baretest\Result\TestResult;
 use Baretest\Result\Records;
 
@@ -43,7 +44,7 @@ class Session
             (static function (string $file): void {
                 require $file;
             })($file);
-        } catch (Failure $failure) {
+        } catch (StopSignal $stop) {
             // already recorded where it was raised
         } catch (\Throwable $e) {
             self::failFile('uncaught exception', self::describe($e));
@@ -62,9 +63,9 @@ class Session
         self::$current = $test;
         try {
             $fn();
-        } catch (Failure $failure) {
+        } catch (StopSignal $stop) {
             // already recorded where it was raised
-        } catch (Skip $skip) {
+        } catch (SkipSignal $skip) {
             $test->skip($skip->getMessage());
         } catch (\Throwable $e) {
             $test->fail(self::describe($e));
@@ -79,7 +80,7 @@ class Session
     /** @return never */
     public static function failValues($expected, $got)
     {
-        $comparison = new Result\Comparison(
+        $comparison = new Comparison(
             Literal::render($expected),
             Literal::render($got),
             Literal::describeType($expected),
@@ -101,15 +102,15 @@ class Session
         if (self::$current === null) {
             self::fail('skip() was called outside a test; to skip a whole file, put its tests inside one test');
         }
-        throw new Skip($reason);
+        throw new SkipSignal($reason);
     }
 
     /** @return never */
-    private static function raise(string $message, ?Result\Comparison $comparison = null)
+    private static function raise(string $message, ?Comparison $comparison = null)
     {
         $site = CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
-        self::failHere(new Result\Failure($message, null, $site['file'] ?? null, $site['line'] ?? null, $site['lastLine'] ?? null, $comparison));
-        throw new Failure($message);
+        self::failHere(new Failure($message, null, $site['file'] ?? null, $site['line'] ?? null, $site['lastLine'] ?? null, $comparison));
+        throw new StopSignal($message);
     }
 
     private static function onError(int $level, string $message, string $file, int $line): bool
@@ -117,8 +118,8 @@ class Session
         if (!(error_reporting() & $level)) {
             return false;
         }
-        self::failHere(new Result\Failure($message, self::LABELS[$level] ?? 'Error', $file, $line));
-        throw new Failure($message);
+        self::failHere(new Failure($message, self::LABELS[$level] ?? 'Error', $file, $line));
+        throw new StopSignal($message);
     }
 
     private static function onShutdown(): void
@@ -133,13 +134,13 @@ class Session
             $message .= "\nwhile running: " . TestResult::formatTitle(self::$current->listPath());
         }
         $failure = $fatal
-            ? new Result\Failure($message, 'Fatal error', $last['file'], $last['line'])
-            : new Result\Failure($message);
+            ? new Failure($message, 'Fatal error', $last['file'], $last['line'])
+            : new Failure($message);
         self::failFile($fatal ? 'fatal error' : 'exit() called', $failure);
     }
 
     /** Fails the running test, or the file when no test is running. */
-    private static function failHere(Result\Failure $failure): void
+    private static function failHere(Failure $failure): void
     {
         if (self::$current === null) {
             self::failFile('outside a test', $failure);
@@ -149,7 +150,7 @@ class Session
     }
 
     /** Fails the file outside any test; only the first such failure is kept, as it stopped the file. */
-    private static function failFile(string $title, Result\Failure $failure): void
+    private static function failFile(string $title, Failure $failure): void
     {
         if (!self::$fileFailed) {
             self::$fileFailed = true;
@@ -157,8 +158,8 @@ class Session
         }
     }
 
-    private static function describe(\Throwable $e): Result\Failure
+    private static function describe(\Throwable $e): Failure
     {
-        return new Result\Failure($e->getMessage(), get_class($e), $e->getFile(), $e->getLine());
+        return new Failure($e->getMessage(), get_class($e), $e->getFile(), $e->getLine());
     }
 }

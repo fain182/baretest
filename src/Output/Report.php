@@ -34,8 +34,8 @@ class Report
     public function printFile(FileResult $result): void
     {
         $ok = !$result->hasFailures() && !$result->hasNoTests();
-        $time = $this->paint(self::DIM, sprintf('%.2fs', $result->time));
-        $header = $this->mark($ok) . ' ' . $result->file . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n";
+        $time = $this->paint(self::DIM, sprintf('%.2fs', $result->getTime()));
+        $header = $this->mark($ok) . ' ' . $result->getFile() . '  ' . $this->summarize($result, $ok) . '  ' . $time . "\n";
         fwrite(STDOUT, $header . $this->renderEntries($result) . $this->renderOutput($result));
     }
 
@@ -79,25 +79,25 @@ class Report
     private function renderEntries(FileResult $result): string
     {
         $skips = '';
-        foreach ($result->tests as $test) {
-            if ($test->skipped !== null) {
-                $skips .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . $test->title . '  ' . $test->skipped . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
+        foreach ($result->listTests() as $test) {
+            if ($test->getSkipReason() !== null) {
+                $skips .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . $test->getTitle() . '  ' . $test->getSkipReason() . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
             }
         }
         $out = '';
         foreach ($result->listFailures() as $test) {
-            $out .= $this->renderBlock($test->title, $test->failure) . "\n";
+            $out .= $this->renderBlock($test->getTitle(), $test->getFailure()) . "\n";
         }
         return $skips . ($out === '' ? '' : "\n" . $out);
     }
 
     private function renderOutput(FileResult $result): string
     {
-        if ($result->output === '') {
+        if ($result->getOutput() === '') {
             return '';
         }
         $out = '  ' . $this->paint(self::DIM, 'output') . "\n";
-        foreach (explode("\n", rtrim($result->output, "\n")) as $line) {
+        foreach (explode("\n", rtrim($result->getOutput(), "\n")) as $line) {
             $out .= self::DETAIL_INDENT . $this->paint(self::DIM, '│') . ($line === '' ? '' : ' ' . $line) . "\n";
         }
         return $out . "\n";
@@ -111,12 +111,12 @@ class Report
             $out .= '  ' . $this->paint(self::DIM, '(' . $location . ')');
         }
         $out .= "\n";
-        $source = $location !== null ? $this->readSource($failure->file, $failure->line, $failure->lastLine) : [];
+        $source = $location !== null ? $this->readSource($failure->getFile(), $failure->getLine(), $failure->getLastLine()) : [];
         $width = strlen((string) array_key_last($source));
         foreach ($source as $number => $code) {
             $out .= self::DETAIL_INDENT . $this->paint(self::DIM, str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
-        return $out . "\n" . ($failure->comparison !== null ? $this->renderValues($failure->comparison) : $this->renderMessage($failure));
+        return $out . "\n" . ($failure->getComparison() !== null ? $this->renderValues($failure->getComparison()) : $this->renderMessage($failure));
     }
 
     private function renderMessage(Failure $failure): string
@@ -127,13 +127,13 @@ class Report
 
     private function renderValues(Comparison $comparison): string
     {
-        [$expected, $got, $caret] = Columns::cut($comparison->expected, $comparison->got, $comparison->caret);
+        [$expected, $got, $caret] = Columns::cut($comparison->getExpected(), $comparison->getGot(), $comparison->getCaret());
         $width = max(Columns::measure($expected), Columns::measure($got)) + 4;
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Columns::measure($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
-        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $comparison->expectedType . ')') . "\n"
-            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $comparison->gotType . ')') . "\n";
+        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $comparison->getExpectedType() . ')') . "\n"
+            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $comparison->getGotType() . ')') . "\n";
         return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint(self::RED, '^') . "\n";
     }
 

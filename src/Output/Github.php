@@ -20,10 +20,10 @@ class Github
     {
         $out = '';
         foreach ($result->listFailures() as $test) {
-            $failure = $test->failure;
-            $properties = 'file=' . self::escape($failure->locateFile($result->file), true)
-                . ($failure->line !== null ? ',line=' . $failure->line : '')
-                . ',title=' . self::escape($test->title, true);
+            $failure = $test->getFailure();
+            $properties = 'file=' . self::escape($failure->locateFile($result->getFile()), true)
+                . ($failure->getLine() !== null ? ',line=' . $failure->getLine() : '')
+                . ',title=' . self::escape($test->getTitle(), true);
             $out .= '::error ' . $properties . '::' . self::escape($failure->describe(), false) . "\n";
         }
         return $out;

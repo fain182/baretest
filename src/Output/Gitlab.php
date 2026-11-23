@@ -25,14 +25,14 @@ class Gitlab
         foreach ($results as $result) {
             $xml .= sprintf(
                 "  <testsuite name=\"%s\" tests=\"%d\" failures=\"%d\" skipped=\"%d\" time=\"%.3f\">\n",
-                self::escape($result->file),
+                self::escape($result->getFile()),
                 $result->countTests(),
                 $result->countFailed(),
                 $result->countSkipped(),
-                $result->time,
+                $result->getTime(),
             );
-            foreach ($result->tests as $test) {
-                $xml .= self::renderTestCase($result->file, $test->title, $test->time, $test->findCause(), $test->skipped);
+            foreach ($result->listTests() as $test) {
+                $xml .= self::renderTestCase($result->getFile(), $test->getTitle(), $test->getTime(), $test->findCause(), $test->getSkipReason());
             }
             $xml .= "  </testsuite>\n";
         }

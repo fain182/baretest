@@ -7,12 +7,12 @@ namespace Baretest\Result;
 /** Why a test failed: a message, where in the code, and for equal() the two values. */
 class Failure
 {
-    public string $message;
-    public ?string $label;
-    public ?string $file;
-    public ?int $line;
-    public ?int $lastLine;
-    public ?Comparison $comparison;
+    private string $message;
+    private ?string $label;
+    private ?string $file;
+    private ?int $line;
+    private ?int $lastLine;
+    private ?Comparison $comparison;
 
     public function __construct(string $message, ?string $label = null, ?string $file = null, ?int $line = null, ?int $lastLine = null, ?Comparison $comparison = null)
     {
@@ -22,6 +22,26 @@ class Failure
         $this->line = $line;
         $this->lastLine = $lastLine ?? $line;
         $this->comparison = $comparison;
+    }
+
+    public function getFile(): ?string
+    {
+        return $this->file;
+    }
+
+    public function getLine(): ?int
+    {
+        return $this->line;
+    }
+
+    public function getLastLine(): ?int
+    {
+        return $this->lastLine;
+    }
+
+    public function getComparison(): ?Comparison
+    {
+        return $this->comparison;
     }
 
     /** file:line, relative to the working directory. */

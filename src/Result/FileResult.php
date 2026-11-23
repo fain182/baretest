@@ -7,11 +7,11 @@ namespace Baretest\Result;
 /** What happened when one test file ran in its own process. */
 class FileResult
 {
-    public string $file;
+    private string $file;
     /** @var list<TestResult> in the order they started, then any failure outside a test */
-    public array $tests;
-    public float $time;
-    public string $output;
+    private array $tests;
+    private float $time;
+    private string $output;
 
     public function __construct(string $file, array $tests, float $time, string $output)
     {
@@ -19,6 +19,26 @@ class FileResult
         $this->tests = $tests;
         $this->time = $time;
         $this->output = $output;
+    }
+
+    public function getFile(): string
+    {
+        return $this->file;
+    }
+
+    public function listTests(): array
+    {
+        return $this->tests;
+    }
+
+    public function getTime(): float
+    {
+        return $this->time;
+    }
+
+    public function getOutput(): string
+    {
+        return $this->output;
     }
 
     public static function makeRelative(string $path): string
@@ -44,7 +64,7 @@ class FileResult
 
     public function countSkipped(): int
     {
-        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->skipped !== null));
+        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->getSkipReason() !== null));
     }
 
     public function hasFailures(): bool
@@ -55,6 +75,6 @@ class FileResult
     /** @return list<TestResult> the tests that failed themselves, not only through a subtest */
     public function listFailures(): array
     {
-        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->failure !== null));
+        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->getFailure() !== null));
     }
 }

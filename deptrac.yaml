@@ -2,29 +2,44 @@ deptrac:
   paths:
     - src
   layers:
-    - name: Functions
+    - name: Core
       collectors:
-        - type: functionName
-          value: ^Baretest\\.*
+        - type: classLike
+          value: ^Baretest\\Core\\.*
+    - name: Cli
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Cli$
+    - name: Console
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Console\\.*
+    - name: Ci
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Ci\\.*
+    - name: Filesystem
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Filesystem\\.*
+    - name: Process
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Process\\.*
     - name: Worker
       collectors:
         - type: classLike
           value: ^Baretest\\Worker\\.*
-    - name: Runner
+    - name: Functions
       collectors:
-        - type: classLike
-          value: ^Baretest\\Runner\\.*
-    - name: Result
-      collectors:
-        - type: classLike
-          value: ^Baretest\\Result\\.*
-    - name: Output
-      collectors:
-        - type: classLike
-          value: ^Baretest\\Output\\.*
+        - type: functionName
+          value: ^Baretest\\.*
   ruleset:
+    Core: ~
+    Cli: [Core, Console, Ci, Filesystem, Process]
+    Console: [Core]
+    Ci: [Core]
+    Filesystem: [Core]
+    Process: [Core]
+    Worker: [Core, Process]
     Functions: [Worker]
-    Worker: [Result, Output]
-    Runner: [Result, Output]
-    Output: [Result]
-    Result: ~

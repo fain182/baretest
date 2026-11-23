@@ -6,6 +6,7 @@ namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
+use Baretest\Core\RunningTest;
 use Baretest\Core\TestResult;
 use Baretest\Execution\Records;
 
@@ -67,11 +68,7 @@ class Session
             $test->fail(self::describe($e));
         }
         self::$current = $test->getParent();
-        $result = $test->finish();
-        if (self::$current !== null && $result->hasFailed()) {
-            self::$current->markSubtestFailed();
-        }
-        self::$records->add($order, $result);
+        self::$records->add($order, $test->finish());
     }
 
     /** @return never */

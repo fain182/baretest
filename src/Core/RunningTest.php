@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Baretest\Execution\Worker;
+namespace Baretest\Core;
 
-use Baretest\Core\Failure;
-use Baretest\Core\TestResult;
-
+/** A test while it runs: the rules for how its failures, skips and subtests decide its result. */
 class RunningTest
 {
     private string $name;
@@ -40,7 +38,7 @@ class RunningTest
         $this->failure ??= $failure;
     }
 
-    public function markSubtestFailed(): void
+    private function markSubtestFailed(): void
     {
         $this->subtestFailed = true;
     }
@@ -50,10 +48,13 @@ class RunningTest
         $this->skipReason = $reason;
     }
 
-    /** A test that failed stays failed, even if it was then skipped. */
+    /** A test that failed stays failed even if it was then skipped, and fails the test around it. */
     public function finish(): TestResult
     {
         $failed = $this->failure !== null || $this->subtestFailed;
+        if ($failed && $this->parent !== null) {
+            $this->parent->markSubtestFailed();
+        }
         return new TestResult($this->formatTitle(), microtime(true) - $this->start, $this->failure, $this->subtestFailed, $failed ? null : $this->skipReason);
     }
 }

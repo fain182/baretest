@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Output;
 
+use Baretest\Result\Comparison;
 use Baretest\Result\Failure;
 use Baretest\Result\FileResult;
 use Baretest\Result\SuiteResult;
@@ -115,7 +116,7 @@ class Report
         foreach ($source as $number => $code) {
             $out .= self::DETAIL_INDENT . $this->paint(self::DIM, str_pad((string) $number, $width, ' ', STR_PAD_LEFT) . ' │') . ($code === '' ? '' : ' ' . $code) . "\n";
         }
-        return $out . "\n" . ($failure->expected !== null ? $this->renderValues($failure) : $this->renderMessage($failure));
+        return $out . "\n" . ($failure->comparison !== null ? $this->renderValues($failure->comparison) : $this->renderMessage($failure));
     }
 
     private function renderMessage(Failure $failure): string
@@ -124,15 +125,15 @@ class Report
         return self::DETAIL_INDENT . implode("\n" . self::DETAIL_INDENT, $lines) . "\n";
     }
 
-    private function renderValues(Failure $failure): string
+    private function renderValues(Comparison $comparison): string
     {
-        [$expected, $got, $caret] = Columns::cut($failure->expected, $failure->got, $failure->caret);
+        [$expected, $got, $caret] = Columns::cut($comparison->expected, $comparison->got, $comparison->caret);
         $width = max(Columns::measure($expected), Columns::measure($got)) + 4;
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Columns::measure($value));
         $label = self::DETAIL_INDENT . 'expected  ';
 
-        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $failure->expectedType . ')') . "\n"
-            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $failure->gotType . ')') . "\n";
+        $out = $label . $pad($expected) . $this->paint(self::DIM, '(' . $comparison->expectedType . ')') . "\n"
+            . str_pad('got  ', strlen($label), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $comparison->gotType . ')') . "\n";
         return $caret === null ? $out : $out . str_repeat(' ', strlen($label) + $caret) . $this->paint(self::RED, '^') . "\n";
     }
 

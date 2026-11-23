@@ -12,11 +12,7 @@ class Failure
     public ?string $file;
     public ?int $line;
     public ?int $lastLine;
-    public ?string $expected;
-    public ?string $got;
-    public ?string $expectedType;
-    public ?string $gotType;
-    public ?int $caret;
+    public ?Comparison $comparison;
 
     /** @param array{message: string} $record as the worker wrote it */
     public function __construct(array $record)
@@ -26,11 +22,9 @@ class Failure
         $this->file = $record['file'] ?? null;
         $this->line = $record['line'] ?? null;
         $this->lastLine = $record['lastLine'] ?? $this->line;
-        $this->expected = $record['expected'] ?? null;
-        $this->got = $record['got'] ?? null;
-        $this->expectedType = $record['expectedType'] ?? null;
-        $this->gotType = $record['gotType'] ?? null;
-        $this->caret = $record['caret'] ?? null;
+        $this->comparison = isset($record['expected'])
+            ? new Comparison($record['expected'], $record['got'], $record['expectedType'], $record['gotType'], $record['caret'])
+            : null;
     }
 
     /** file:line, relative to the working directory. */

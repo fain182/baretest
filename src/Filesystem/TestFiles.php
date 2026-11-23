@@ -6,7 +6,7 @@ namespace Baretest\Filesystem;
 
 use Baretest\Core\TestFileRepository;
 
-/** The *_test.php files under the given paths, or under tests/. */
+/** The given files, and the *_test.php files under the given directories, or under tests/. */
 class TestFiles implements TestFileRepository
 {
     /** @var list<string> */
@@ -22,14 +22,35 @@ class TestFiles implements TestFileRepository
     {
         $files = [];
         foreach ($this->paths as $path) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
-            foreach ($iterator as $file) {
-                if (substr($file->getFilename(), -9) === '_test.php') {
-                    $files[] = $file->getPathname();
-                }
+            array_push($files, ...(is_dir($path) ? $this->search($path) : [$this->resolve($path)]));
+        }
+        if ($files === []) {
+            throw new \InvalidArgumentException('no *_test.php files in ' . implode(', ', $this->paths));
+        }
+        return array_values(array_unique($files));
+    }
+
+    /** @return list<string> */
+    private function search(string $directory): array
+    {
+        $files = [];
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)) as $file) {
+            if (substr($file->getFilename(), -9) === '_test.php') {
+                $files[] = $this->resolve($file->getPathname());
             }
         }
         sort($files);
         return $files;
+    }
+
+    /** The path relative to the working directory, once symlinks are followed. */
+    private function resolve(string $path): string
+    {
+        $real = realpath($path);
+        if ($real === false) {
+            throw new \InvalidArgumentException("no such file or directory: $path");
+        }
+        $prefix = getcwd() . DIRECTORY_SEPARATOR;
+        return strncmp($real, $prefix, strlen($prefix)) === 0 ? substr($real, strlen($prefix)) : $real;
     }
 }

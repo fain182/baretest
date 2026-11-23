@@ -18,10 +18,14 @@ class Terminal implements Report
     private const RED = '31';
     private const GREEN = '32';
 
+    /** @var resource */
+    private $stream;
     private bool $color;
 
-    public function __construct(bool $color)
+    /** @param resource $stream */
+    public function __construct($stream, bool $color)
     {
+        $this->stream = $stream;
         $this->color = $color;
     }
 
@@ -31,7 +35,7 @@ class Terminal implements Report
         $summary = $ok ? self::count($file->countTests(), 'test') : $file->countFailed() . ' of ' . $file->countTests() . ' failed';
         $out = $this->mark($ok) . ' ' . $file->getFile() . '  ' . $summary . '  ' . $this->formatTime($file->getTime()) . "\n";
         $blocks = array_map([$this, 'renderFailure'], $file->listFailures());
-        fwrite(STDOUT, $out . ($blocks === [] ? '' : "\n" . implode("\n", $blocks) . "\n"));
+        fwrite($this->stream, $out . ($blocks === [] ? '' : "\n" . implode("\n", $blocks) . "\n"));
     }
 
     public function finish(SuiteResult $suite): void
@@ -41,7 +45,7 @@ class Terminal implements Report
         $text = $ok
             ? self::count($suite->countTests(), 'test') . ' in ' . $files
             : $suite->countFailed() . ' of ' . self::count($suite->countTests(), 'test') . ' failed in ' . $suite->countFailedFiles() . ' of ' . $files;
-        fwrite(STDOUT, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->formatTime($suite->getTime()) . "\n");
+        fwrite($this->stream, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->formatTime($suite->getTime()) . "\n");
     }
 
     private function renderFailure(TestResult $test): string

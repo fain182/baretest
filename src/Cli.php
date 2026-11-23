@@ -15,7 +15,17 @@ class Cli
     /** @param list<string> $argv */
     public static function run(array $argv, string $autoload): int
     {
-        $suite = new Suite(new TestFiles(array_slice($argv, 1)), new ChildProcess($autoload), [new Terminal(false)]);
-        return $suite->run()->computeExitCode();
+        try {
+            if (!function_exists('proc_open')) {
+                throw new \RuntimeException('proc_open() is disabled in php.ini (disable_functions), and baretest runs each test file in its own process');
+            }
+            $noColor = getenv('NO_COLOR');
+            $reports = [new Terminal(STDOUT, stream_isatty(STDOUT) && ($noColor === false || $noColor === ''))];
+            $suite = new Suite(new TestFiles(array_slice($argv, 1)), new ChildProcess($autoload), $reports);
+            return $suite->run()->computeExitCode();
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            fwrite(STDERR, 'baretest: ' . $e->getMessage() . "\n");
+            return 2;
+        }
     }
 }

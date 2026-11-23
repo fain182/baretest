@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Baretest\Worker;
 
+use Baretest\Core\Failure;
 use Baretest\Process\Records;
 
 /** The test file running in this process, and the test running in it. */
@@ -29,8 +30,20 @@ class Session
         $order = self::$started++;
         $test = new RunningTest($name, self::$current);
         self::$current = $test;
-        $fn();
+        try {
+            $fn();
+        } catch (StopSignal $stop) {
+        } catch (\Throwable $e) {
+            $test->fail(new Failure($e->getMessage(), get_class($e)));
+        }
         self::$current = $test->getParent();
         self::$records->add($order, $test->finish());
+    }
+
+    /** @return never */
+    public static function fail(string $message)
+    {
+        self::$current->fail(new Failure($message));
+        throw new StopSignal($message);
     }
 }

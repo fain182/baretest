@@ -16,7 +16,6 @@ class Cli
     public static function run(array $argv, string $autoload): int
     {
         $suite = new Suite(new TestFiles(array_slice($argv, 1)), new ChildProcess($autoload), [new Terminal(false)]);
-        $suite->run();
-        return 0;
+        return $suite->run()->computeExitCode();
     }
 }

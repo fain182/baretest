@@ -47,4 +47,20 @@ class FileResult
     {
         return count($this->tests);
     }
+
+    public function countFailed(): int
+    {
+        return count($this->listFailures());
+    }
+
+    public function hasFailures(): bool
+    {
+        return $this->listFailures() !== [];
+    }
+
+    /** @return list<TestResult> */
+    public function listFailures(): array
+    {
+        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->hasFailed()));
+    }
 }

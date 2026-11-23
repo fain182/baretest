@@ -7,11 +7,15 @@ namespace Baretest\Console;
 use Baretest\Core\FileResult;
 use Baretest\Core\Report;
 use Baretest\Core\SuiteResult;
+use Baretest\Core\TestResult;
 
 /** The output described in the README, for people to read. */
 class Terminal implements Report
 {
+    private const INDENT = '       ';
+    private const BOLD = '1';
     private const DIM = '2';
+    private const RED = '31';
     private const GREEN = '32';
 
     private bool $color;
@@ -23,23 +27,35 @@ class Terminal implements Report
 
     public function addFile(FileResult $file): void
     {
-        $this->write($this->mark() . ' ' . $file->getFile() . '  ' . self::count($file->countTests(), 'test') . '  ' . $this->formatTime($file->getTime()));
+        $ok = !$file->hasFailures();
+        $summary = $ok ? self::count($file->countTests(), 'test') : $file->countFailed() . ' of ' . $file->countTests() . ' failed';
+        $out = $this->mark($ok) . ' ' . $file->getFile() . '  ' . $summary . '  ' . $this->formatTime($file->getTime()) . "\n";
+        $blocks = array_map([$this, 'renderFailure'], $file->listFailures());
+        fwrite(STDOUT, $out . ($blocks === [] ? '' : "\n" . implode("\n", $blocks) . "\n"));
     }
 
     public function finish(SuiteResult $suite): void
     {
-        $text = self::count($suite->countTests(), 'test') . ' in ' . self::count($suite->countFiles(), 'file');
-        $this->write($this->mark() . ' ' . $text . '  ' . $this->formatTime($suite->getTime()));
+        $ok = $suite->countFailedFiles() === 0;
+        $files = self::count($suite->countFiles(), 'file');
+        $text = $ok
+            ? self::count($suite->countTests(), 'test') . ' in ' . $files
+            : $suite->countFailed() . ' of ' . self::count($suite->countTests(), 'test') . ' failed in ' . $suite->countFailedFiles() . ' of ' . $files;
+        fwrite(STDOUT, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->formatTime($suite->getTime()) . "\n");
     }
 
-    private function write(string $line): void
+    private function renderFailure(TestResult $test): string
     {
-        fwrite(STDOUT, $line . "\n");
+        $out = '  ' . $this->mark(false) . ' ' . $this->paint(self::BOLD, $test->getTitle()) . "\n\n";
+        foreach (explode("\n", $test->getFailure()->describe()) as $line) {
+            $out .= self::INDENT . $line . "\n";
+        }
+        return $out;
     }
 
-    private function mark(): string
+    private function mark(bool $ok): string
     {
-        return $this->paint(self::GREEN, '✓');
+        return $ok ? $this->paint(self::GREEN, '✓') : $this->paint(self::RED, '✗');
     }
 
     private function formatTime(float $seconds): string

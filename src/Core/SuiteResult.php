@@ -38,4 +38,19 @@ class SuiteResult
     {
         return array_sum(array_map(static fn (FileResult $file): int => $file->countTests(), $this->files));
     }
+
+    public function countFailed(): int
+    {
+        return array_sum(array_map(static fn (FileResult $file): int => $file->countFailed(), $this->files));
+    }
+
+    public function countFailedFiles(): int
+    {
+        return count(array_filter($this->files, static fn (FileResult $file): bool => $file->hasFailures()));
+    }
+
+    public function computeExitCode(): int
+    {
+        return $this->countFailedFiles() > 0 ? 1 : 0;
+    }
 }

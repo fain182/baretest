@@ -70,11 +70,19 @@ class TerminalReport implements Report
         }
         $ok = $failedFiles === 0 && $emptyFiles === 0;
         $text = self::addSkipped($text, $suite->countSkipped());
-        foreach ($suite->listSlowTests() as $slow) {
-            fwrite($this->stream, '  ' . $this->paint(self::YELLOW, '◷') . ' ' . $slow->getFile()->getPath() . ' › ' . $slow->getTest()->getTitle()
-                . '  ' . sprintf('%.2fs', $slow->getTest()->getTime()) . '  ' . $this->paint(self::DIM, '(' . $slow->getTimesMedian() . '× the median)') . "\n");
+        $time = sprintf('%.2fs', $suite->getTime());
+        $rule = str_repeat('─', Columns::measure(($ok ? '✓' : '✗') . ' ' . $text . '  ' . $time));
+        fwrite($this->stream, $this->paint(self::DIM, $rule) . "\n" . $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->paint(self::DIM, $time) . "\n");
+        $slowTests = $suite->listSlowTests();
+        if ($slowTests !== []) {
+            fwrite($this->stream, "\n" . $this->paint(self::YELLOW, '◷') . ' Tests feeling too slow? Start with:' . "\n");
         }
-        fwrite($this->stream, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->formatTime($suite->getTime()) . "\n");
+        foreach ($slowTests as $slow) {
+            $seconds = $slow->getTest()->getTime();
+            $share = round(100 * $seconds / max($suite->getTime(), $seconds));
+            fwrite($this->stream, '  ' . $slow->getFile()->getPath() . ' › ' . $slow->getTest()->getTitle()
+                . '  ' . sprintf('%.2fs', $seconds) . '  ' . $this->paint(self::DIM, '(' . $share . '% of the run)') . "\n");
+        }
     }
 
     private function renderFailure(TestResult $test): string
@@ -132,11 +140,6 @@ class TerminalReport implements Report
     private function mark(bool $ok): string
     {
         return $ok ? $this->paint(self::GREEN, '✓') : $this->paint(self::RED, '✗');
-    }
-
-    private function formatTime(float $seconds): string
-    {
-        return $this->paint(self::DIM, sprintf('%.2fs', $seconds));
     }
 
     private function paint(string $code, string $text): string

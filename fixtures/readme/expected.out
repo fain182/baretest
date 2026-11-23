@@ -22,4 +22,5 @@
        expected  3      (int)
             got  "3"    (string)
 
+───────────────────────────────────────────────────────
 ✗ 4 of 8 tests failed in 1 of 2 files, 1 skipped  0.00s

@@ -17,4 +17,5 @@
 
        skip() was called outside a test; to skip a whole file, put its tests inside one test
 
+────────────────────────────────────────────────────────
 ✗ 3 of 10 tests failed in 2 of 2 files, 4 skipped  0.00s

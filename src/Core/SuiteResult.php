@@ -75,23 +75,21 @@ class SuiteResult
         foreach ($this->files as $file) {
             foreach ($file->listTests() as $test) {
                 if (!$test->hasSubtests() && $test->getTime() > 0.0) {
-                    $tests[] = [$file->getFile(), $test];
+                    $tests[] = new SlowTest($file->getFile(), $test);
                 }
             }
         }
         if ($tests === []) {
             return [];
         }
-        $times = array_map(static fn (array $entry): float => $entry[1]->getTime(), $tests);
+        $time = static fn (SlowTest $slow): float => $slow->getTest()->getTime();
+        $times = array_map($time, $tests);
         sort($times);
         $middle = intdiv(count($times), 2);
         $median = count($times) % 2 === 1 ? $times[$middle] : ($times[$middle - 1] + $times[$middle]) / 2;
-        $slow = array_filter($tests, static fn (array $entry): bool => $entry[1]->getTime() >= max(self::SLOW_SECONDS, self::SLOW_TIMES_MEDIAN * $median));
-        usort($slow, static fn (array $a, array $b): int => $b[1]->getTime() <=> $a[1]->getTime());
-        return array_map(
-            static fn (array $entry): SlowTest => new SlowTest($entry[0], $entry[1], (int) round($entry[1]->getTime() / $median)),
-            array_slice($slow, 0, self::SLOW_SHOWN),
-        );
+        $slow = array_filter($tests, static fn (SlowTest $test): bool => $time($test) >= max(self::SLOW_SECONDS, self::SLOW_TIMES_MEDIAN * $median));
+        usort($slow, static fn (SlowTest $a, SlowTest $b): int => $time($b) <=> $time($a));
+        return array_slice($slow, 0, self::SLOW_SHOWN);
     }
 
     /** 2 when a file ran no tests, 1 when a test failed, 0 when every test passed. */

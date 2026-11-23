@@ -14,4 +14,5 @@
 
 ::error file=fixtures/ci/ci_test.php,line=6,title=fails%2C with%3A odd%2Cchars::expected "50%25\n" (string), got "x" (string)
 ::error file=fixtures/ci/ci_test.php,line=7,title=<xml> & "quotes"::Exception: a < b
+───────────────────────────────────────────
 ✗ 2 of 3 tests failed in 1 of 1 file  0.00s

@@ -45,4 +45,5 @@
        expected  2    (int)
             got  3    (int)
 
+───────────────────────────────────────────
 ✗ 5 of 5 tests failed in 1 of 1 file  0.00s

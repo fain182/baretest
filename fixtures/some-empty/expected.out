@@ -7,4 +7,5 @@
             got  2    (int)
 
 ✗ fixtures/some-empty/nothing_test.php  no tests
+───────────────────────────────────────────────────────────────────
 ✗ 1 of 1 test failed in 1 of 2 files, 1 did not run any test  0.00s

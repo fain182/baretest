@@ -9,13 +9,11 @@ class SlowTest
 {
     private TestFile $file;
     private TestResult $test;
-    private int $timesMedian;
 
-    public function __construct(TestFile $file, TestResult $test, int $timesMedian)
+    public function __construct(TestFile $file, TestResult $test)
     {
         $this->file = $file;
         $this->test = $test;
-        $this->timesMedian = $timesMedian;
     }
 
     public function getFile(): TestFile
@@ -26,11 +24,5 @@ class SlowTest
     public function getTest(): TestResult
     {
         return $this->test;
-    }
-
-    /** How many times the median test of the run it took. */
-    public function getTimesMedian(): int
-    {
-        return $this->timesMedian;
     }
 }

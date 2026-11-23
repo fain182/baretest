@@ -24,6 +24,7 @@
        expected  1    (int)
             got  2    (int)
 
+──────────────────────────────────────────────────────
 ✗ 5 of 7 tests failed in 1 of 1 file, 1 skipped  0.00s
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>

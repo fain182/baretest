@@ -14,12 +14,18 @@ use function Baretest\{test, equal};
 /** What the terminal prints for these files, one after the other, and then the summary. */
 function printed(FileResult ...$files): string
 {
+    return printedIn(0.0, ...$files);
+}
+
+/** What the terminal prints for a run of these files that took $seconds. */
+function printedIn(float $seconds, FileResult ...$files): string
+{
     $stream = fopen('php://memory', 'w+');
     $terminal = new TerminalReport($stream, false);
     foreach ($files as $file) {
         $terminal->addFile($file);
     }
-    $terminal->finish(new SuiteResult($files, 0.0));
+    $terminal->finish(new SuiteResult($files, $seconds));
     rewind($stream);
     return (string) stream_get_contents($stream);
 }
@@ -37,7 +43,7 @@ function fileOf(array $tests, string $output = ''): FileResult
 /** What the terminal prints under the header of a file with this one failed test. */
 function detailOf(TestResult $test): string
 {
-    return implode("\n", array_slice(explode("\n", printed(fileOf([$test]))), 2, -2));
+    return implode("\n", array_slice(explode("\n", printed(fileOf([$test]))), 2, -3));
 }
 
 function ok(string $title = 'ok'): TestResult
@@ -57,7 +63,7 @@ test('the header of a file', function () {
 
 test('lists the skipped tests under their file, with the reason', function () {
     $file = fileOf([new TestResult('parent › child', 0.0, null, false, 'needs mbstring')]);
-    equal("✓ a_test.php  1 test, 1 skipped\n  - parent › child  needs mbstring  (skipped)\n", explode('✓ 1 test', printed($file))[0]);
+    equal(['✓ a_test.php  1 test, 1 skipped', '  - parent › child  needs mbstring  (skipped)'], array_slice(explode("\n", printed($file)), 0, 2));
 });
 
 test('shows a failure with its whole call, without the indentation the lines share', function () use ($source) {
@@ -96,7 +102,7 @@ test('shows the two values of equal() in a column, with the caret under the firs
 
 test('shows what the file printed', function () {
     $printed = printed(fileOf([ok()], "at the top\nno newline"));
-    equal("✓ a_test.php  1 test\n  output\n       │ at the top\n       │ no newline\n\n✓ 1 test in 1 file  0.00s\n", $printed);
+    equal("✓ a_test.php  1 test\n  output\n       │ at the top\n       │ no newline\n\n" . str_repeat('─', 25) . "\n✓ 1 test in 1 file  0.00s\n", $printed);
 });
 
 test('sums up the run', function () {
@@ -108,11 +114,15 @@ test('sums up the run', function () {
     test('when tests failed', fn () => equal('✗ 1 of 3 tests failed in 1 of 3 files, 1 did not run any test, 1 skipped  0.00s', $last($failed, fileOf([]), $skipped)));
 });
 
-test('lists the tests that stood out as slow before the summary', function () {
+test('sets the summary apart with a rule as wide as it', function () {
+    equal(['✓ a_test.php  1 test', str_repeat('─', 25), '✓ 1 test in 1 file  0.00s', ''], explode("\n", printed(fileOf([ok()]))));
+});
+
+test('suggests where to start when tests stand out as slow, with their share of the run', function () {
     $tests = [new TestResult('slow', 1.2, null), new TestResult('quick', 0.02, null), new TestResult('quicker', 0.02, null)];
     equal(
-        "✓ a_test.php  3 tests\n  ◷ a_test.php › slow  1.20s  (60× the median)\n✓ 3 tests in 1 file  0.00s\n",
-        printed(fileOf($tests)),
+        "✓ 3 tests in 1 file  2.00s\n\n◷ Tests feeling too slow? Start with:\n  a_test.php › slow  1.20s  (60% of the run)\n",
+        explode(str_repeat('─', 26) . "\n", printedIn(2.0, fileOf($tests)))[1],
     );
 });
 

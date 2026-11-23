@@ -43,7 +43,7 @@ class TerminalReport implements Report
         } else {
             $summary = $ok ? self::count($file->countTests(), 'test') : $file->countFailed() . ' of ' . $file->countTests() . ' failed';
         }
-        $out = $this->mark($ok) . ' ' . $file->getFile()->getPath() . '  ' . self::addSkipped($summary, $file->countSkipped()) . '  ' . $this->formatTime($file->getTime()) . "\n";
+        $out = $this->mark($ok) . ' ' . $file->getFile()->getPath() . '  ' . self::addSkipped($summary, $file->countSkipped()) . "\n";
         foreach ($file->listTests() as $test) {
             if ($test->isSkipped()) {
                 $out .= '  ' . $this->paint(self::YELLOW, '-') . ' ' . $test->getTitle() . '  ' . $test->getSkipReason() . '  ' . $this->paint(self::DIM, '(skipped)') . "\n";
@@ -70,6 +70,10 @@ class TerminalReport implements Report
         }
         $ok = $failedFiles === 0 && $emptyFiles === 0;
         $text = self::addSkipped($text, $suite->countSkipped());
+        foreach ($suite->listSlowTests() as $slow) {
+            fwrite($this->stream, '  ' . $this->paint(self::YELLOW, '◷') . ' ' . $slow->getFile()->getPath() . ' › ' . $slow->getTest()->getTitle()
+                . '  ' . sprintf('%.2fs', $slow->getTest()->getTime()) . '  ' . $this->paint(self::DIM, '(' . $slow->getTimesMedian() . '× the median)') . "\n");
+        }
         fwrite($this->stream, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $this->formatTime($suite->getTime()) . "\n");
     }
 

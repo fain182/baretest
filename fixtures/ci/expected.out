@@ -1,4 +1,4 @@
-✗ fixtures/ci/ci_test.php  2 of 3 failed  0.00s
+✗ fixtures/ci/ci_test.php  2 of 3 failed
 
   ✗ fails, with: odd,chars  (fixtures/ci/ci_test.php:6)
        6 │ test('fails, with: odd,chars', fn () => equal("50%\n", 'x'));

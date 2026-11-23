@@ -1,4 +1,4 @@
-✗ fixtures/some-empty/fail_test.php  1 of 1 failed  0.00s
+✗ fixtures/some-empty/fail_test.php  1 of 1 failed
 
   ✗ fails  (fixtures/some-empty/fail_test.php:5)
        5 │ test('fails', fn () => equal(1, 2));
@@ -6,5 +6,5 @@
        expected  1    (int)
             got  2    (int)
 
-✗ fixtures/some-empty/nothing_test.php  no tests  0.00s
+✗ fixtures/some-empty/nothing_test.php  no tests
 ✗ 1 of 1 test failed in 1 of 2 files, 1 did not run any test  0.00s

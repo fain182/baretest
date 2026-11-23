@@ -1,4 +1,4 @@
-✗ fixtures/output/printing_test.php  1 of 2 failed  0.00s
+✗ fixtures/output/printing_test.php  1 of 2 failed
 
   ✗ fails  (fixtures/output/printing_test.php:14)
        14 │ equal(1, 2);

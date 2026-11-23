@@ -1,6 +1,6 @@
-✓ fixtures/readme/encoding_test.php  3 tests, 1 skipped  0.00s
+✓ fixtures/readme/encoding_test.php  3 tests, 1 skipped
   - lowercases accented letters  needs mbstring  (skipped)
-✗ fixtures/readme/split_test.php  4 of 5 failed  0.00s
+✗ fixtures/readme/split_test.php  4 of 5 failed
 
   ✗ splits › trailing comma  (fixtures/readme/split_test.php:17)
        17 │ test($name, fn () => equal($expected, split($separator, $input)));

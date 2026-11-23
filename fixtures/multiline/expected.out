@@ -1,4 +1,4 @@
-✗ fixtures/multiline/multiline_test.php  5 of 5 failed  0.00s
+✗ fixtures/multiline/multiline_test.php  5 of 5 failed
 
   ✗ arguments on their own lines  (fixtures/multiline/multiline_test.php:6)
        6 │ equal(

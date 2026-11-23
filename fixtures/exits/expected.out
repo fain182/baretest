@@ -1,25 +1,25 @@
-✗ fixtures/exits/exit_test.php  1 of 2 failed  0.00s
+✗ fixtures/exits/exit_test.php  1 of 2 failed
 
   ✗ exit() called
 
        the file called exit()
        while running: exits › inner
 
-✗ fixtures/exits/fatal_test.php  1 of 1 failed  0.00s
+✗ fixtures/exits/fatal_test.php  1 of 1 failed
 
   ✗ fatal error  (fixtures/exits/fatal_test.php(6) : eval()'d code:1)
 
        Fatal error: 'break' not in the 'loop' or 'switch' context
        while running: fatal
 
-✓ fixtures/exits/ok_test.php  1 test  0.00s
-✗ fixtures/exits/shutdown_test.php  1 of 2 failed  0.00s
+✓ fixtures/exits/ok_test.php  1 test
+✗ fixtures/exits/shutdown_test.php  1 of 2 failed
 
   ✗ crashed
 
        the process ended unexpectedly (exit code 3)
 
-✗ fixtures/exits/uncaught_test.php  1 of 1 failed  0.00s
+✗ fixtures/exits/uncaught_test.php  1 of 1 failed
 
   ✗ uncaught exception  (fixtures/exits/uncaught_test.php:3)
        3 │ throw new LogicException('at the top of the file');

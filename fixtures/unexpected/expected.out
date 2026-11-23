@@ -1,4 +1,4 @@
-✗ fixtures/unexpected/outside_test.php  1 of 2 failed  0.00s
+✗ fixtures/unexpected/outside_test.php  1 of 2 failed
 
   ✗ outside a test  (fixtures/unexpected/outside_test.php:7)
        7 │ equal(1, 2);
@@ -6,7 +6,7 @@
        expected  1    (int)
             got  2    (int)
 
-✗ fixtures/unexpected/raised_test.php  8 of 9 failed  0.00s
+✗ fixtures/unexpected/raised_test.php  8 of 9 failed
 
   ✗ unexpected warning  (fixtures/unexpected/raised_test.php:6)
        6 │ hex2bin('a');

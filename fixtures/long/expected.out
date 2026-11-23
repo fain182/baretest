@@ -1,4 +1,4 @@
-✗ fixtures/long/long_test.php  5 of 5 failed  0.00s
+✗ fixtures/long/long_test.php  5 of 5 failed
 
   ✗ long string  (fixtures/long/long_test.php:5)
        5 │ test('long string', fn () => equal(str_repeat('abcdefghij', 20) . 'X' . str_repeat('k', 100), str_repeat('abcdefghij', 20) . 'Y' . str_repeat('k', 100)));

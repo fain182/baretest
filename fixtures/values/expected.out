@@ -1,4 +1,4 @@
-✗ fixtures/values/values_test.php  6 of 6 failed  0.00s
+✗ fixtures/values/values_test.php  6 of 6 failed
 
   ✗ null and bool  (fixtures/values/values_test.php:5)
        5 │ test('null and bool', fn () => equal(null, false));

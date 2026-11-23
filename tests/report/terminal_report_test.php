@@ -49,15 +49,15 @@ $source = tempnam(sys_get_temp_dir(), 'source');
 file_put_contents($source, "<?php\ntest('x', function () {\n    equal(\n        1,\n    );\n});\n" . str_repeat("\n", 3) . "    fail('ten');\n");
 
 test('the header of a file', function () {
-    test('counts its tests', fn () => equal('✓ a_test.php  2 tests  0.00s', headerOf(fileOf([ok(), ok()]))));
-    test('counts the failed ones', fn () => equal('✗ a_test.php  1 of 2 failed  0.00s', headerOf(fileOf([ok(), new TestResult('x', 0.0, new Failure('no'))]))));
-    test('says when there were none', fn () => equal('✗ a_test.php  no tests  0.00s', headerOf(fileOf([]))));
-    test('counts the skipped ones', fn () => equal('✓ a_test.php  2 tests, 1 skipped  0.00s', headerOf(fileOf([ok(), new TestResult('s', 0.0, null, false, 'why')]))));
+    test('counts its tests', fn () => equal('✓ a_test.php  2 tests', headerOf(fileOf([ok(), ok()]))));
+    test('counts the failed ones', fn () => equal('✗ a_test.php  1 of 2 failed', headerOf(fileOf([ok(), new TestResult('x', 0.0, new Failure('no'))]))));
+    test('says when there were none', fn () => equal('✗ a_test.php  no tests', headerOf(fileOf([]))));
+    test('counts the skipped ones', fn () => equal('✓ a_test.php  2 tests, 1 skipped', headerOf(fileOf([ok(), new TestResult('s', 0.0, null, false, 'why')]))));
 });
 
 test('lists the skipped tests under their file, with the reason', function () {
     $file = fileOf([new TestResult('parent › child', 0.0, null, false, 'needs mbstring')]);
-    equal("✓ a_test.php  1 test, 1 skipped  0.00s\n  - parent › child  needs mbstring  (skipped)\n", explode('✓ 1 test', printed($file))[0]);
+    equal("✓ a_test.php  1 test, 1 skipped\n  - parent › child  needs mbstring  (skipped)\n", explode('✓ 1 test', printed($file))[0]);
 });
 
 test('shows a failure with its whole call, without the indentation the lines share', function () use ($source) {
@@ -96,7 +96,7 @@ test('shows the two values of equal() in a column, with the caret under the firs
 
 test('shows what the file printed', function () {
     $printed = printed(fileOf([ok()], "at the top\nno newline"));
-    equal("✓ a_test.php  1 test  0.00s\n  output\n       │ at the top\n       │ no newline\n\n✓ 1 test in 1 file  0.00s\n", $printed);
+    equal("✓ a_test.php  1 test\n  output\n       │ at the top\n       │ no newline\n\n✓ 1 test in 1 file  0.00s\n", $printed);
 });
 
 test('sums up the run', function () {
@@ -108,11 +108,19 @@ test('sums up the run', function () {
     test('when tests failed', fn () => equal('✗ 1 of 3 tests failed in 1 of 3 files, 1 did not run any test, 1 skipped  0.00s', $last($failed, fileOf([]), $skipped)));
 });
 
+test('lists the tests that stood out as slow before the summary', function () {
+    $tests = [new TestResult('slow', 1.2, null), new TestResult('quick', 0.02, null), new TestResult('quicker', 0.02, null)];
+    equal(
+        "✓ a_test.php  3 tests\n  ◷ a_test.php › slow  1.20s  (60× the median)\n✓ 3 tests in 1 file  0.00s\n",
+        printed(fileOf($tests)),
+    );
+});
+
 test('paints in colours when asked', function () {
     $stream = fopen('php://memory', 'w+');
     (new TerminalReport($stream, true))->addFile(fileOf([ok()]));
     rewind($stream);
-    equal("\e[32m✓\e[0m a_test.php  1 test  \e[2m0.00s\e[0m\n", stream_get_contents($stream));
+    equal("\e[32m✓\e[0m a_test.php  1 test\n", stream_get_contents($stream));
 });
 
 unlink($source);

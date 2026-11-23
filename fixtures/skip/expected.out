@@ -1,4 +1,4 @@
-✗ fixtures/skip/skip_test.php  2 of 8 failed, 4 skipped  0.00s
+✗ fixtures/skip/skip_test.php  2 of 8 failed, 4 skipped
   - skipped  needs mbstring  (skipped)
   - after a check  not on this PHP  (skipped)
   - parent › skipped child  child reason  (skipped)
@@ -10,7 +10,7 @@
        expected  1    (int)
             got  2    (int)
 
-✗ fixtures/skip/top_test.php  1 of 2 failed  0.00s
+✗ fixtures/skip/top_test.php  1 of 2 failed
 
   ✗ outside a test  (fixtures/skip/top_test.php:6)
        6 │ skip('whole file');

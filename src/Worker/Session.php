@@ -38,9 +38,9 @@ class Session
                 require $file;
             })($file);
         } catch (Failure $failure) {
-            // already registered where it was raised
+            // already recorded where it was raised
         } catch (\Throwable $e) {
-            self::register(self::describe($e), 'uncaught exception');
+            self::failFile('uncaught exception', self::describe($e));
         }
         self::$finished = true;
         self::$records->write(['t' => 'done']);
@@ -57,11 +57,11 @@ class Session
         try {
             $fn();
         } catch (Failure $failure) {
-            // already registered where it was raised
+            // already recorded where it was raised
         } catch (Skip $skip) {
             $test->skip($skip->getMessage());
         } catch (\Throwable $e) {
-            self::register(self::describe($e));
+            $test->fail(self::describe($e));
         }
         self::$current = $test->getParent();
         if (self::$current !== null && $test->hasFailed()) {
@@ -102,7 +102,7 @@ class Session
     /** @return never */
     private static function raise(array $failure)
     {
-        self::register($failure + CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
+        self::failHere($failure + CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
         throw new Failure($failure['message']);
     }
 
@@ -116,7 +116,7 @@ class Session
             E_NOTICE => 'Notice', E_USER_NOTICE => 'Notice',
             E_DEPRECATED => 'Deprecated', E_USER_DEPRECATED => 'Deprecated',
         ][$level] ?? 'Error';
-        self::register(['label' => $label, 'message' => $message, 'file' => $file, 'line' => $line]);
+        self::failHere(['label' => $label, 'message' => $message, 'file' => $file, 'line' => $line]);
         throw new Failure($message);
     }
 
@@ -133,20 +133,26 @@ class Session
         if (self::$current !== null) {
             $failure['message'] .= "\nwhile running: " . TestResult::formatTitle(self::$current->listPath());
         }
-        self::$current = null;
-        self::register($failure, $fatal ? 'fatal error' : 'exit() called');
+        self::failFile($fatal ? 'fatal error' : 'exit() called', $failure);
     }
 
-    private static function register(array $failure, string $title = 'outside a test'): void
+    /** Fails the running test, or the file when no test is running. */
+    private static function failHere(array $failure): void
     {
         if (self::$current === null) {
-            if (!self::$fileFailed) {
-                self::$fileFailed = true;
-                self::$records->write(['t' => 'file', 'title' => $title, 'failure' => $failure]);
-            }
-            return;
+            self::failFile('outside a test', $failure);
+        } else {
+            self::$current->fail($failure);
         }
-        self::$current->fail($failure);
+    }
+
+    /** Fails the file outside any test; only the first such failure is kept, as it stopped the file. */
+    private static function failFile(string $title, array $failure): void
+    {
+        if (!self::$fileFailed) {
+            self::$fileFailed = true;
+            self::$records->write(['t' => 'file', 'title' => $title, 'failure' => $failure]);
+        }
     }
 
     private static function describe(\Throwable $e): array

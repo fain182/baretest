@@ -21,8 +21,7 @@ class Github
         $out = '';
         foreach ($result->listFailures() as $test) {
             $failure = $test->failure;
-            $file = $failure->file !== null ? FileResult::makeRelative($failure->file) : $result->file;
-            $properties = 'file=' . self::escape($file, true)
+            $properties = 'file=' . self::escape($failure->locateFile($result->file), true)
                 . ($failure->line !== null ? ',line=' . $failure->line : '')
                 . ',title=' . self::escape($test->title, true);
             $out .= '::error ' . $properties . '::' . self::escape($failure->describe(), false) . "\n";

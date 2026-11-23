@@ -28,6 +28,12 @@ class TestResult
         return implode(' › ', $path);
     }
 
+    /** Why this test failed: its own failure, or one of its subtests. */
+    public function findCause(): ?Failure
+    {
+        return $this->failure ?? ($this->subtestFailed ? new Failure('a subtest failed') : null);
+    }
+
     public function hasFailed(): bool
     {
         return $this->failure !== null || $this->subtestFailed;

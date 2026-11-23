@@ -22,4 +22,9 @@ class Comparison
         $this->gotType = $gotType;
         $this->caret = $caret;
     }
+
+    public function describe(): string
+    {
+        return sprintf('expected %s (%s), got %s (%s)', $this->expected, $this->expectedType, $this->got, $this->gotType);
+    }
 }

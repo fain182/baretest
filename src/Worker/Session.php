@@ -87,7 +87,7 @@ class Session
             Literal::describeType($got),
             Literal::findOffset($expected, $got),
         );
-        self::raise(sprintf('expected %s (%s), got %s (%s)', $comparison->expected, $comparison->expectedType, $comparison->got, $comparison->gotType), $comparison);
+        self::raise($comparison->describe(), $comparison);
     }
 
     /** @return never */

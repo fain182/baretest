@@ -30,6 +30,12 @@ class Failure
         return $this->file === null ? null : FileResult::makeRelative($this->file) . ':' . $this->line;
     }
 
+    /** The file that failed, relative to the working directory; $testFile when the failure has no location. */
+    public function locateFile(string $testFile): string
+    {
+        return $this->file === null ? $testFile : FileResult::makeRelative($this->file);
+    }
+
     public function describe(): string
     {
         if ($this->label === null) {

@@ -13,6 +13,8 @@ class RunningTest
     private ?RunningTest $parent;
     private float $start;
     private ?Failure $failure = null;
+    private bool $subtestFailed = false;
+    private ?string $skipReason = null;
 
     public function __construct(string $name, ?RunningTest $parent)
     {
@@ -38,8 +40,20 @@ class RunningTest
         $this->failure ??= $failure;
     }
 
+    public function markSubtestFailed(): void
+    {
+        $this->subtestFailed = true;
+    }
+
+    public function skip(string $reason): void
+    {
+        $this->skipReason = $reason;
+    }
+
+    /** A test that failed stays failed, even if it was then skipped. */
     public function finish(): TestResult
     {
-        return new TestResult($this->formatTitle(), microtime(true) - $this->start, $this->failure);
+        $failed = $this->failure !== null || $this->subtestFailed;
+        return new TestResult($this->formatTitle(), microtime(true) - $this->start, $this->failure, $this->subtestFailed, $failed ? null : $this->skipReason);
     }
 }

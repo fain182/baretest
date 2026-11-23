@@ -33,11 +33,23 @@ class Session
         try {
             $fn();
         } catch (StopSignal $stop) {
+        } catch (SkipSignal $skip) {
+            $test->skip($skip->getMessage());
         } catch (\Throwable $e) {
             $test->fail(new Failure($e->getMessage(), get_class($e)));
         }
         self::$current = $test->getParent();
-        self::$records->add($order, $test->finish());
+        $result = $test->finish();
+        if (self::$current !== null && $result->hasFailed()) {
+            self::$current->markSubtestFailed();
+        }
+        self::$records->add($order, $result);
+    }
+
+    /** @return never */
+    public static function skip(string $reason)
+    {
+        throw new SkipSignal($reason);
     }
 
     /** @return never */

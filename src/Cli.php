@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Baretest;
 
+use Baretest\Ci\Github;
+use Baretest\Ci\Gitlab;
 use Baretest\Console\Terminal;
 use Baretest\Core\Suite;
 use Baretest\Filesystem\TestFiles;
@@ -21,6 +23,12 @@ class Cli
             }
             $noColor = getenv('NO_COLOR');
             $reports = [new Terminal(STDOUT, stream_isatty(STDOUT) && ($noColor === false || $noColor === ''))];
+            if (getenv('GITHUB_ACTIONS') === 'true') {
+                $reports[] = new Github(STDOUT);
+            }
+            if (getenv('GITLAB_CI') === 'true') {
+                $reports[] = new Gitlab('baretest-junit.xml');
+            }
             $suite = new Suite(new TestFiles(array_slice($argv, 1)), new ChildProcess($autoload), $reports);
             return $suite->run()->computeExitCode();
         } catch (\InvalidArgumentException | \RuntimeException $e) {

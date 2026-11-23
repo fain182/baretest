@@ -50,17 +50,27 @@ class FileResult
 
     public function countFailed(): int
     {
-        return count($this->listFailures());
+        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->hasFailed()));
+    }
+
+    public function countSkipped(): int
+    {
+        return count(array_filter($this->tests, static fn (TestResult $test): bool => $test->isSkipped()));
     }
 
     public function hasFailures(): bool
     {
-        return $this->listFailures() !== [];
+        return $this->countFailed() > 0;
     }
 
-    /** @return list<TestResult> */
+    public function hasNoTests(): bool
+    {
+        return $this->tests === [];
+    }
+
+    /** @return list<TestResult> the tests that failed themselves, not only through a subtest */
     public function listFailures(): array
     {
-        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->hasFailed()));
+        return array_values(array_filter($this->tests, static fn (TestResult $test): bool => $test->getFailure() !== null));
     }
 }

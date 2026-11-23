@@ -44,13 +44,27 @@ class SuiteResult
         return array_sum(array_map(static fn (FileResult $file): int => $file->countFailed(), $this->files));
     }
 
+    public function countSkipped(): int
+    {
+        return array_sum(array_map(static fn (FileResult $file): int => $file->countSkipped(), $this->files));
+    }
+
     public function countFailedFiles(): int
     {
         return count(array_filter($this->files, static fn (FileResult $file): bool => $file->hasFailures()));
     }
 
+    public function countEmptyFiles(): int
+    {
+        return count(array_filter($this->files, static fn (FileResult $file): bool => $file->hasNoTests()));
+    }
+
+    /** 2 when a file ran no tests, 1 when a test failed, 0 when every test passed. */
     public function computeExitCode(): int
     {
+        if ($this->countEmptyFiles() > 0) {
+            return 2;
+        }
         return $this->countFailedFiles() > 0 ? 1 : 0;
     }
 }

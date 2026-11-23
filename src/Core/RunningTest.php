@@ -12,12 +12,16 @@ class RunningTest
     private float $start;
     private ?Failure $failure = null;
     private bool $subtestFailed = false;
+    private bool $hasSubtests = false;
     private ?string $skipReason = null;
 
     public function __construct(string $name, ?RunningTest $parent)
     {
         $this->name = $name;
         $this->parent = $parent;
+        if ($parent !== null) {
+            $parent->hasSubtests = true;
+        }
         $this->start = microtime(true);
     }
 
@@ -55,6 +59,6 @@ class RunningTest
         if ($failed && $this->parent !== null) {
             $this->parent->markSubtestFailed();
         }
-        return new TestResult($this->formatTitle(), microtime(true) - $this->start, $this->failure, $this->subtestFailed, $failed ? null : $this->skipReason);
+        return new TestResult($this->formatTitle(), microtime(true) - $this->start, $this->failure, $this->subtestFailed, $failed ? null : $this->skipReason, $this->hasSubtests);
     }
 }

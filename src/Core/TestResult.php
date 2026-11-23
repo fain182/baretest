@@ -12,14 +12,16 @@ class TestResult
     private ?Failure $failure;
     private bool $subtestFailed;
     private ?string $skipReason;
+    private bool $hasSubtests;
 
-    public function __construct(string $title, float $time, ?Failure $failure, bool $subtestFailed = false, ?string $skipReason = null)
+    public function __construct(string $title, float $time, ?Failure $failure, bool $subtestFailed = false, ?string $skipReason = null, bool $hasSubtests = false)
     {
         $this->title = $title;
         $this->time = $time;
         $this->failure = $failure;
         $this->subtestFailed = $subtestFailed;
         $this->skipReason = $skipReason;
+        $this->hasSubtests = $hasSubtests;
     }
 
     public function getTitle(): string
@@ -41,6 +43,12 @@ class TestResult
     public function getSkipReason(): ?string
     {
         return $this->skipReason;
+    }
+
+    /** A test with subtests took their time too. */
+    public function hasSubtests(): bool
+    {
+        return $this->hasSubtests;
     }
 
     public function isSkipped(): bool

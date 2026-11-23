@@ -34,6 +34,11 @@ test('a running test', function () {
         $middle->finish();
         equal(true, $outer->finish()->hasFailed());
     });
+    test('says whether it ran subtests', function () {
+        $parent = new RunningTest('parent', null);
+        $child = new RunningTest('child', $parent);
+        equal([false, true], [$child->finish()->hasSubtests(), $parent->finish()->hasSubtests()]);
+    });
     test('is skipped with its reason', function () {
         $test = new RunningTest('a', null);
         $test->skip('needs mbstring');

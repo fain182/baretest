@@ -14,17 +14,14 @@ class Failure
     public ?int $lastLine;
     public ?Comparison $comparison;
 
-    /** @param array{message: string} $record as the worker wrote it */
-    public function __construct(array $record)
+    public function __construct(string $message, ?string $label = null, ?string $file = null, ?int $line = null, ?int $lastLine = null, ?Comparison $comparison = null)
     {
-        $this->message = $record['message'];
-        $this->label = $record['label'] ?? null;
-        $this->file = $record['file'] ?? null;
-        $this->line = $record['line'] ?? null;
-        $this->lastLine = $record['lastLine'] ?? $this->line;
-        $this->comparison = isset($record['expected'])
-            ? new Comparison($record['expected'], $record['got'], $record['expectedType'], $record['gotType'], $record['caret'])
-            : null;
+        $this->message = $message;
+        $this->label = $label;
+        $this->file = $file;
+        $this->line = $line;
+        $this->lastLine = $lastLine ?? $line;
+        $this->comparison = $comparison;
     }
 
     /** file:line, relative to the working directory. */

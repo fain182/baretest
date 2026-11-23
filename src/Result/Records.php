@@ -23,7 +23,7 @@ class Records
     /** @return list<array> without the last line of a worker that died while writing it */
     public static function read(string $path): array
     {
-        $decode = static fn (string $line) => @unserialize(base64_decode($line), ['allowed_classes' => false]);
+        $decode = static fn (string $line) => @unserialize(base64_decode($line), ['allowed_classes' => [Failure::class, Comparison::class]]);
         return array_values(array_filter(array_map($decode, file($path, FILE_IGNORE_NEW_LINES) ?: []), 'is_array'));
     }
 }

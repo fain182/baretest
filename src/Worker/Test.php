@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Baretest\Worker;
 
+use Baretest\Result;
+
 /** One running test, in the process that runs its file. */
 class Test
 {
@@ -11,7 +13,7 @@ class Test
     private int $seq;
     private ?Test $parent;
     private float $start;
-    private ?array $failure = null;
+    private ?Result\Failure $failure = null;
     private bool $subtestFailed = false;
     private ?string $skipped = null;
 
@@ -36,7 +38,7 @@ class Test
     }
 
     /** Keeps the first failure, the one that stopped the test even if the test caught it. */
-    public function fail(array $failure): void
+    public function fail(Result\Failure $failure): void
     {
         $this->failure ??= $failure;
     }

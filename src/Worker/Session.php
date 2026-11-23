@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baretest\Worker;
 
 use Baretest\Output\Literal;
+use Baretest\Result;
 use Baretest\Result\TestResult;
 use Baretest\Result\Records;
 
@@ -78,21 +79,20 @@ class Session
     /** @return never */
     public static function failValues($expected, $got)
     {
-        $failure = [
-            'expected' => Literal::render($expected),
-            'got' => Literal::render($got),
-            'expectedType' => Literal::describeType($expected),
-            'gotType' => Literal::describeType($got),
-            'caret' => Literal::findOffset($expected, $got),
-        ];
-        $failure['message'] = sprintf('expected %s (%s), got %s (%s)', $failure['expected'], $failure['expectedType'], $failure['got'], $failure['gotType']);
-        self::raise($failure);
+        $comparison = new Result\Comparison(
+            Literal::render($expected),
+            Literal::render($got),
+            Literal::describeType($expected),
+            Literal::describeType($got),
+            Literal::findOffset($expected, $got),
+        );
+        self::raise(sprintf('expected %s (%s), got %s (%s)', $comparison->expected, $comparison->expectedType, $comparison->got, $comparison->gotType), $comparison);
     }
 
     /** @return never */
     public static function fail(string $message)
     {
-        self::raise(['message' => $message]);
+        self::raise($message);
     }
 
     /** @return never */
@@ -105,10 +105,11 @@ class Session
     }
 
     /** @return never */
-    private static function raise(array $failure)
+    private static function raise(string $message, ?Result\Comparison $comparison = null)
     {
-        self::failHere($failure + CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)));
-        throw new Failure($failure['message']);
+        $site = CallSite::find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
+        self::failHere(new Result\Failure($message, null, $site['file'] ?? null, $site['line'] ?? null, $site['lastLine'] ?? null, $comparison));
+        throw new Failure($message);
     }
 
     private static function onError(int $level, string $message, string $file, int $line): bool
@@ -116,7 +117,7 @@ class Session
         if (!(error_reporting() & $level)) {
             return false;
         }
-        self::failHere(['label' => self::LABELS[$level] ?? 'Error', 'message' => $message, 'file' => $file, 'line' => $line]);
+        self::failHere(new Result\Failure($message, self::LABELS[$level] ?? 'Error', $file, $line));
         throw new Failure($message);
     }
 
@@ -127,17 +128,18 @@ class Session
         }
         $last = error_get_last();
         $fatal = $last !== null && ($last['type'] & self::FATAL);
-        $failure = $fatal
-            ? ['label' => 'Fatal error', 'message' => $last['message'], 'file' => $last['file'], 'line' => $last['line']]
-            : ['message' => 'the file called exit()'];
+        $message = $fatal ? $last['message'] : 'the file called exit()';
         if (self::$current !== null) {
-            $failure['message'] .= "\nwhile running: " . TestResult::formatTitle(self::$current->listPath());
+            $message .= "\nwhile running: " . TestResult::formatTitle(self::$current->listPath());
         }
+        $failure = $fatal
+            ? new Result\Failure($message, 'Fatal error', $last['file'], $last['line'])
+            : new Result\Failure($message);
         self::failFile($fatal ? 'fatal error' : 'exit() called', $failure);
     }
 
     /** Fails the running test, or the file when no test is running. */
-    private static function failHere(array $failure): void
+    private static function failHere(Result\Failure $failure): void
     {
         if (self::$current === null) {
             self::failFile('outside a test', $failure);
@@ -147,7 +149,7 @@ class Session
     }
 
     /** Fails the file outside any test; only the first such failure is kept, as it stopped the file. */
-    private static function failFile(string $title, array $failure): void
+    private static function failFile(string $title, Result\Failure $failure): void
     {
         if (!self::$fileFailed) {
             self::$fileFailed = true;
@@ -155,8 +157,8 @@ class Session
         }
     }
 
-    private static function describe(\Throwable $e): array
+    private static function describe(\Throwable $e): Result\Failure
     {
-        return ['label' => get_class($e), 'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()];
+        return new Result\Failure($e->getMessage(), get_class($e), $e->getFile(), $e->getLine());
     }
 }

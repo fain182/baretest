@@ -49,7 +49,7 @@ class Process
         $tests = array_map([self::class, 'buildTest'], $tests);
         $printed = (string) file_get_contents($output);
         if ((!$done || $code !== 0) && $stopped === null) {
-            $stopped = self::buildFailedTest('crashed', ['message' => self::describeCrash($code, $printed)]);
+            $stopped = self::buildFailedTest('crashed', new Failure(self::describeCrash($code, $printed)));
             $printed = '';
         }
         unlink($records);
@@ -63,16 +63,16 @@ class Process
         return new TestResult(
             TestResult::formatTitle($record['path']),
             $record['time'],
-            $record['failure'] === null ? null : new Failure($record['failure']),
+            $record['failure'],
             $record['subtestFailed'],
             $record['skipped'],
         );
     }
 
     /** A failure outside any test, listed after the tests as one more failed test. */
-    private static function buildFailedTest(string $title, array $failure): TestResult
+    private static function buildFailedTest(string $title, Failure $failure): TestResult
     {
-        return new TestResult($title, 0.0, new Failure($failure), false, null);
+        return new TestResult($title, 0.0, $failure, false, null);
     }
 
     /**

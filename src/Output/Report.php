@@ -57,7 +57,8 @@ class Report
                 . ' failed in ' . $failedFiles . ' of ' . self::count($files, 'file')
                 . ($emptyFiles > 0 ? ', ' . $emptyFiles . ' did not run any test' : '');
         }
-        fwrite(STDOUT, $this->mark($ok) . ' ' . $this->paint(self::BOLD, self::addSkipped($text, $skipped)) . '  ' . $time . "\n");
+        $text .= $skipped > 0 ? ', ' . $skipped . ' skipped' : '';
+        fwrite(STDOUT, $this->mark($ok) . ' ' . $this->paint(self::BOLD, $text) . '  ' . $time . "\n");
     }
 
     private function summarize(FileResult $result, bool $ok): string
@@ -67,12 +68,7 @@ class Report
         } else {
             $text = $ok ? self::count($result->countTests(), 'test') : $result->countFailed() . ' of ' . $result->countTests() . ' failed';
         }
-        return self::addSkipped($text, $result->countSkipped());
-    }
-
-    private static function addSkipped(string $text, int $skipped): string
-    {
-        return $skipped > 0 ? $text . ', ' . $skipped . ' skipped' : $text;
+        return $text . ($result->countSkipped() > 0 ? ', ' . $result->countSkipped() . ' skipped' : '');
     }
 
     /** The skipped tests of a file, then its failures, each in the order their tests started. */

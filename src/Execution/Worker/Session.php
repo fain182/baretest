@@ -6,6 +6,7 @@ namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
+use Baretest\Core\Literal;
 use Baretest\Core\RunningTest;
 use Baretest\Core\TestResult;
 use Baretest\Execution\Records;

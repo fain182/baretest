@@ -18,7 +18,7 @@ if (!function_exists('Baretest\test')) {
     function equal($expected, $actual): void
     {
         if ($expected !== $actual) {
-            Session::fail('expected ' . var_export($expected, true) . ', got ' . var_export($actual, true));
+            Session::failValues($expected, $actual);
         }
     }
 

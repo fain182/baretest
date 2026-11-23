@@ -45,6 +45,12 @@ class CallSite
                 return new Location(self::makeRelative($file), $start, $end);
             }
         }
+        return $this->locateLine($file, $line);
+    }
+
+    /** A single line, for an error or an exception that PHP reports there. */
+    public function locateLine(string $file, int $line): Location
+    {
         return new Location(self::makeRelative($file), $line, $line);
     }
 

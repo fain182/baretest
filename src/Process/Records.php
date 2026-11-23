@@ -29,6 +29,17 @@ class Records
         $this->append(base64_encode(serialize([$order, $test])));
     }
 
+    /** Records a failure outside any test; it is listed after the tests. */
+    public function failFile(TestResult $test): void
+    {
+        $this->add(PHP_INT_MAX, $test);
+    }
+
+    public function hasFileFailure(): bool
+    {
+        return isset($this->readRecords()[PHP_INT_MAX]);
+    }
+
     /** Marks the file as run to its end. */
     public function close(): void
     {
@@ -40,8 +51,14 @@ class Records
         return in_array(self::CLOSED, $this->readLines(), true);
     }
 
-    /** @return list<TestResult> in the order they started; a line cut short by a crash is left out */
+    /** @return list<TestResult> in the order they started */
     public function readTests(): array
+    {
+        return array_values($this->readRecords());
+    }
+
+    /** @return array<int, TestResult> by order; a line cut short by a crash is left out */
+    private function readRecords(): array
     {
         $tests = [];
         foreach ($this->readLines() as $line) {
@@ -51,7 +68,7 @@ class Records
             }
         }
         ksort($tests);
-        return array_values($tests);
+        return $tests;
     }
 
     private function append(string $line): void

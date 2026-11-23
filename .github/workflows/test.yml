@@ -38,3 +38,14 @@ jobs:
           cache-from: type=gha,scope=php-${{ matrix.php }}
           cache-to: type=gha,mode=max,scope=php-${{ matrix.php }}
       - run: docker run --rm -v "$PWD":/app baretest-php:${{ matrix.php }} php bin/baretest
+
+  deptrac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - run: composer install --no-interaction --no-progress
+      - run: make deptrac

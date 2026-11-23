@@ -14,5 +14,8 @@
     },
     "autoload-dev": {
         "psr-4": {"Baretest\\Tests\\": "tests/"}
+    },
+    "require-dev": {
+        "deptrac/deptrac": "^4.7"
     }
 }

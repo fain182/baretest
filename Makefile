@@ -1,6 +1,6 @@
 PHP ?= php
 
-.PHONY: test lines update-snapshots screenshot
+.PHONY: test lines deptrac update-snapshots screenshot
 
 test: lines vendor/autoload.php
 	$(PHP) bin/baretest
@@ -14,6 +14,9 @@ update-snapshots: vendor/autoload.php
 lines:
 	@n=$$(cat bin/baretest $$(find src -name '*.php') | grep -vE '^[[:space:]]*($$|//|#($$|[^!])|/\*|\*)' | wc -l); \
 		echo "$$n lines of code"; test $$n -lt 1100
+
+deptrac:
+	vendor/bin/deptrac analyse --no-progress
 
 # Records the README example with vhs, from a directory laid out like a project that uses baretest.
 screenshot:

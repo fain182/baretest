@@ -1,0 +1,30 @@
+deptrac:
+  paths:
+    - src
+  layers:
+    - name: Functions
+      collectors:
+        - type: functionName
+          value: ^Baretest\\.*
+    - name: Worker
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Worker\\.*
+    - name: Runner
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Runner\\.*
+    - name: Result
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Result\\.*
+    - name: Output
+      collectors:
+        - type: classLike
+          value: ^Baretest\\Output\\.*
+  ruleset:
+    Functions: [Worker]
+    Worker: [Result, Output]
+    Runner: [Result, Output]
+    Output: [Result]
+    Result: ~

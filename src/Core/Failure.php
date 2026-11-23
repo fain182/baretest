@@ -9,11 +9,25 @@ class Failure
 {
     private string $message;
     private ?string $label;
+    private ?Location $location;
+    private ?Comparison $comparison;
 
-    public function __construct(string $message, ?string $label = null)
+    public function __construct(string $message, ?string $label = null, ?Location $location = null, ?Comparison $comparison = null)
     {
         $this->message = $message;
         $this->label = $label;
+        $this->location = $location;
+        $this->comparison = $comparison;
+    }
+
+    public function getLocation(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function getComparison(): ?Comparison
+    {
+        return $this->comparison;
     }
 
     public function describe(): string

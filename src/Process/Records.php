@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Baretest\Process;
 
+use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
+use Baretest\Core\Location;
 use Baretest\Core\TestResult;
 
 /**
@@ -43,7 +45,7 @@ class Records
     {
         $tests = [];
         foreach ($this->readLines() as $line) {
-            $record = @unserialize((string) base64_decode($line, true), ['allowed_classes' => [TestResult::class, Failure::class]]);
+            $record = @unserialize((string) base64_decode($line, true), ['allowed_classes' => [TestResult::class, Failure::class, Location::class, Comparison::class]]);
             if (is_array($record)) {
                 $tests[$record[0]] = $record[1];
             }

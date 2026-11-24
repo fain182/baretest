@@ -96,8 +96,22 @@ test('shows the two values of equal() in a column, with the caret under the firs
     $comparison = new Comparison('"caffè"', "\"caffe\u{300}\"", 'string', 'string', 5);
     equal(
         "  ✗ a\n\n       expected  \"caffè\"    (string)\n            got  \"caffe\u{300}\"    (string)\n                      ^\n",
-        detailOf(new TestResult('a', 0.0, new Failure($comparison->describe(), null, null, $comparison))),
+        detailOf(new TestResult('a', 0.0, new Failure($comparison->describe(), null, null, [$comparison]))),
     );
+});
+
+test('shows each element that differs after its keys, aligned on the right', function () {
+    $comparisons = [new Comparison('1', '2', 'int', 'int', null, '[0]'), new Comparison('"a"', '"b"', 'string', 'string', 1, '["x"]')];
+    equal(
+        "  ✗ a\n\n         [0]  expected  1    (int)\n                   got  2    (int)\n\n"
+        . "       [\"x\"]  expected  \"a\"    (string)\n                   got  \"b\"    (string)\n                         ^\n",
+        detailOf(new TestResult('a', 0.0, new Failure('', null, null, $comparisons))),
+    );
+});
+
+test('shows at most five elements that differ', function () {
+    $comparisons = array_map(fn (int $i) => new Comparison('1', '2', 'int', 'int', null, "[$i]"), range(0, 6));
+    equal('       2 more elements differ', array_slice(explode("\n", detailOf(new TestResult('a', 0.0, new Failure('', null, null, $comparisons)))), -2, 1)[0]);
 });
 
 test('shows what the file printed', function () {

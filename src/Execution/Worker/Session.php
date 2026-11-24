@@ -6,7 +6,6 @@ namespace Baretest\Execution\Worker;
 
 use Baretest\Core\Comparison;
 use Baretest\Core\Failure;
-use Baretest\Core\Literal;
 use Baretest\Core\RunningTest;
 use Baretest\Core\TestResult;
 use Baretest\Execution\Records;
@@ -75,8 +74,8 @@ class Session
     /** @return never */
     public static function failValues($expected, $got)
     {
-        $comparison = new Comparison(Literal::render($expected, $got), Literal::render($got, $expected), Literal::describeType($expected), Literal::describeType($got), Literal::findOffset($expected, $got));
-        self::raise($comparison->describe(), $comparison);
+        $comparisons = Comparison::listDifferences($expected, $got);
+        self::raise(implode("\n", array_map(static fn (Comparison $comparison): string => $comparison->describe(), $comparisons)), $comparisons);
     }
 
     /** @return never */
@@ -95,9 +94,10 @@ class Session
     }
 
     /** @return never */
-    private static function raise(string $message, ?Comparison $comparison = null)
+    /** @param list<Comparison> $comparisons */
+    private static function raise(string $message, array $comparisons = [])
     {
-        self::failHere(new Failure($message, null, self::$callSite->find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)), $comparison));
+        self::failHere(new Failure($message, null, self::$callSite->find(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)), $comparisons));
         throw new StopSignal($message);
     }
 

@@ -1,4 +1,4 @@
-✗ fixtures/values/values_test.php  6 of 6 failed
+✗ fixtures/values/values_test.php  10 of 10 failed
 
   ✗ null and bool  (fixtures/values/values_test.php:5)
        5 │ test('null and bool', fn () => equal(null, false));
@@ -39,5 +39,55 @@
             got  " "    (string)
                   ^
 
-───────────────────────────────────────────
-✗ 6 of 6 tests failed in 1 of 1 file  0.00s
+  ✗ each element that differs  (fixtures/values/values_test.php:12)
+       12 │ equal(
+       13 │     ['return' => false, 'matches' => null, 'message' => 'preg_match(): Compilation failed: missing closing parenthesis at offset 3'],
+       14 │     ['return' => null, 'matches' => null, 'message' => 'preg_match(): Compilation failed: missing ) at offset 3'],
+       15 │ );
+
+        ["return"]  expected  false    (bool)
+                         got  null     (null)
+
+       ["message"]  expected  …failed: missing closing parenthesis at offset …    (string)
+                         got  …failed: missing ) at offset 3"                     (string)
+                                               ^
+
+  ✗ nested elements  (fixtures/values/values_test.php:17)
+       17 │ test('nested elements', fn () => equal(['a' => [1, [2, 3]], 'é' => 'x'], ['a' => [1, [2, 4]], 'é' => 'y']));
+
+       ["a"][1][1]  expected  3    (int)
+                         got  4    (int)
+
+             ["é"]  expected  "x"    (string)
+                         got  "y"    (string)
+                               ^
+
+  ✗ at most five elements  (fixtures/values/values_test.php:18)
+       18 │ test('at most five elements', fn () => equal(range(1, 8), range(11, 18)));
+
+       [0]  expected  1     (int)
+                 got  11    (int)
+
+       [1]  expected  2     (int)
+                 got  12    (int)
+
+       [2]  expected  3     (int)
+                 got  13    (int)
+
+       [3]  expected  4     (int)
+                 got  14    (int)
+
+       [4]  expected  5     (int)
+                 got  15    (int)
+
+       3 more elements differ
+
+  ✗ keys that differ  (fixtures/values/values_test.php:19)
+       19 │ test('keys that differ', fn () => equal(['a' => 1, 'b' => 2], ['a' => 1, 'c' => 3]));
+
+       expected  ["a" => 1, "b" => 2]    (array)
+            got  ["a" => 1, "c" => 3]    (array)
+                            ^
+
+─────────────────────────────────────────────
+✗ 10 of 10 tests failed in 1 of 1 file  0.00s

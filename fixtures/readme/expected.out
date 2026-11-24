@@ -12,9 +12,9 @@
   ✗ splits › invalid bytes  (fixtures/readme/split_test.php:17)
        17 │ test($name, fn () => equal($expected, split($separator, $input)));
 
-       expected  ["b\xE0c"]        (array)
-            got  ["b\xE0\xA0c"]    (array)
-                        ^
+       [0]  expected  "b\xE0c"        (string)
+                 got  "b\xE0\xA0c"    (string)
+                            ^
 
   ✗ counts pieces  (fixtures/readme/split_test.php:22)
        22 │ equal(3, '3');

@@ -10,14 +10,16 @@ class Failure
     private string $message;
     private ?string $label;
     private ?Location $location;
-    private ?Comparison $comparison;
+    /** @var list<Comparison> */
+    private array $comparisons;
 
-    public function __construct(string $message, ?string $label = null, ?Location $location = null, ?Comparison $comparison = null)
+    /** @param list<Comparison> $comparisons */
+    public function __construct(string $message, ?string $label = null, ?Location $location = null, array $comparisons = [])
     {
         $this->message = $message;
         $this->label = $label;
         $this->location = $location;
-        $this->comparison = $comparison;
+        $this->comparisons = $comparisons;
     }
 
     public function getLocation(): ?Location
@@ -25,9 +27,10 @@ class Failure
         return $this->location;
     }
 
-    public function getComparison(): ?Comparison
+    /** @return list<Comparison> */
+    public function listComparisons(): array
     {
-        return $this->comparison;
+        return $this->comparisons;
     }
 
     public function describe(): string

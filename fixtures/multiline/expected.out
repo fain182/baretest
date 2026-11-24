@@ -6,9 +6,8 @@
        8 │     ['a' => 2],
        9 │ );
 
-       expected  ["a" => 1]    (array)
-            got  ["a" => 2]    (array)
-                         ^
+       ["a"]  expected  1    (int)
+                   got  2    (int)
 
   ✗ parentheses in strings and comments  (fixtures/multiline/multiline_test.php:13)
        13 │ equal(')', strtoupper( // )

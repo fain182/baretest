@@ -15,7 +15,8 @@ use Baretest\Core\TestResult;
 class TerminalReport implements Report
 {
     private const INDENT = '       ';
-    private const LABEL = self::INDENT . 'expected  ';
+    private const LABEL = 'expected  ';
+    private const DIFFERENCES = 5;
     private const BOLD = '1';
     private const DIM = '2';
     private const RED = '31';
@@ -94,8 +95,18 @@ class TerminalReport implements Report
         if ($location !== null) {
             $out .= $this->renderSource($location);
         }
-        $comparison = $failure->getComparison();
-        return $out . "\n" . ($comparison === null ? self::INDENT . str_replace("\n", "\n" . self::INDENT, $failure->describe()) . "\n" : $this->renderValues($comparison));
+        $comparisons = $failure->listComparisons();
+        return $out . "\n" . ($comparisons === [] ? self::INDENT . str_replace("\n", "\n" . self::INDENT, $failure->describe()) . "\n" : $this->renderComparisons($comparisons));
+    }
+
+    /** @param non-empty-list<Comparison> $comparisons */
+    private function renderComparisons(array $comparisons): string
+    {
+        $shown = array_slice($comparisons, 0, self::DIFFERENCES);
+        $width = max(array_map(static fn (Comparison $comparison): int => Columns::measure($comparison->getPath()), $shown));
+        $out = implode("\n", array_map(fn (Comparison $comparison): string => $this->renderValues($comparison, $width), $shown));
+        $more = count($comparisons) - count($shown);
+        return $more === 0 ? $out : $out . "\n" . self::INDENT . $this->paint(self::DIM, $more . ' more elements differ') . "\n";
     }
 
     /** The lines of the call, without the indentation they share. */
@@ -115,14 +126,18 @@ class TerminalReport implements Report
         return $out;
     }
 
-    private function renderValues(Comparison $comparison): string
+    /** @param int $width of the widest path, to which every path is aligned on the right */
+    private function renderValues(Comparison $comparison, int $width): string
     {
+        $path = $comparison->getPath();
+        $margin = self::INDENT . ($width === 0 ? '' : str_repeat(' ', $width - Columns::measure($path)) . $path . '  ');
+        $blank = str_repeat(' ', Columns::measure($margin));
         [$expected, $got, $caret] = Columns::cut($comparison->getExpected(), $comparison->getGot(), $comparison->getCaret());
         $width = max(Columns::measure($expected), Columns::measure($got)) + 4;
         $pad = static fn (string $value): string => $value . str_repeat(' ', $width - Columns::measure($value));
-        $out = self::LABEL . $pad($expected) . $this->paint(self::DIM, '(' . $comparison->getExpectedType() . ')') . "\n"
-            . str_pad('got  ', strlen(self::LABEL), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $comparison->getGotType() . ')') . "\n";
-        return $caret === null ? $out : $out . str_repeat(' ', strlen(self::LABEL) + $caret) . $this->paint(self::RED, '^') . "\n";
+        $out = $margin . self::LABEL . $pad($expected) . $this->paint(self::DIM, '(' . $comparison->getExpectedType() . ')') . "\n"
+            . $blank . str_pad('got  ', strlen(self::LABEL), ' ', STR_PAD_LEFT) . $pad($got) . $this->paint(self::DIM, '(' . $comparison->getGotType() . ')') . "\n";
+        return $caret === null ? $out : $out . $blank . str_repeat(' ', strlen(self::LABEL) + $caret) . $this->paint(self::RED, '^') . "\n";
     }
 
     private function renderOutput(string $output): string

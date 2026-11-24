@@ -57,6 +57,17 @@ test('shows the last lines a crashed file printed in its failure', function () {
     equal('', $result->getOutput());
 });
 
+test('reports every level of error, unless this process was given another', function () {
+    $level = error_reporting();
+    equal((string) E_ALL, runFile("echo error_reporting();")->getOutput());
+    try {
+        error_reporting(E_ALL & ~E_DEPRECATED);
+        equal((string) (E_ALL & ~E_DEPRECATED), runFile("echo error_reporting();")->getOutput());
+    } finally {
+        error_reporting($level);
+    }
+});
+
 test('runs the file with the settings of this process', function () {
     ini_set('precision', '7');
     equal('7', runFile("echo ini_get('precision');")->getOutput());

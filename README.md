@@ -82,6 +82,12 @@ When `equal()` fails on two arrays with the same keys in the same order, every e
 
 A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
 
+Every level of error counts, whatever php.ini says. To leave some out, for example deprecations on a PHP version that deprecates functions the suite still calls, give the runner `error_reporting` with `-d`:
+
+```
+php -d error_reporting='E_ALL & ~E_DEPRECATED' vendor/bin/baretest
+```
+
 ### Running
 
 ```

@@ -80,14 +80,6 @@ A failure stops the test it happens in. Any other test, and any other subtest, s
 
 When `equal()` fails on two arrays with the same keys in the same order, every element that differs is shown on its own, after its keys, up to five; otherwise the two values are shown whole. Long values are cut around the first byte that differs, which is marked with `^`.
 
-A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
-
-Every level of error counts, whatever php.ini says. To leave some out, for example deprecations on a PHP version that deprecates functions the suite still calls, give the runner `error_reporting` with `-d`:
-
-```
-php -d error_reporting='E_ALL & ~E_DEPRECATED' vendor/bin/baretest
-```
-
 ### Running
 
 ```
@@ -95,7 +87,7 @@ vendor/bin/baretest [PATH...]
 ```
 
 - `PATH` is a file or a directory; directories are searched for `*_test.php`. Default: `tests/`.
-- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner. A fatal error, an `exit()` or a crash fails that file, and the other files still run.
+- Each file runs in its own PHP process, with the same php.ini and `-d` settings as the runner, except `error_reporting`: see [Errors and exceptions](#errors-and-exceptions). A fatal error, an `exit()` or a crash fails that file, and the other files still run.
 - Anything a test file prints, with `echo` or `var_dump()`, is shown under the file.
 - When every test passed, the tests that stand out as slow are listed after the summary: see [Finding slow tests](#finding-slow-tests).
 - The output fits where it runs, with nothing to set:
@@ -138,9 +130,20 @@ test('lowercases accented letters', function () {
 
 A skipped test does not fail the run, and it is always listed under its file with its reason. A test whose subtest failed stays failed even if it then calls `skip()`. Outside a test, `skip()` fails the file: to skip a whole file, put its tests inside one test.
 
-### Expected warnings
+### Errors and exceptions
 
-Silence the call with `@` and read the warning with `error_get_last()`:
+An uncaught exception fails the test. So does a warning, notice or deprecation, whatever php.ini says.
+
+An expected exception is checked with `throws()`, which returns it, so its message can be checked too:
+
+```php
+test('rejects empty input', function () {
+    $e = throws(InvalidArgumentException::class, fn () => slug(''));
+    equal('the input is empty', $e->getMessage());
+});
+```
+
+An expected warning is silenced with `@` and read with `error_get_last()`:
 
 ```php
 test('rejects odd-length input', function () {
@@ -151,6 +154,14 @@ test('rejects odd-length input', function () {
 ```
 
 `error_get_last()` is cleared before each test and subtest. Within one test it keeps the last warning until another one replaces it, so call `error_clear_last()` between two checks.
+
+To leave some levels out of every file, for example deprecations on a PHP version that deprecates functions the suite still calls, give the runner `error_reporting` with `-d`. A value equal to the one in php.ini cannot be told apart from it, and counts as every level.
+
+```
+php -d error_reporting='E_ALL & ~E_DEPRECATED' vendor/bin/baretest
+```
+
+To leave them out of one file only, call `error_reporting()` at its top.
 
 ### Finding slow tests
 

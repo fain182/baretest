@@ -155,13 +155,13 @@ test('rejects odd-length input', function () {
 
 `error_get_last()` is cleared before each test and subtest. Within one test it keeps the last warning until another one replaces it, so call `error_clear_last()` between two checks.
 
-To leave some levels out of every file, for example deprecations on a PHP version that deprecates functions the suite still calls, give the runner `error_reporting` with `-d`. A value equal to the one in php.ini cannot be told apart from it, and counts as every level.
+To leave some levels out, for example deprecations on a PHP version that deprecates functions a file still calls, call `error_reporting()` at the top of that file:
 
+```php
+if (PHP_VERSION_ID >= 80400) {
+    error_reporting(E_ALL & ~E_DEPRECATED);
+}
 ```
-php -d error_reporting='E_ALL & ~E_DEPRECATED' vendor/bin/baretest
-```
-
-To leave them out of one file only, call `error_reporting()` at its top.
 
 ### Finding slow tests
 

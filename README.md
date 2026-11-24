@@ -78,6 +78,8 @@ Five functions in the `Baretest` namespace are the whole API:
 
 A failure stops the test it happens in. Any other test, and any other subtest, still runs. A failed subtest also fails the test that contains it.
 
+When `equal()` fails on two arrays with the same keys in the same order, every element that differs is shown on its own, after its keys, up to five; otherwise the two values are shown whole. Long values are cut around the first byte that differs, which is marked with `^`.
+
 A warning, notice or deprecation fails the test, unless it was silenced with `@`. So does an uncaught exception.
 
 ### Running

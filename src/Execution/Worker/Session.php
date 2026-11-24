@@ -33,6 +33,7 @@ class Session
     {
         self::$records = $records;
         self::$callSite = new CallSite();
+        error_reporting(E_ALL);
         ini_set('display_errors', '0');
         ini_set('log_errors', '0');
         set_error_handler(\Closure::fromCallable([self::class, 'onError']));

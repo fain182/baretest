@@ -51,7 +51,6 @@ class ChildProcessExecution implements Execution
     /**
      * PHP with the php.ini of this process, or none, and a -d only for each setting that
      * differs from it: some values, like `a=href,form=`, do not survive the ini parser.
-     * error_reporting is E_ALL unless it was given with -d, so that php.ini cannot hide errors.
      *
      * @return list<string>
      */
@@ -65,9 +64,6 @@ class ChildProcessExecution implements Execution
                 if ($value !== null && ($fresh[$name] ?? null) !== $value) {
                     array_push($this->command, '-d', "$name=$value");
                 }
-            }
-            if (ini_get('error_reporting') === ($fresh['error_reporting'] ?? null)) {
-                array_push($this->command, '-d', 'error_reporting=' . E_ALL);
             }
         }
         return $this->command;
